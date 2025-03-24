@@ -1,0 +1,46 @@
+name: Validate Parent POM
+
+on:
+  pull_request:
+    paths:
+      - 'backend/pom.xml'
+
+
+jobs:
+  validate-parent:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Validate POM structure
+        working-directory: ./backend
+        run: |
+          mvn dependency:resolve-plugins -q
+                    echo "✅ All plugins are resolvable"
+          mvn versions:display-plugin-updates -DallowSnapshots=false -q | grep -v "No plugin updates"
+                    if [ $? -eq 0 ]; then
+                      echo "❌ Outdated plugins detected!"
+                      exit 1
+                    fi
+          if ! xmllint --xpath '//dependencyManagement' pom.xml > /dev/null; then
+                      echo "❌ Missing dependencyManagement section"
+                      exit 1
+                    fi
+
+      - name: Verify Java version
+        working-directory: ./backend
+        run: |
+          JAVA_VERSION=$(mvn help:evaluate -Dexpression=java.version -q -DforceStdout)
+          if [ "$JAVA_VERSION" != "21" ]; then
+            echo "❌ Invalid Java version: $JAVA_VERSION"
+            exit 1
+          fi
