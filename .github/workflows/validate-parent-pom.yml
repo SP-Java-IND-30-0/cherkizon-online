@@ -12,6 +12,8 @@ jobs:
     timeout-minutes: 5
 
     steps:
+      - name: Install XML tools
+        run: sudo apt-get install -y libxml2-utils
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -31,10 +33,10 @@ jobs:
               exit 1
           fi
           echo "✅ All plugins are up-to-date"
-          if ! xmllint --xpath '//dependencyManagement' pom.xml > /dev/null; then
-                      echo "❌ Missing dependencyManagement section"
-                      exit 1
-                    fi
+          if ! grep -q "<dependencyManagement>" pom.xml; then
+            echo "❌ Missing dependencyManagement section"
+            exit 1
+                fi
 
       - name: Verify Java version
         working-directory: ./backend
