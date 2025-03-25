@@ -26,11 +26,11 @@ jobs:
         run: |
           mvn dependency:resolve-plugins -q
                     echo "✅ All plugins are resolvable"
-          mvn versions:display-plugin-updates -DallowSnapshots=false -q | grep -v "No plugin updates"
-                    if [ $? -eq 0 ]; then
-                      echo "❌ Outdated plugins detected!"
-                      exit 1
-                    fi
+          if mvn versions:display-plugin-updates -DallowSnapshots=false -q | grep -q "The following plugin updates are available"; then
+              echo "❌ Outdated plugins detected!"
+              exit 1
+          fi
+          echo "✅ All plugins are up-to-date"
           if ! xmllint --xpath '//dependencyManagement' pom.xml > /dev/null; then
                       echo "❌ Missing dependencyManagement section"
                       exit 1
