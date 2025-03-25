@@ -39,10 +39,12 @@ jobs:
                 fi
 
       - name: Verify Java version
-        working-directory: ./backend
         run: |
           JAVA_VERSION=$(mvn help:evaluate -Dexpression=java.version -q -DforceStdout)
-          if [ "$JAVA_VERSION" != "21" ]; then
-            echo "❌ Invalid Java version: $JAVA_VERSION"
+          JAVA_MAJOR_VERSION=$(echo "$JAVA_VERSION" | cut -d. -f1)
+          
+          if [ "$JAVA_MAJOR_VERSION" != "21" ]; then
+            echo "❌ Invalid Java version: $JAVA_VERSION (expected 21)"
             exit 1
           fi
+          echo "✅ Java version OK: $JAVA_VERSION"
