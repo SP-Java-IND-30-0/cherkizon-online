@@ -1,0 +1,19 @@
+spring:
+  application.name: notification-service
+
+  mail:
+    host: smtp.yandex.ru
+    port: 465
+    username: ${EMAIL_USER:notifications@example.com}
+    password: ${EMAIL_PASSWORD:}
+    protocol: smtps
+    properties:
+      mail.smtp:
+        auth: true
+        ssl.enable: true
+        starttls.enable: false
+        connectiontimeout: 5000
+        timeout: 5000
+        writetimeout: 5000
+
+

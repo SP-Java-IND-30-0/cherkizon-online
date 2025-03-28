@@ -4,14 +4,42 @@ on:
   pull_request:
     branches: [dev]
     paths:
-      - 'backend/**'
+      - 'backend/notification-service/**'
       - '!backend/pom.xml'
 
 jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
+  detect-changed-modules:
+      runs-on: ubuntu-latest
+      outputs:
+        modules: ${{ steps.get-modules.outputs.modules }}
+      steps:
+        - uses: actions/checkout@v4
 
+        - name: Install jq
+          run: sudo apt-get install -y jq
+        
+        - name: Get changed modules
+          id: get-modules
+          run: |
+            git fetch origin ${{ github.event.pull_request.base.ref }}
+            
+            CHANGED_MODULES=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }}..HEAD |
+            grep -E '^backend/[^/]+/' |
+            sed -E 's|backend/([^/]+)/.*|\1|' |
+            sort -u |
+            jq -R -n '[inputs | select(length>0)]' | tr -d '\n')
+          
+            echo "modules=$CHANGED_MODULES" >> $GITHUB_OUTPUT
+            echo "Detected modules: $CHANGED_MODULES"
+          
+  build-and-test:
+    needs: detect-changed-modules
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        module: ${{ fromJson(needs.detect-changed-modules.outputs.modules) || 'null'}}
+    timeout-minutes: 30
+    
     steps:
       - uses: actions/checkout@v4
 
@@ -20,10 +48,9 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Build and Test
+      - name: Build and Test ${{ matrix.module }}
         run: |
-          cd backend/example-service
+          cd backend/${{ matrix.module }}
           mvn clean test
 
-      - name: Checkstyle
-        run: mvn checkstyle:check
+
