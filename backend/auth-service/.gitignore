@@ -1,0 +1,21 @@
+.DS_Store
+.idea/
+*.iml
+*.log
+*.swp
+*.env
+.env
+key.env
+
+/target/
+/bin/
+/build/
+out/
+
+logs/
+
+*.db
+*.sql
+/config/application-dev.yml  # Если есть чувствительные данные
+
+docker-compose.override.yml
