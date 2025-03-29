@@ -1,0 +1,91 @@
+openapi: 3.0.0
+info:
+  title: Auth Service API
+  version: 1.0.0
+  description: Микросервис аутентификации
+
+servers:
+  - url: http://localhost:8080
+    description: Локальный сервер
+
+paths:
+  /api/auth/register:
+    post:
+      tags: [Auth]
+      summary: Регистрация пользователя
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        201:
+          description: Пользователь создан
+        400:
+          description: Невалидные данные
+
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Авторизация пользователя
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        200:
+          description: Успешный вход
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JwtResponse'
+        401:
+          description: Неавторизован
+
+components:
+  schemas:
+    RegisterRequest:
+      type: object
+      required: [username, password, firstName, lastName, phone]
+      properties:
+        username:
+          type: string
+          example: "user123"
+        password:
+          type: string
+          example: "P@ssw0rd"
+        firstName:
+          type: string
+          example: "Иван"
+        lastName:
+          type: string
+          example: "Петров"
+        phone:
+          type: string
+          example: "+79389067289"
+        role:
+          type: string
+          enum: [USER, ADMIN]
+          default: "USER"
+
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+          example: "user123"
+        password:
+          type: string
+          example: "P@ssw0rd"
+
+    JwtResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        expiresIn:
+          type: number
+          example: 86400
