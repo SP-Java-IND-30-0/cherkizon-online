@@ -15,7 +15,6 @@ out/
 logs/
 
 *.db
-*.sql
-/config/application-dev.yml  # Если есть чувствительные данные
+*.sql 
 
 docker-compose.override.yml
