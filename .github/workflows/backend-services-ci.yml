@@ -35,6 +35,11 @@ jobs:
   build-and-test:
     needs: detect-changed-modules
     runs-on: ubuntu-latest
+    env:
+      SECRET_1: ${{ secrets.COMMENTS_DB_PASSWORD }}
+      SECRET_2: ${{ secrets.ABS_DB_PASSWORD }}
+      SECRET_3: ${{ secrets.EMAIL_PASSWORD }}
+      SECRET_4: ${{ secrets.EMAIL_USER }}
     strategy:
       matrix:
         module: ${{ fromJson(needs.detect-changed-modules.outputs.modules) || 'null'}}
