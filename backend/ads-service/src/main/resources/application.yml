@@ -4,9 +4,9 @@ spring:
 
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/ads_service_db
-    username: dev
-    password: ${DB_PASSWORD}
+    url: jdbc:postgresql://localhost:5432/ads-service
+    username: root
+    password: ${ABS_DB_PASSWORD}
 
   jpa:
     hibernate:
