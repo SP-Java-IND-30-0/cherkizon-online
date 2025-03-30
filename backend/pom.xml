@@ -19,7 +19,9 @@
 
     <modules>
         <module>notification-service</module>
+        <module>ads-service</module>
     </modules>
+
 
 
     <properties>
