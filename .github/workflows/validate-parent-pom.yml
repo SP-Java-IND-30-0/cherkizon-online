@@ -33,10 +33,16 @@ jobs:
               exit 1
           fi
           echo "✅ All plugins are up-to-date"
+
           if ! grep -q "<dependencyManagement>" pom.xml; then
             echo "❌ Missing dependencyManagement section"
             exit 1
                 fi
+                
+          if ! xmllint --xpath '//dependencyManagement' pom.xml > /dev/null; then
+                      echo "❌ Missing dependencyManagement section"
+                      exit 1
+                    fi
 
       - name: Verify Java version
         run: |
@@ -47,4 +53,6 @@ jobs:
             echo "❌ Invalid Java version: $JAVA_VERSION (expected 21)"
             exit 1
           fi
+
           echo "✅ Java version OK: $JAVA_VERSION"
+
