@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: abs-service
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/ads-service
+    username: root
+    password: ${ABS_DB_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        show_sql: true
+
+  logging:
+    level:
+      root: INFO
