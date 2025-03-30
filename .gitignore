@@ -26,5 +26,8 @@ replay_pid*
 
 /.idea/.gitignore
 /.idea/*
-/backend/abs-service/.env
 
+/target/*
+/backend/comments-service/target/
+/backend/notification-service/target/
+/backend/abs-service/.env
