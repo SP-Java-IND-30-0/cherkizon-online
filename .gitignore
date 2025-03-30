@@ -23,7 +23,8 @@
 hs_err_pid*
 replay_pid*
 
-
 /.idea/.gitignore
 /.idea/*
 
+/backend/comments-service/target/
+/backend/notification-service/target/
