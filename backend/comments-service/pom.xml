@@ -21,6 +21,7 @@
         <liquibase.defaultSchemaName>app</liquibase.defaultSchemaName>
         <database.url>jdbc:postgresql://localhost:5432/comments_service_db</database.url>
         <database.username>dev</database.username>
+        <database.password>${env.COMMENTS_DB_PASSWORD}</database.password>
     </properties>
 
     <dependencies>
@@ -121,6 +122,7 @@
                     <defaultSchemaName>${liquibase.defaultSchemaName}</defaultSchemaName>
                     <url>${database.url}</url>
                     <username>${database.username}</username>
+                    <password>${database.password}</password>
                     <driver>org.postgresql.Driver</driver>
                     <logLevel>info</logLevel>
                 </configuration>

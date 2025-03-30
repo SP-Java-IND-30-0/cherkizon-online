@@ -20,7 +20,14 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Set up environment variables
+      - name: Load environment variables from Example.env
+        run: |
+          if [ -f backend/comments-service/Example.env ]; then
+            export $(cat backend/comments-service/Example.env | xargs)
+            echo "Environment variables loaded from Example.env"
+          fi
+
+      - name: Set up COMMENTS_DB_PASSWORD from secrets
         run: echo "COMMENTS_DB_PASSWORD=${{ secrets.COMMENTS_DB_PASSWORD }}" >> $GITHUB_ENV
 
       - name: Build and Test comments-service

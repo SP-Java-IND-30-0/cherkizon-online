@@ -28,3 +28,4 @@ replay_pid*
 
 /backend/comments-service/target/
 /backend/notification-service/target/
+/backend/comments-service/.env
