@@ -36,10 +36,10 @@ jobs:
     needs: detect-changed-modules
     runs-on: ubuntu-latest
     env:
-      SECRET_1: ${{ secrets.COMMENTS_DB_PASSWORD }}
-      SECRET_2: ${{ secrets.ABS_DB_PASSWORD }}
-      SECRET_3: ${{ secrets.EMAIL_PASSWORD }}
-      SECRET_4: ${{ secrets.EMAIL_USER }}
+      COMMENTS_DB_PASSWORD: ${{ secrets.COMMENTS_DB_PASSWORD }}
+      ABS_DB_PASSWORD: ${{ secrets.ABS_DB_PASSWORD }}
+      EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+      EMAIL_USER: ${{ secrets.EMAIL_USER }}
     strategy:
       matrix:
         module: ${{ fromJson(needs.detect-changed-modules.outputs.modules) || 'null'}}
