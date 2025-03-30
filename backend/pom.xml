@@ -21,6 +21,7 @@
         <module>notification-service</module>
         <module>auth-service</module>
         <module>comments-service</module>
+        <module>ads-service</module>
     </modules>
 
 
@@ -48,6 +49,7 @@
                 <scope>import</scope>
             </dependency>
         </dependencies>
+
     </dependencyManagement>
 
     <dependencies>
