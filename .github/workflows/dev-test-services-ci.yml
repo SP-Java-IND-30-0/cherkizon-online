@@ -40,19 +40,19 @@ jobs:
           MODULE="${{ steps.extract-module.outputs.module }}"
           case "$MODULE" in
             "comments-service")
-              CONFIG='{"module":"comments-service","needs_db":true,"db_name":"comments_service_db","secret":"COMMENTS_SERVICE_DB_PASSWORD"}'
+              CONFIG='{"module":["comments-service"],"needs_db":[true],"db_name":["comments_service_db"],"secret":["COMMENTS_SERVICE_DB_PASSWORD"]}'
               ;;
             "ads-service")
-              CONFIG='{"module":"ads-service","needs_db":true,"db_name":"ads_service_db","secret":"ADS_SERVICE_DB_PASSWORD"}'
+              CONFIG='{"module":["ads-service"],"needs_db":[true],"db_name":["ads_service_db"],"secret":["ADS_SERVICE_DB_PASSWORD"]}'
               ;;
             "auth-service")
-              CONFIG='{"module":"auth-service","needs_db":true,"db_name":"auth_service_db","secret":"AUTH_SERVICE_DB_PASSWORD"}'
+              CONFIG='{"module":["auth-service"],"needs_db":[true],"db_name":["auth_service_db"],"secret":["AUTH_SERVICE_DB_PASSWORD"]}'
               ;;
             "profile-service")
-              CONFIG='{"module":"profile-service","needs_db":true,"db_name":"profile_service_db","secret":"PROFILE_SERVICE_DB_PASSWORD"}'
+              CONFIG='{"module":["profile-service"],"needs_db":[true],"db_name":["profile_service_db"],"secret":["PROFILE_SERVICE_DB_PASSWORD"]}'
               ;;
             *)
-              CONFIG='{"module":"$MODULE","needs_db":false}'
+              CONFIG='{"module":["'"$MODULE"'"],"needs_db":[false]}'
               ;;
           esac
           echo "config=$CONFIG" >> $GITHUB_OUTPUT
@@ -69,5 +69,5 @@ jobs:
         with:
           module: ${{ matrix.module }}
           needs_db: ${{ matrix.needs_db }}
-          db_name: ${{ matrix.db_name || '' }}
-          db_password: ${{ secrets[matrix.secret] || '' }}
+          db_name: ${{ matrix.db_name[0] || '' }}
+          db_password: ${{ secrets[matrix.secret[0]] || '' }}
