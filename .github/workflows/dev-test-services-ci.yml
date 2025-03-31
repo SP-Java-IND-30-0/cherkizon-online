@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       module: ${{ steps.extract-module.outputs.module }}
-      modele_upper: ${{ steps.uppercase.outputs.module_upper }}
+      module_upper: ${{ steps.uppercase.outputs.module_upper }}
       branch-type: ${{ steps.extract-type.outputs.type }}
       is-valid-branch: ${{ steps.check-branch.outputs.is-valid }}
     steps:
@@ -48,7 +48,7 @@ jobs:
       - name: Convert module to uppercase
         id: uppercase
         run: |
-          MODULE_UPPER=$(echo "${{ needs.validate-branch-name.outputs.module }}" | tr '[:lower:]' '[:upper:]')
+          MODULE_UPPER=$(echo "${{ steps.validate-branch-name.outputs.module }}" | tr '[:lower:]' '[:upper:]')
           echo "module_upper=$MODULE_UPPER" >> $GITHUB_OUTPUT
 
   test-module:
@@ -58,5 +58,5 @@ jobs:
     with:
       module: ${{ needs.validate-branch-name.outputs.module }}
       needs_db: ${{ contains('comments-service,ads-service,auth-service,profile-service', needs.validate-branch-name.outputs.module) }}
-      db_secret: ${{ format('{0}_DB_PASSWORD', needs.validate-branch-name.outputs.module_upper) }}
+      db_password: ${{ format('{0}_DB_PASSWORD', needs.validate-branch-name.outputs.module_upper) }}
     
