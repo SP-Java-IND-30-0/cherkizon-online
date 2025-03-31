@@ -18,6 +18,8 @@ spring:
 
   liquibase:
     change-log: classpath:liquibase/changelog-master.yml
+    search-path: classpath:/liquibase/
+    duplicate-file-mode: WARN
     enabled: true
     default-schema: app
 
