@@ -52,4 +52,4 @@ jobs:
     with:
       module: ${{ needs.validate-branch-name.outputs.module }}
       needs_db: ${{ contains('comments-service,ads-service,auth-service,profile-service', needs.validate-branch-name.outputs.module) }}
-      db_password: ${{ format('{0}_DB_PASSWORD', upper(needs.validate-branch-name.outputs.module)) }}
+      db_password: ${{ format('{0}_DB_PASSWORD', toUpper(needs.validate-branch-name.outputs.module)) }}
