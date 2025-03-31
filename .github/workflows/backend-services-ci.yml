@@ -1,61 +1,47 @@
-name: Dev example CI
+name: Service Test CI
 
 on:
-  pull_request:
-    branches: [dev]
-    paths:
-      - 'backend/**'
-      - '!backend/pom.xml'
+  workflow_call:
+    inputs:
+      module:
+        required: true
+        type: string
+      need_db:
+        default: false
+        type: boolean
+      db_password:
+        required: false
+        type: string
+
 
 jobs:
-  detect-changed-modules:
-      runs-on: ubuntu-latest
-      outputs:
-        modules: ${{ steps.get-modules.outputs.modules }}
-      steps:
-        - uses: actions/checkout@v4
-
-        - name: Install jq
-          run: sudo apt-get install -y jq
-        
-        - name: Get changed modules
-          id: get-modules
-          run: |
-            git fetch origin ${{ github.event.pull_request.base.ref }}
-            
-            CHANGED_MODULES=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }}..HEAD |
-            grep -E '^backend/[^/]+/' |
-            sed -E 's|backend/([^/]+)/.*|\1|' |
-            sort -u |
-            jq -R -n '[inputs | select(length>0)]' | tr -d '\n')
-          
-            echo "modules=$CHANGED_MODULES" >> $GITHUB_OUTPUT
-            echo "Detected modules: $CHANGED_MODULES"
-          
-  build-and-test:
-    needs: detect-changed-modules
+  service-test:
     runs-on: ubuntu-latest
     env:
-      COMMENTS_DB_PASSWORD: ${{ secrets.COMMENTS_DB_PASSWORD }}
-      ABS_DB_PASSWORD: ${{ secrets.ABS_DB_PASSWORD }}
-      EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
-      EMAIL_USER: ${{ secrets.EMAIL_USER }}
-    strategy:
-      matrix:
-        module: ${{ fromJson(needs.detect-changed-modules.outputs.modules) || 'null'}}
-    timeout-minutes: 30
-    
+
+      DB_MODULE: ${{ replace(inputs.module, '-', '_') }}
+      DB_NAME: ${{ env.DB_MODULE }}_db  #
+      DB_USER: dev
+      DB_PASSWORD: ${{ inputs.db_password || '' }}
+    services:
+      postgres:
+        if: ${{ inputs.need_db }}
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: ${{ env.DB_NAME }}_db
+          POSTGRES_USER: dev
+          POSTGRES_PASSWORD: ${{ inputs.db_password }}
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-java@v3
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-
-      - name: Build and Test ${{ matrix.module }}
-        run: |
-          cd backend/${{ matrix.module }}
+      - run: |
+          cd backend/${{ inputs.module }}
           mvn clean test
+          
+
 
 
