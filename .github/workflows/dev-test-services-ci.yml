@@ -1,0 +1,51 @@
+name: Test Services on PR to dev CI
+
+on:
+  pull_request:
+    branches: [dev]
+
+jobs:
+  validate-branch-name:
+    runs-on: ubuntu-latest
+    outputs:
+      module: ${{ steps.extract-module.outputs.module }}
+      branch-type: ${{ steps.extract-type.outputs.type }}
+      is-valid-branch: ${{ steps.check-branch.outputs.is-valid }}
+    steps:
+      - name: Check branch format
+        id: check-branch
+        run: |
+          BRANCH_NAME="${{ github.head_ref || github.ref_name }}"
+          
+          # Проверяем формат: тип/модуль/...
+          if [[ "$BRANCH_NAME" =~ ^(feature|fix|chore|docs|test|refactor|hotfix)/([^/]+)/[^/]+/.* ]]; then
+            echo "is-valid=true" >> $GITHUB_OUTPUT
+          else
+            echo "is-valid=false" >> $GITHUB_OUTPUT
+            echo "Branch name '$BRANCH_NAME' does not match the required format: type/module/description" >&2
+            exit 1
+          fi
+      - name: Extract module name
+        id: extract-module
+        if: steps.check-branch.outputs.is-valid == 'true'
+        run: |
+          BRANCH_NAME="${{ github.head_ref || github.ref_name }}"
+          MODULE=$(echo "$BRANCH_NAME" | cut -d '/' -f 2)
+          echo "module=$MODULE" >> $GITHUB_OUTPUT
+
+      - name: Extract branch type
+        id: extract-type
+        if: steps.check-branch.outputs.is-valid == 'true'
+        run: |
+          BRANCH_NAME="${{ github.head_ref || github.ref_name }}"
+          TYPE=$(echo "$BRANCH_NAME" | cut -d '/' -f 1)
+          echo "type=$TYPE" >> $GITHUB_OUTPUT
+
+  test-module:
+    needs: validate-branch-name
+    if: needs.validate-branch-name.outputs.is-valid == 'true'
+    uses: ./.github/workflows/backend-services-ci.yml
+    with:
+      module: ${{ needs.validate-branch-name.outputs.module }}
+      needs_db: ${{ contains('comments-service,ads-service,auth-service,profile-service', needs.validate-branch-name.outputs.module) }}
+      db_secret: ${{ format('{0}_DB_PASSWORD', upper(needs.validate-branch-name.outputs.module)) }}
