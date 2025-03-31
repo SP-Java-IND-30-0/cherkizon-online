@@ -110,7 +110,7 @@ jobs:
           echo "SPRING_DATASOURCE_PASSWORD_LENGTH: ${#SPRING_DATASOURCE_PASSWORD}"
           
           cd backend/${{ matrix.module }}
-          mvn clean test
+          mvn clean test -Dspring.datasource.password=$DB_PASSWORD 
   
       - name: Stop PostgreSQL
         if: ${{ matrix.needs_db }}
