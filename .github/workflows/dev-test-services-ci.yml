@@ -3,6 +3,9 @@ name: Test Services on PR to dev CI
 on:
   pull_request:
     branches: [dev]
+    paths:
+      - 'backend/**'
+      - '!backend/pom.xml'
 
 jobs:
   validate-branch-name:
