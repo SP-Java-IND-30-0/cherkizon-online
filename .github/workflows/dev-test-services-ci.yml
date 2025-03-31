@@ -21,7 +21,8 @@ jobs:
           BRANCH_NAME="${{ github.head_ref || github.ref_name }}"
           
           # Проверяем формат: тип/модуль/...
-          if [[ "$BRANCH_NAME" =~ ^(feature|fix|chore|docs|test|refactor|hotfix)/([^/]+)/[^/]+/.* ]]; then
+          if [[ "$BRANCH_NAME" =~ ^(feature|fix|chore|docs|test|refactor|hotfix)/([^/]+)/.* ]];
+          then
             echo "is-valid=true" >> $GITHUB_OUTPUT
           else
             echo "is-valid=false" >> $GITHUB_OUTPUT
@@ -51,4 +52,4 @@ jobs:
     with:
       module: ${{ needs.validate-branch-name.outputs.module }}
       needs_db: ${{ contains('comments-service,ads-service,auth-service,profile-service', needs.validate-branch-name.outputs.module) }}
-      db_secret: ${{ format('{0}_DB_PASSWORD', upper(needs.validate-branch-name.outputs.module)) }}
+      db_password: ${{ format('{0}_DB_PASSWORD', upper(needs.validate-branch-name.outputs.module)) }}
