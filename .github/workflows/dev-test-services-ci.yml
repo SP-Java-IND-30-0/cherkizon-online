@@ -49,6 +49,3 @@ jobs:
       module: ${{ needs.validate-branch-name.outputs.module }}
       needs_db: ${{ contains('comments-service,ads-service,auth-service,profile-service', needs.validate-branch-name.outputs.module) }}
       db_secret: ${{ format('{0}_DB_PASSWORD', upper(needs.validate-branch-name.outputs.module)) }}
-    secrets:
-      COMMENTS_DB_PASSWORD: ${{ secrets.COMMENTS_DB_PASSWORD }}
-      USERS_DB_PASSWORD: ${{ secrets.USERS_DB_PASSWORD }}
