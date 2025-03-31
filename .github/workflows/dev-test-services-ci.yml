@@ -59,7 +59,7 @@ jobs:
 
   test-module:
     needs: validate-branch-name
-    if: ${{ needs.validate-branch-name.outputs.is-valid == 'true' }}
+    if: ${{ needs.validate-branch-name.outputs.is-valid-branch == 'true' }}
     runs-on: ubuntu-latest
     strategy:
       matrix: ${{ fromJson(needs.validate-branch-name.outputs.matrix-config) }}
