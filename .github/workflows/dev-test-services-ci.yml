@@ -97,12 +97,18 @@ jobs:
             -p 5432:5432 \
             postgres:17-alpine
           timeout 120 bash -c 'until docker exec postgres pg_isready -U dev; do sleep 2; done'
-
+          
+      - name: Verify PostgreSQL connection
+        if: ${{ matrix.needs_db }}
+        run: |
+          docker exec postgres psql -U dev -d ${{ matrix.db_name }} -c "SELECT 1"
+          
       - name: Run tests
         env:
           DB_PASSWORD: ${{ secrets[matrix.secret] }}
         run: |
           echo "SPRING_DATASOURCE_PASSWORD_LENGTH: ${#SPRING_DATASOURCE_PASSWORD}"
+          
           cd backend/${{ matrix.module }}
           mvn clean test
   
