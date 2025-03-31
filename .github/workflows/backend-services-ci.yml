@@ -7,7 +7,7 @@ on:
         required: true
         type: string
       needs_db:
-        default: false
+        required: true
         type: boolean
       db_name:
         required: false
@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Start PostgreSQL
         if: ${{ inputs.needs_db }}
         run: |
@@ -32,7 +32,8 @@ jobs:
             -p 5432:5432 \
             postgres:17-alpine
 
-          timeout 60 bash -c 'until docker exec postgres pg_isready -U dev; do sleep 2; done'
+          # Ожидание готовности БД (таймаут 2 минуты)
+          timeout 120 bash -c 'until docker exec postgres pg_isready -U dev; do sleep 2; done'
 
       - name: Run tests
         run: |
@@ -42,9 +43,8 @@ jobs:
       - name: Stop PostgreSQL
         if: ${{ inputs.needs_db }}
         run: |
-          docker stop postgres
-          docker rm postgres
-
+          docker stop postgres || true
+          docker rm postgres || true
 
       
           
