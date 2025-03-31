@@ -19,8 +19,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
 
-      DB_MODULE: ${{ replace(inputs.module, '-', '_') }}
-      DB_NAME: ${{ env.DB_MODULE }}_db  #
+      #DB_MODULE: ${{ replace(inputs.module, '-', '_') }}
+      POSTGRES_DB: ${{ env.DB_MODULE }}
       DB_USER: dev
       DB_PASSWORD: ${{ inputs.db_password || '' }}
     services:
@@ -28,9 +28,9 @@ jobs:
         if: ${{ inputs.need_db }}
         image: postgres:17-alpine
         env:
-          POSTGRES_DB: ${{ env.DB_NAME }}
+          POSTGRES_DB: ${{  env.DB_MODULE }}_db
           POSTGRES_USER: dev
-          POSTGRES_PASSWORD: ${{ inputs.db_password }}
+          POSTGRES_PASSWORD: ${{ env.DB_PASSWORD_CLEAN }}
         ports:
           - 5432:5432
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
@@ -38,6 +38,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - name: Sanitize DB password
+        if: ${{ inputs.need_db }}
+        run: |
+          CLEAN_PASSWORD=$(echo "${{ inputs.db_password }}" | sed 's/-/_/g')
+          echo "DB_PASSWORD_CLEAN=$CLEAN_PASSWORD" >> $GITHUB_ENV
+      - name: Set DB_MODULE
+        run: |
+          MODULE_CLEAN=$(echo "${{ inputs.module }}" | sed 's/-/_/g')
+          echo "DB_MODULE=$MODULE_CLEAN" >> $GITHUB_ENV
+      - name: Run test
       - run: |
           cd backend/${{ inputs.module }}
           mvn clean test
