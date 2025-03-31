@@ -35,19 +35,27 @@ jobs:
   test-module:
     needs: validate-branch-name
     if: needs.validate-branch-name.outputs.is-valid == 'true'
-    uses: ./.github/workflows/backend-services-ci.yml
-    with:
-      module: ${{ needs.validate-branch-name.outputs.module }}
-      needs_db: ${{ contains('comments-service,ads-service,auth-service,profile-service', needs.validate-branch-name.outputs.module) }}
-      db_name: ${{ 
-        needs.validate-branch-name.outputs.module == 'comments-service' && 'comments_service_db' ||
-        needs.validate-branch-name.outputs.module == 'ads-service' && 'ads_service_db' ||
-        needs.validate-branch-name.outputs.module == 'auth-service' && 'auth_service_db' ||
-        needs.validate-branch-name.outputs.module == 'profile-service' && 'profile_service_db' 
-        }}
-      db_password: ${{ 
-        needs.validate-branch-name.outputs.module == 'comments-service' && secrets.COMMENTS_SERVICE_DB_PASSWORD ||
-        needs.validate-branch-name.outputs.module == 'ads-service' && secrets.ADS_SERVICE_DB_PASSWORD ||
-        needs.validate-branch-name.outputs.module == 'auth-service' && secrets.AUTH_SERVICE_DB_PASSWORD ||
-        needs.validate-branch-name.outputs.module == 'profile-service' && secrets.PROFILE_SERVICE_DB_PASSWORD 
-        }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - module: comments-service
+            db_name: comments_service_db
+            secret: COMMENTS_SERVICE_DB_PASSWORD
+          - module: ads-service
+            db_name: ads_service_db
+            secret: ADS_SERVICE_DB_PASSWORD
+          - module: auth-service
+            db_name: auth_service_db
+            secret: AUTH_SERVICE_DB_PASSWORD
+          - module: profile-service
+            db_name: profile_service_db
+            secret: PROFILE_SERVICE_DB_PASSWORD
+    steps:
+      - name: Run tests
+        uses: ./.github/workflows/backend-services-ci.yml
+        with:
+          module: ${{ needs.validate-branch-name.outputs.module }}
+          needs_db: ${{ contains(matrix.*.module, needs.validate-branch-name.outputs.module) }}
+          db_name: ${{ matrix.db_name }}
+          db_password: ${{ secrets[matrix.secret] }}
