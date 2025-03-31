@@ -6,7 +6,7 @@ on:
       module:
         required: true
         type: string
-      need_db:
+      needs_db:
         default: false
         type: boolean
       db_password:
@@ -18,39 +18,45 @@ jobs:
   service-test:
     runs-on: ubuntu-latest
     env:
-
-      #DB_MODULE: ${{ replace(inputs.module, '-', '_') }}
-      POSTGRES_DB: ${{ env.DB_MODULE }}
       DB_USER: dev
-      DB_PASSWORD: ${{ inputs.db_password || '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Sanitize inputs
+        id: sanitize
+        if: ${{ inputs.needs_db }}
+        run: |
+          CLEAN_PASSWORD=$(echo "${{ inputs.db_password }}" | sed 's/-/_/g')
+          echo "DB_PASSWORD_CLEAN=$CLEAN_PASSWORD" >> $GITHUB_ENV
+     
+          MODULE_CLEAN=$(echo "${{ inputs.module }}" | sed 's/-/_/g')
+          echo "DB_MODULE=$MODULE_CLEAN" >> $GITHUB_ENV
+
+      - name: waiting for Postgres
+        if: ${{ inputs.needs_db }}
+        run: |
+          sudo apt_get install -y netcat
+          timeout 120 bash -c 'until nc -z localhost 5432; do sleep 2; done'      
+
+      - name: Run test
+      - run: |
+          cd backend/${{ inputs.module }}
+          mvn clean test
+          
     services:
       postgres:
-        if: ${{ inputs.need_db }}
+        if: ${{ inputs.needs_db }}
         image: postgres:17-alpine
         env:
-          POSTGRES_DB: ${{  env.DB_MODULE }}_db
+          POSTGRES_DB: ${ DB_MODULE }_db
           POSTGRES_USER: dev
-          POSTGRES_PASSWORD: ${{ env.DB_PASSWORD_CLEAN }}
+          POSTGRES_PASSWORD: ${ DB_PASSWORD_CLEAN }
         ports:
           - 5432:5432
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
 
-    steps:
-      - uses: actions/checkout@v4
-      - name: Sanitize DB password
-        if: ${{ inputs.need_db }}
-        run: |
-          CLEAN_PASSWORD=$(echo "${{ inputs.db_password }}" | sed 's/-/_/g')
-          echo "DB_PASSWORD_CLEAN=$CLEAN_PASSWORD" >> $GITHUB_ENV
-      - name: Set DB_MODULE
-        run: |
-          MODULE_CLEAN=$(echo "${{ inputs.module }}" | sed 's/-/_/g')
-          echo "DB_MODULE=$MODULE_CLEAN" >> $GITHUB_ENV
-      - name: Run test
-      - run: |
-          cd backend/${{ inputs.module }}
-          mvn clean test
+
+      
           
 
 
