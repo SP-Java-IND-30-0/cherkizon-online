@@ -32,29 +32,32 @@ jobs:
           MODULE_CLEAN=$(echo "${{ inputs.module }}" | sed 's/-/_/g')
           echo "DB_MODULE=$MODULE_CLEAN" >> $GITHUB_ENV
 
-      - name: waiting for Postgres
+      - name: Start PostgreSQL
         if: ${{ inputs.needs_db }}
         run: |
-          sudo apt_get install -y netcat
-          timeout 120 bash -c 'until nc -z localhost 5432; do sleep 2; done'      
+          docker run -d --name postgres \
+            -e POSTGRES_DB=${DB_MODULE}_db \
+            -e POSTGRES_USER=dev \
+            -e POSTGRES_PASSWORD=${DB_PASSWORD_CLEAN} \
+            -p 5432:5432 \
+            postgres:17-alpine \
+            -c 'healthcheck_cmd=pg_isready -U dev'
 
+          # Ждем готовности БД
+          docker exec postgres bash -c \
+            "until pg_isready -U dev; do sleep 2; done"
+      
       - name: Run test
         run: |
           cd backend/${{ inputs.module }}
           mvn clean test
           
-    services:
-      postgres:
+      - name: Stop PostgreSQL
         if: ${{ inputs.needs_db }}
-        image: postgres:17-alpine
-        env:
-          POSTGRES_DB: ${ DB_MODULE }_db
-          POSTGRES_USER: dev
-          POSTGRES_PASSWORD: ${ DB_PASSWORD_CLEAN }
-        ports:
-          - 5432:5432
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
-
+        run: |
+          docker stop postgres
+          docker rm postgres
+    
 
 
       
