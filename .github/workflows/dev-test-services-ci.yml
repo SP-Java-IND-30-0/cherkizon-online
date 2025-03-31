@@ -12,46 +12,25 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       module: ${{ steps.extract-module.outputs.module }}
-      module_upper: ${{ steps.uppercase.outputs.module_upper }}
-      branch-type: ${{ steps.extract-type.outputs.type }}
       is-valid-branch: ${{ steps.check-branch.outputs.is-valid }}
     steps:
       - name: Check branch format
         id: check-branch
         run: |
           BRANCH_NAME="${{ github.head_ref || github.ref_name }}"
-          
-          if [[ "$BRANCH_NAME" =~ ^(feature|fix|chore|docs|test|refactor|hotfix)/([^/]+)/.* ]];
-          then
+          if [[ "$BRANCH_NAME" =~ ^(feature|fix|chore|docs|test|refactor|hotfix)/([^/]+)/.* ]]; then
             echo "is-valid=true" >> $GITHUB_OUTPUT
           else
             echo "is-valid=false" >> $GITHUB_OUTPUT
-            echo "Branch name '$BRANCH_NAME' does not match the required format: type/module/description" >&2
             exit 1
           fi
 
-      - name: Extract module name
+      - name: Extract module
         id: extract-module
         if: steps.check-branch.outputs.is-valid == 'true'
         run: |
-          BRANCH_NAME="${{ github.head_ref || github.ref_name }}"
-          MODULE=$(echo "$BRANCH_NAME" | cut -d '/' -f 2)
+          MODULE=$(echo "${{ github.head_ref || github.ref_name }}" | cut -d'/' -f2)
           echo "module=$MODULE" >> $GITHUB_OUTPUT
-
-      - name: Extract branch type
-        id: extract-type
-        if: steps.check-branch.outputs.is-valid == 'true'
-        run: |
-          BRANCH_NAME="${{ github.head_ref || github.ref_name }}"
-          TYPE=$(echo "$BRANCH_NAME" | cut -d '/' -f 1)
-          echo "type=$TYPE" >> $GITHUB_OUTPUT
-
-      - name: Convert module to uppercase
-        id: uppercase
-        if: steps.check-branch.outputs.is-valid == 'true' 
-        run: |
-          MODULE_UPPER=$(echo "${{ steps.extract-module.outputs.module }}" | tr '[:lower:]' '[:upper:]')  
-          echo "module_upper=$MODULE_UPPER" >> $GITHUB_OUTPUT
 
   test-module:
     needs: validate-branch-name
@@ -60,4 +39,15 @@ jobs:
     with:
       module: ${{ needs.validate-branch-name.outputs.module }}
       needs_db: ${{ contains('comments-service,ads-service,auth-service,profile-service', needs.validate-branch-name.outputs.module) }}
-      db_password: ${{ secrets[format('{0}_DB_PASSWORD', needs.validate-branch-name.outputs.module_upper) ]}} 
+      db_name: ${{ 
+        needs.validate-branch-name.outputs.module == 'comments-service' && 'comments_service_db' ||
+        needs.validate-branch-name.outputs.module == 'ads-service' && 'ads_service_db' ||
+        needs.validate-branch-name.outputs.module == 'auth-service' && 'auth_service_db' ||
+        needs.validate-branch-name.outputs.module == 'profile-service' && 'profile_service_db' 
+        }}
+      db_password: ${{ 
+        needs.validate-branch-name.outputs.module == 'comments-service' && secrets.COMMENTS_SERVICE_DB_PASSWORD ||
+        needs.validate-branch-name.outputs.module == 'ads-service' && secrets.ADS_SERVICE_DB_PASSWORD ||
+        needs.validate-branch-name.outputs.module == 'auth-service' && secrets.AUTH_SERVICE_DB_PASSWORD ||
+        needs.validate-branch-name.outputs.module == 'profile-service' && secrets.PROFILE_SERVICE_DB_PASSWORD 
+        }}
