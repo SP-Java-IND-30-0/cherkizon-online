@@ -9,55 +9,41 @@ on:
       needs_db:
         default: false
         type: boolean
+      db_name:
+        required: false
+        type: string
       db_password:
         required: false
         type: string
 
-
 jobs:
   service-test:
     runs-on: ubuntu-latest
-    env:
-      DB_USER: dev
     steps:
       - uses: actions/checkout@v4
       
-      - name: Sanitize inputs
-        id: sanitize
-        if: ${{ inputs.needs_db }}
-        run: |
-          CLEAN_PASSWORD=$(echo "${{ inputs.db_password }}" | sed 's/-/_/g')
-          echo "DB_PASSWORD_CLEAN=$CLEAN_PASSWORD" >> $GITHUB_ENV
-     
-          MODULE_CLEAN=$(echo "${{ inputs.module }}" | sed 's/-/_/g')
-          echo "DB_MODULE=$MODULE_CLEAN" >> $GITHUB_ENV
-
       - name: Start PostgreSQL
         if: ${{ inputs.needs_db }}
         run: |
           docker run -d --name postgres \
-            -e POSTGRES_DB=${DB_MODULE}_db \
+            -e POSTGRES_DB=${{ inputs.db_name }} \
             -e POSTGRES_USER=dev \
-            -e POSTGRES_PASSWORD=${DB_PASSWORD_CLEAN} \
+            -e POSTGRES_PASSWORD=${{ inputs.db_password }} \
             -p 5432:5432 \
-            postgres:17-alpine \
-            -c 'healthcheck_cmd=pg_isready -U dev'
+            postgres:17-alpine
 
-          # Ждем готовности БД
-          docker exec postgres bash -c \
-            "until pg_isready -U dev; do sleep 2; done"
-      
-      - name: Run test
+          timeout 60 bash -c 'until docker exec postgres pg_isready -U dev; do sleep 2; done'
+
+      - name: Run tests
         run: |
           cd backend/${{ inputs.module }}
           mvn clean test
-          
+
       - name: Stop PostgreSQL
         if: ${{ inputs.needs_db }}
         run: |
           docker stop postgres
           docker rm postgres
-    
 
 
       
