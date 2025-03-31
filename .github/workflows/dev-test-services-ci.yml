@@ -66,14 +66,22 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4  
+        
+      - name: Validate env variables
+        if: ${{ matrix.needs_db }}
+        run: |
+          if [ -z "${{ secrets[matrix.secret] }}" ]; then
+            echo "ERROR: DB password secret is missing!"
+            exit 1
+          fi
   
       - name: Start PostgreSQL
         if: ${{ matrix.needs_db }}
         run: |
           docker run -d --name postgres \
-            -e POSTGRES_DB=${{ matrix.db_name[0] }} \
+            -e POSTGRES_DB=${{ matrix.db_name }} \
             -e POSTGRES_USER=dev \
-            -e POSTGRES_PASSWORD=${{ secrets[matrix.secret[0]] }} \
+            -e POSTGRES_PASSWORD=${{ secrets[matrix.secret] }} \
             -p 5432:5432 \
             postgres:17-alpine
           timeout 120 bash -c 'until docker exec postgres pg_isready -U dev; do sleep 2; done'
