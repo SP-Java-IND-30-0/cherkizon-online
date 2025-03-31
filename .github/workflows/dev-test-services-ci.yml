@@ -21,7 +21,6 @@ jobs:
         run: |
           BRANCH_NAME="${{ github.head_ref || github.ref_name }}"
           
-          # Проверяем формат: тип/модуль/...
           if [[ "$BRANCH_NAME" =~ ^(feature|fix|chore|docs|test|refactor|hotfix)/([^/]+)/.* ]];
           then
             echo "is-valid=true" >> $GITHUB_OUTPUT
@@ -30,6 +29,7 @@ jobs:
             echo "Branch name '$BRANCH_NAME' does not match the required format: type/module/description" >&2
             exit 1
           fi
+
       - name: Extract module name
         id: extract-module
         if: steps.check-branch.outputs.is-valid == 'true'
@@ -45,10 +45,12 @@ jobs:
           BRANCH_NAME="${{ github.head_ref || github.ref_name }}"
           TYPE=$(echo "$BRANCH_NAME" | cut -d '/' -f 1)
           echo "type=$TYPE" >> $GITHUB_OUTPUT
+
       - name: Convert module to uppercase
         id: uppercase
+        if: steps.check-branch.outputs.is-valid == 'true' 
         run: |
-          MODULE_UPPER=$(echo "${{ steps.validate-branch-name.outputs.module }}" | tr '[:lower:]' '[:upper:]')
+          MODULE_UPPER=$(echo "${{ steps.extract-module.outputs.module }}" | tr '[:lower:]' '[:upper:]')  
           echo "module_upper=$MODULE_UPPER" >> $GITHUB_OUTPUT
 
   test-module:
@@ -58,5 +60,4 @@ jobs:
     with:
       module: ${{ needs.validate-branch-name.outputs.module }}
       needs_db: ${{ contains('comments-service,ads-service,auth-service,profile-service', needs.validate-branch-name.outputs.module) }}
-      db_password: ${{ format('{0}_DB_PASSWORD', needs.validate-branch-name.outputs.module_upper) }}
-    
+      db_password: ${{ secrets[format('{0}_DB_PASSWORD', needs.validate-branch-name.outputs.module_upper) ]} 
