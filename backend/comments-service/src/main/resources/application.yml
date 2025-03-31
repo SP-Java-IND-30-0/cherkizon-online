@@ -19,7 +19,7 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/changelog.yml
     enabled: true
-    default-schema: app
+   
 
 springdoc:
   swagger-ui:
