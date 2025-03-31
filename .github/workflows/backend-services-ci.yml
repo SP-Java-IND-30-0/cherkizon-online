@@ -18,14 +18,17 @@ jobs:
   service-test:
     runs-on: ubuntu-latest
     env:
+      DB_MODULE: ${{ replace(inputs.module, '-', '_') }}
+      DB_NAME: ${{ env.DB_MODULE }}_db  #
+      DB_USER: dev
       DB_PASSWORD: ${{ inputs.db_password || '' }}
     services:
       postgres:
         if: ${{ inputs.need_db }}
         image: postgres:17-alpine
         env:
-          POSTGRES_DB: ${{ inputs.module }}_db
-          POSTGRES_USER: ${{ inputs.module }}_user
+          POSTGRES_DB: ${{ env.DB_NAME }}_db
+          POSTGRES_USER: dev
           POSTGRES_PASSWORD: ${{ inputs.db_password }}
         ports:
           - 5432:5432
