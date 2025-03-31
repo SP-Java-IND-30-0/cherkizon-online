@@ -77,11 +77,15 @@ jobs:
       - name: Validate env variables
         if: ${{ matrix.needs_db }}
         run: |
+          echo "=== Environment Variables ==="
+          echo "DB_NAME: ${{ matrix.db_name }}"
+          echo "SECRET_NAME: ${{ matrix.secret }}"
+
           if [ -z "${{ secrets[matrix.secret] }}" ]; then
             echo "ERROR: DB password secret is missing!"
             exit 1
           fi
-
+      
 
       - name: Start PostgreSQL
         if: ${{ matrix.needs_db }}
@@ -94,13 +98,11 @@ jobs:
             postgres:17-alpine
           timeout 120 bash -c 'until docker exec postgres pg_isready -U dev; do sleep 2; done'
 
-      - name: Verify environment variables
-        run: |
-          echo "SPRING_DATASOURCE_URL: $SPRING_DATASOURCE_URL"
-          echo "SPRING_DATASOURCE_USERNAME: $SPRING_DATASOURCE_USERNAME"
-          echo "SPRING_DATASOURCE_PASSWORD: $SPRING_DATASOURCE_PASSWORD"  # Покажет длину пароля
       - name: Run tests
+        env:
+          DB_PASSWORD: ${{ secrets[matrix.secret] }}
         run: |
+          echo "SPRING_DATASOURCE_PASSWORD_LENGTH: ${#SPRING_DATASOURCE_PASSWORD}"
           cd backend/${{ matrix.module }}
           mvn clean test
   
