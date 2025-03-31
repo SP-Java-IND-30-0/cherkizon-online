@@ -13,6 +13,7 @@ jobs:
     outputs:
       module: ${{ steps.extract-module.outputs.module }}
       is-valid-branch: ${{ steps.check-branch.outputs.is-valid }}
+      matrix-config: ${{ steps.set-matrix.outputs.config }}
     steps:
       - name: Check branch format
         id: check-branch
@@ -20,8 +21,10 @@ jobs:
           BRANCH_NAME="${{ github.head_ref || github.ref_name }}"
           if [[ "$BRANCH_NAME" =~ ^(feature|fix|chore|docs|test|refactor|hotfix)/([^/]+)/.* ]]; then
             echo "is-valid=true" >> $GITHUB_OUTPUT
+            echo "Branch is valid!"
           else
             echo "is-valid=false" >> $GITHUB_OUTPUT
+            echo "Branch is invalid!" >&2
             exit 1
           fi
 
@@ -32,30 +35,42 @@ jobs:
           MODULE=$(echo "${{ github.head_ref || github.ref_name }}" | cut -d'/' -f2)
           echo "module=$MODULE" >> $GITHUB_OUTPUT
 
+      - name: Set matrix config
+        id: set-matrix
+        if: steps.check-branch.outputs.is-valid == 'true'
+        run: |
+          MODULE="${{ steps.extract-module.outputs.module }}"
+          case "$MODULE" in
+            "comments-service")
+              CONFIG='{"needs_db":true,"db_name":"comments_service_db","secret":"COMMENTS_SERVICE_DB_PASSWORD"}'
+              ;;
+            "ads-service")
+              CONFIG='{"needs_db":true,"db_name":"ads_service_db","secret":"ADS_SERVICE_DB_PASSWORD"}'
+              ;;
+            "auth-service")
+              CONFIG='{"needs_db":true,"db_name":"auth_service_db","secret":"AUTH_SERVICE_DB_PASSWORD"}'
+              ;;
+            "profile-service")
+              CONFIG='{"needs_db":true,"db_name":"profile_service_db","secret":"PROFILE_SERVICE_DB_PASSWORD"}'
+              ;;
+            *)
+              CONFIG='{"needs_db":false}'
+              ;;
+          esac
+          echo "config=$CONFIG" >> $GITHUB_OUTPUT
+
   test-module:
     needs: validate-branch-name
     if: needs.validate-branch-name.outputs.is-valid == 'true'
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        include:
-          - module: comments-service
-            db_name: comments_service_db
-            secret: COMMENTS_SERVICE_DB_PASSWORD
-          - module: ads-service
-            db_name: ads_service_db
-            secret: ADS_SERVICE_DB_PASSWORD
-          - module: auth-service
-            db_name: auth_service_db
-            secret: AUTH_SERVICE_DB_PASSWORD
-          - module: profile-service
-            db_name: profile_service_db
-            secret: PROFILE_SERVICE_DB_PASSWORD
+        config: ${{ fromJson(needs.validate-branch-name.outputs.matrix-config) }}
     steps:
       - name: Run tests
         uses: ./.github/workflows/backend-services-ci.yml
         with:
           module: ${{ needs.validate-branch-name.outputs.module }}
-          needs_db: ${{ contains(matrix.*.module, needs.validate-branch-name.outputs.module) }}
-          db_name: ${{ matrix.db_name }}
-          db_password: ${{ secrets[matrix.secret] }}
+          needs_db: ${{ matrix.config.needs_db }}
+          db_name: ${{ matrix.config.db_name }}
+          db_password: ${{ secrets[matrix.config.secret] }}
