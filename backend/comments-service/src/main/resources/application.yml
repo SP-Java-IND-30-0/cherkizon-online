@@ -6,7 +6,7 @@ spring:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/comments_service_db
     username: dev
-    password: ${COMMENTS_DB_PASSWORD}
+    password: ${DB_PASSWORD}
 
   jpa:
     hibernate:
