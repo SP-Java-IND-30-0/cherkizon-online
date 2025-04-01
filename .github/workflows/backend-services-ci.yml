@@ -6,39 +6,47 @@ on:
       module:
         required: true
         type: string
-      need_db:
-        default: false
+      needs_db:
+        required: true
         type: boolean
+      db_name:
+        required: false
+        type: string
       db_password:
         required: false
         type: string
 
-
 jobs:
   service-test:
     runs-on: ubuntu-latest
-    env:
-      DB_MODULE: ${{ replace(inputs.module, '-', '_') }}
-      DB_NAME: ${{ env.DB_MODULE }}_db  #
-      DB_USER: dev
-      DB_PASSWORD: ${{ inputs.db_password || '' }}
-    services:
-      postgres:
-        if: ${{ inputs.need_db }}
-        image: postgres:17-alpine
-        env:
-          POSTGRES_DB: ${{ env.DB_NAME }}_db
-          POSTGRES_USER: dev
-          POSTGRES_PASSWORD: ${{ inputs.db_password }}
-        ports:
-          - 5432:5432
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
-
     steps:
       - uses: actions/checkout@v4
-      - run: |
+
+      - name: Start PostgreSQL
+        if: ${{ inputs.needs_db }}
+        run: |
+          docker run -d --name postgres \
+            -e POSTGRES_DB=${{ inputs.db_name }} \
+            -e POSTGRES_USER=dev \
+            -e POSTGRES_PASSWORD=${{ inputs.db_password }} \
+            -p 5432:5432 \
+            postgres:17-alpine
+
+          # Ожидание готовности БД (таймаут 2 минуты)
+          timeout 120 bash -c 'until docker exec postgres pg_isready -U dev; do sleep 2; done'
+
+      - name: Run tests
+        run: |
           cd backend/${{ inputs.module }}
           mvn clean test
+
+      - name: Stop PostgreSQL
+        if: ${{ inputs.needs_db }}
+        run: |
+          docker stop postgres || true
+          docker rm postgres || true
+
+      
           
 
 

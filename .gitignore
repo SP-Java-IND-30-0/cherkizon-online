@@ -22,12 +22,18 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
 # Игнорировать .env во ВСЕХ подпапках
 **/.env
 **/.env*
 
 /.idea/.gitignore
 /.idea/*
+
+/backend/comments-service/target/
+/backend/notification-service/target/
+/backend/comments-service/.env
+
 /target/*
 /backend/comments-service/target/
 /backend/notification-service/target/
