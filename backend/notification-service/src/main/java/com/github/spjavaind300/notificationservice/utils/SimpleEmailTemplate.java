@@ -10,34 +10,16 @@ import static com.github.spjavaind300.notificationservice.model.NotificationType
 
 @Component
 public class SimpleEmailTemplate {
-    private final Map<NotificationType, EmailTemplateProvider> simpleTemplates = new HashMap<>();
+    private final Map<NotificationType, String> simpleTemplates = new HashMap<>();
 
     public SimpleEmailTemplate() {
-        simpleTemplates.put(USER_CREATED, this::getGreetingTemplate);
-        simpleTemplates.put(ADV_UPDATED, this::getAdvUpdatedTemplate);
-        simpleTemplates.put(COMMENT_CREATED, this::getCommentCreatedTemplate);
+        simpleTemplates.put(USER_CREATED,GREETING_TEMPLATE);
+        simpleTemplates.put(ADV_UPDATED, ADV_UPDATED_TEMPLATE);
+        simpleTemplates.put(COMMENT_CREATED, COMMENT_CREATED_TEMPLATE);
     }
 
     public String getTemplate(NotificationType type) {
-        return simpleTemplates.get(type).getTemplate();
-    }
-
-    private String getGreetingTemplate() {
-        return GREETING_TEMPLATE;
-    }
-
-    private String getCommentCreatedTemplate() {
-        return COMMENT_CREATED_TEMPLATE;
-    }
-
-    private String getAdvUpdatedTemplate() {
-        return ADV_UPDATED_TEMPLATE;
-    }
-
-
-    @FunctionalInterface
-    private interface EmailTemplateProvider {
-        String getTemplate();
+        return simpleTemplates.get(type);
     }
 
     private static final String GREETING_TEMPLATE = """
