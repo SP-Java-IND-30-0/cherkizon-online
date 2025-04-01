@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: 'Arial', sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { color: #2c3e50; text-align: center; }
+        .footer { margin-top: 30px; font-size: 12px; text-align: center; color: #7f8c8d; }
+        .button {
+            display: inline-block; padding: 10px 20px; background-color: #3498db;
+            color: white; text-decoration: none; border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 class="header">Добро пожаловать! 🌟</h1>
+    <p>Привет, {{username}}!</p>
+    <p>Мы так рады, что вы решили присоединиться к нашему сообществу. Теперь у вас есть доступ ко всем возможностям, которые мы подготовили с любовью.</p>
+    <p>Если у вас есть вопросы или нужна помощь — просто нажмите кнопку ниже. Мы всегда рядом!</p>
+    <p style="text-align: center;">
+        <a href="{{supportLink}}" class="button">Написать в поддержку</a>
+    </p>
+    <p>С теплом,<br>Команда {{serviceName}}</p>
+    <div class="footer">
+        <p>Если это письмо пришло вам по ошибке, просто проигнорируйте его.</p>
+    </div>
+</div>
+</body>
+</html>
