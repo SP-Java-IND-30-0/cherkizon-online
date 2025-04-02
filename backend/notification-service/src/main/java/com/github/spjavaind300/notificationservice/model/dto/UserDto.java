@@ -1,4 +1,4 @@
-package com.github.spjavaind300.notificationservice.dto;
+package com.github.spjavaind300.notificationservice.model.dto;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
