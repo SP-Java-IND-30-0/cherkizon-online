@@ -5,12 +5,13 @@ spring:
     host: smtp.yandex.ru
     port: 465
     username: ${EMAIL_USER:notifications@example.com}
-    password: ${EMAIL_PASSWORD:}
+    password: ${EMAIL_APP_PASSWORD:""}
     protocol: smtps
     properties:
       mail.smtp:
         auth: true
         ssl.enable: true
+        ssl.trust: smtp.yandex.ru
         starttls.enable: false
         connectiontimeout: 5000
         timeout: 5000
