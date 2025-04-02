@@ -16,4 +16,6 @@ spring:
         timeout: 5000
         writetimeout: 5000
 
-
+email:
+  templates:
+    dir: ${EMAIL_TEMPLATES_DIR:file:${user.dir}/email-templates}
