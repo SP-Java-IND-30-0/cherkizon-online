@@ -4,8 +4,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class AbsServiceApplication {
+public class AdsServiceApplication {
     public static void main(String[] args) {
-        SpringApplication.run(AbsServiceApplication.class, args);
+        SpringApplication.run(AdsServiceApplication.class, args);
     }
 }
