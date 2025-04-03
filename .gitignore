@@ -23,6 +23,10 @@
 hs_err_pid*
 replay_pid*
 
+# Игнорировать .env во ВСЕХ подпапках
+**/.env
+**/.env*
+
 /.idea/.gitignore
 /.idea/*
 
