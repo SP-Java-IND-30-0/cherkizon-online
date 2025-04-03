@@ -1,0 +1,37 @@
+spring:
+  mail:
+    host: mock.smtp
+    port: 2525
+    username: test@test.com
+    password: test
+    properties:
+      mail.smtp:
+        auth: false
+
+
+  security:
+    user:
+      name: test
+      password: test
+      roles: ACTUATOR
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+    logfile:
+      access: none
+    loggers:
+      access: none
+
+logging:
+  file:
+    name: build/test.log
+
+email:
+  templates:
+    dir: ${EMAIL_TEMPLATES_DIR:file:${user.dir}/email-templates}

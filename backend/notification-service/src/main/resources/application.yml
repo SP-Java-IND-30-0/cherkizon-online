@@ -3,18 +3,44 @@ spring:
 
   mail:
     host: smtp.yandex.ru
-    port: 465
+    port: 587
     username: ${EMAIL_USER:notifications@example.com}
-    password: ${EMAIL_PASSWORD:}
-    protocol: smtps
+    password: ${EMAIL_APP_PASSWORD:}
+    protocol: smtp
     properties:
       mail.smtp:
         auth: true
-        ssl.enable: true
-        starttls.enable: false
+        ssl.enable: false
+        starttls.enable: true
         connectiontimeout: 5000
         timeout: 5000
         writetimeout: 5000
+
+  security:
+    user:
+      name: actuator-user
+      password: ${ACTUATOR_PASSWORD:actuator-password}
+      roles: ACTUATOR
+
+  kafka:
+    bootstrap-servers: localhost:29092
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, metrics, info, logfile, loggers
+  endpoint:
+    health:
+      show-details: always
+    metrics:
+      access: read_only
+    info:
+      access: read_only
+    loggers:
+      access: unrestricted
+    logfile:
+      access: read_only
 
 email:
   templates:
