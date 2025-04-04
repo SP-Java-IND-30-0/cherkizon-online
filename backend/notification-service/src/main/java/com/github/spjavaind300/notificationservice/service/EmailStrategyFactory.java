@@ -2,21 +2,30 @@ package com.github.spjavaind300.notificationservice.service;
 
 import com.github.spjavaind300.notificationservice.model.NotificationType;
 import com.github.spjavaind300.notificationservice.model.dto.Event;
-import lombok.RequiredArgsConstructor;
+import jakarta.el.MethodNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
 public class EmailStrategyFactory {
 
-    private final List<NotificationStrategy<Event>> strategies;
+
+    private final Map<NotificationType, NotificationStrategy<Event>> strategyMap = new HashMap<>();
+
+    EmailStrategyFactory(@Autowired List<NotificationStrategy<Event>> strategies) {
+        for (NotificationStrategy<Event> strategy : strategies) {
+            strategyMap.put(strategy.getType(), strategy);
+        }
+    }
 
     public NotificationStrategy<Event> getStrategy(NotificationType type) {
-        return strategies.stream()
-                .filter(strategy -> strategy.getType() == type)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("No strategy found for " + type)); //TODO: throw custom exception
+
+        return Optional.ofNullable(strategyMap.get(type))
+                .orElseThrow(() -> new MethodNotFoundException("No email prepare strategy found for type " + type));
     }
 }
