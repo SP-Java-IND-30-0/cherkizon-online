@@ -1,0 +1,25 @@
+name: Auth Service CI
+
+on:
+  push:
+    branches: [ "feature/auth-service/**", "dev" ]
+  pull_request:
+    branches: [ "dev" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    env:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/auth_service_db
+      SPRING_DATASOURCE_USERNAME: dev
+      SPRING_DATASOURCE_PASSWORD: ${{ secrets.AUTH_SERVICE_DB_PASSWORD }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      - name: Build and test
+        run: mvn -B package test --file backend/auth-service/pom.xml
