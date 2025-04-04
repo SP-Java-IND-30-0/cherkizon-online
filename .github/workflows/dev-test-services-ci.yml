@@ -5,7 +5,9 @@ on:
     branches: [dev]
     paths:
       - 'backend/**'
-      - '!backend/pom.xml'
+    paths-ignore:
+      - 'backend/pom.xml'
+      - 'docker-compose*.yml'
 
 jobs:
   validate-branch-name:
