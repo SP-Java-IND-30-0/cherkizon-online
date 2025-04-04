@@ -1,0 +1,42 @@
+# Build directories
+target/
+build/
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# IDE files
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.classpath
+.project
+.settings/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+*.env.local
+*.env*.backup
+
+
+# Logs
+*.log
+logs/
+
+# Maven
+pom.xml.versionsBackup
+dependency-reduced-pom.xml
+
+# Gradle
+.gradle/
+!gradle-wrapper.jar
+
+# Other
+*.swp
+*.bak
+~$*

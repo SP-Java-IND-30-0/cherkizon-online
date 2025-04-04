@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: auth-service
+
+logging:
+  level:
+    root: INFO
+    

@@ -1,0 +1,121 @@
+name: Test Services on PR to dev CI
+
+on:
+  pull_request:
+    branches: [dev]
+    paths:
+      - 'backend/**'
+    paths-ignore:
+      - 'backend/pom.xml'
+      - 'docker-compose*.yml'
+
+jobs:
+  validate-branch-name:
+    runs-on: ubuntu-latest
+    outputs:
+      module: ${{ steps.extract-module.outputs.module }}
+      is-valid-branch: ${{ steps.check-branch.outputs.is-valid }}
+      matrix-config: ${{ steps.set-matrix.outputs.config }}
+    steps:
+      - name: Check branch format
+        id: check-branch
+        run: |
+          BRANCH_NAME="${{ github.head_ref || github.ref_name }}"
+          if [[ "$BRANCH_NAME" =~ ^(feature|fix|chore|docs|test|refactor|hotfix)/([^/]+)/.* ]]; then
+            echo "is-valid=true" >> $GITHUB_OUTPUT
+          else
+            echo "is-valid=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+      - name: Extract module
+        id: extract-module
+        if: steps.check-branch.outputs.is-valid == 'true'
+        run: |
+          MODULE=$(echo "${{ github.head_ref || github.ref_name }}" | cut -d'/' -f2)
+          echo "module=$MODULE" >> $GITHUB_OUTPUT
+
+      - name: Generate matrix config
+        id: set-matrix
+        if: steps.check-branch.outputs.is-valid == 'true'
+        run: |
+          MODULE="${{ steps.extract-module.outputs.module }}"
+          case "$MODULE" in
+            "comments-service")
+              CONFIG='{"module":["comments-service"],"needs_db":[true],"db_name":["comments_service_db"],"secret":["COMMENTS_SERVICE_DB_PASSWORD"]}'
+              ;;
+            "ads-service")
+              CONFIG='{"module":["ads-service"],"needs_db":[true],"db_name":["ads_service_db"],"secret":["ADS_SERVICE_DB_PASSWORD"]}'
+              ;;
+            "auth-service")
+              CONFIG='{"module":["auth-service"],"needs_db":[true],"db_name":["auth_service_db"],"secret":["AUTH_SERVICE_DB_PASSWORD"]}'
+              ;;
+            "profile-service")
+              CONFIG='{"module":["profile-service"],"needs_db":[true],"db_name":["profile_service_db"],"secret":["PROFILE_SERVICE_DB_PASSWORD"]}'
+              ;;
+            *)
+              CONFIG='{"module":["'"$MODULE"'"],"needs_db":[false]}'
+              ;;
+          esac
+          echo "config=$CONFIG" >> $GITHUB_OUTPUT
+
+  test-module:
+    needs: validate-branch-name
+    if: ${{ needs.validate-branch-name.outputs.is-valid-branch == 'true' }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJson(needs.validate-branch-name.outputs.matrix-config) }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4  
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4  
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+          
+      - name: Validate env variables
+        if: ${{ matrix.needs_db }}
+        run: |
+          echo "=== Environment Variables ==="
+          echo "DB_NAME: ${{ matrix.db_name }}"
+          echo "SECRET_NAME: ${{ matrix.secret }}"
+
+          if [ -z "${{ secrets[matrix.secret] }}" ]; then
+            echo "ERROR: DB password secret is missing!"
+            exit 1
+          fi
+      
+
+      - name: Start PostgreSQL
+        if: ${{ matrix.needs_db }}
+        run: |
+          docker run -d --name postgres \
+            -e POSTGRES_DB=${{ matrix.db_name }} \
+            -e POSTGRES_USER=dev \
+            -e POSTGRES_PASSWORD=${{ secrets[matrix.secret] }} \
+            -p 5432:5432 \
+            postgres:17-alpine
+          timeout 120 bash -c 'until docker exec postgres pg_isready -U dev; do sleep 2; done'
+          
+      - name: Verify PostgreSQL connection
+        if: ${{ matrix.needs_db }}
+        run: |
+          docker exec postgres psql -U dev -d ${{ matrix.db_name }} -c "SELECT 1"
+          
+      - name: Run tests
+        env:
+          DB_PASSWORD: ${{ secrets[matrix.secret] }}
+        run: |
+          echo "SPRING_DATASOURCE_PASSWORD_LENGTH: ${#SPRING_DATASOURCE_PASSWORD}"
+          
+          cd backend/${{ matrix.module }}
+          mvn clean test -Dspring.datasource.password=$DB_PASSWORD 
+  
+      - name: Stop PostgreSQL
+        if: ${{ matrix.needs_db }}
+        run: |
+          docker stop postgres || true
+          docker rm postgres || true
