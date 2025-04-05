@@ -23,7 +23,15 @@ spring:
       roles: ACTUATOR
 
   kafka:
-    bootstrap-servers: localhost:29092
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
+    listener:
+      auto-startup: true
+    consumer:
+      group-id: email-notification-group
+      auto-offset-reset: earliest
+      properties:
+        spring.json.trusted.packages: "*"
+
 
 management:
   endpoints:
@@ -45,3 +53,5 @@ management:
 email:
   templates:
     dir: ${EMAIL_TEMPLATES_DIR:file:${user.dir}/email-templates}
+    support-link: "#"
+    caption: Cherkizon-Online

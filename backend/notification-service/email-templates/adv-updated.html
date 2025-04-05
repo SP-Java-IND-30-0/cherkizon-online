@@ -2,7 +2,7 @@
 <html lang="ru" xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>{{subject}}</title>
+    <title>%s</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -40,20 +40,19 @@
 <body>
 <div class="container">
     <h1 class="header">Кое-что изменилось! ✨</h1>
-    <p>Привет, {{username}}!</p>
-    <p>Вы оставляли комментарий под объявлением <strong>"{{adTitle}}"</strong>, и мы хотели сообщить, что автор внес в
+    <p>Привет, %s!</p>
+    <p>Вы оставляли комментарий под объявлением <strong>"%s"</strong>, и мы хотели сообщить, что автор внес в
         него изменения.</p>
 
     <div class="ad-card">
-        <h3>{{adTitle}}</h3>
-        <p>{{adUpdates}}</p>
-        <p><a href="{{adLink}}">Посмотреть обновленное объявление →</a></p>
+        <h3>%s</h3>
+        <p><a href="%s">Посмотреть обновленное объявление →</a></p>
     </div>
 
     <p>Возможно, теперь там появилось что-то интересное именно для вас!</p>
-    <p>С уважением,<br>Команда {{serviceName}}</p>
+    <p>С уважением,<br>Команда %s</p>
     <div class="footer">
-        <p>Хотите меньше уведомлений? <a href="{{notificationSettings}}">Настроить рассылку</a></p>
+        <p>Хотите меньше уведомлений? <a href="%s">Написать в поддержку</a></p>
     </div>
 </div>
 </body>

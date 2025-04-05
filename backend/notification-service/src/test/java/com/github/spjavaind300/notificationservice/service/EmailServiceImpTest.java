@@ -1,6 +1,7 @@
-package com.github.spjavaind300.notificationservice.servive;
+package com.github.spjavaind300.notificationservice.service;
 
 import com.github.spjavaind300.notificationservice.model.dto.EmailDto;
+import com.github.spjavaind300.notificationservice.service.imp.EmailServiceImp;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +19,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @EnableRetry
-class EmailServiceTest {
+class EmailServiceImpTest {
 
     @Mock
     private JavaMailSender mailSender;
@@ -27,13 +28,13 @@ class EmailServiceTest {
     private MimeMessage mimeMessage;
 
 
-    private EmailService emailService;
+    private EmailServiceImp emailService;
 
     private EmailDto validEmailDto;
 
     @BeforeEach
     void setUp() {
-        emailService = new EmailService(mailSender);
+        emailService = new EmailServiceImp(mailSender);
         validEmailDto = EmailDto.builder()
                 .email("test@example.com")
                 .subject("Test Subject")
