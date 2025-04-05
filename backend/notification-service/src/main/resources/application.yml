@@ -24,6 +24,8 @@ spring:
 
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
+    listener:
+      auto-startup: true
     consumer:
       group-id: email-notification-group
       auto-offset-reset: earliest
@@ -51,5 +53,5 @@ management:
 email:
   templates:
     dir: ${EMAIL_TEMPLATES_DIR:file:${user.dir}/email-templates}
-    support-link: #
+    support-link: "#"
     caption: Cherkizon-Online

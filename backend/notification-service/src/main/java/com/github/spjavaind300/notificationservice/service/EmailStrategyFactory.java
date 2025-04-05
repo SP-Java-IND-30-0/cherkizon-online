@@ -6,16 +6,13 @@ import jakarta.el.MethodNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class EmailStrategyFactory {
 
 
-    private final Map<NotificationType, NotificationStrategy<Event>> strategyMap = new HashMap<>();
+    private final Map<NotificationType, NotificationStrategy<Event>> strategyMap = new EnumMap<>(NotificationType.class);
 
     EmailStrategyFactory(@Autowired List<NotificationStrategy<Event>> strategies) {
         for (NotificationStrategy<Event> strategy : strategies) {

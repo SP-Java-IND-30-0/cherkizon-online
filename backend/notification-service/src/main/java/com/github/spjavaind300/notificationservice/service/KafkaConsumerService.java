@@ -16,7 +16,8 @@ public class KafkaConsumerService {
     @KafkaListener(topics = {
             "auth.user.created",
             "adv.updated",
-            "comment.created"})
+            "comment.created"},
+            autoStartup = "${kafka.listener.auto-startup:false}")
     public void handleEvent(Event event) {
         NotificationStrategy<Event> strategy = factory.getStrategy(event.getNotificationType());
         for (EmailDto emailDto : strategy.prepareEmail(event)) {

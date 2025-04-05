@@ -7,10 +7,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class NotificationServiceConfig {
 
-    @Value("${mail.template.caption}")
+    @Value("${email.templates.caption}")
     private String caption;
 
-    @Value("${mail.template.support-link}")
+    @Value("${email.templates.support-link}")
     String supportLink;
 
     @Bean("caption")
