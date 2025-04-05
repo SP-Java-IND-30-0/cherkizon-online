@@ -1,6 +1,5 @@
 package com.github.spjavaind300.commentsservice.model;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
@@ -23,19 +22,12 @@ import java.time.Instant;
 public class Comment {
 
     @Id
-    @Schema(description = "Идентификатор комментария", accessMode = Schema.AccessMode.READ_ONLY)
-    private Long id;
+    private Integer id;
 
-    @Schema(description = "Идентификатор объявления, к которому относится комментарий")
-    private Long adId;
+    private Integer adId;
 
-    @Schema(description = "Идентификатор автора комментария")
-    private Long authorId;
-
-    @Schema(description = "Текст комментария")
     private String text;
 
-    @Schema(description = "Дата и время создания комментария")
     private Instant createdAt;
 
     @PrePersist
@@ -43,5 +35,20 @@ public class Comment {
         if (this.createdAt == null) {
             this.createdAt = Instant.now();
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Comment comment = (Comment) o;
+
+        return id != null && id.equals(comment.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id != null ? id.hashCode() : 0;
     }
 }
