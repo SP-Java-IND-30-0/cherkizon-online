@@ -16,7 +16,7 @@ public class ProfileServiceImp implements ProfileService {
     private final ProfileServiceClient client;
 
     @Override
-    public List<UserDto> getProfiles(List<Integer> userIds) {
+    public List<UserDto> getProfiles(List<Long> userIds) {
         return new ArrayList<>(client.getProfiles(userIds));
     }
 }

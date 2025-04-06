@@ -60,7 +60,7 @@ class AdvUpdatedStrategyTest {
     void test_prepareEmail() {
 
         AdvUpdatedEvent event = new AdvUpdatedEvent(1, "title","firstName", "lastName", "advURI");
-        List<Integer> ids = List.of(1,2,5);
+        List<Long> ids = List.of(1L,2L,5L);
         UserDto user1 = new UserDto(1,"Author1 FirstName", "Author1 LastName", "author1@test.com");
         UserDto user2 = new UserDto(2,"Author2 FirstName", "Author2 LastName", "author2@test.com");
         UserDto user5 = new UserDto(5,"Author5 FirstName", "Author5 LastName", "author5@test.com");
