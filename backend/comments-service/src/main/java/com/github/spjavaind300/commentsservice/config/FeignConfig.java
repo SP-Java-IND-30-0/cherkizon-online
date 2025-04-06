@@ -18,7 +18,7 @@ public class FeignConfig {
     public RequestInterceptor requestInterceptor() {
         return template -> {
             String token = SecurityUtils.getCurrentToken();
-            if (token != null) {
+            if (token != null && !template.request().url().contains("/internal/")) {
                 template.header("Authorization", "Bearer " + token);
             }
         };

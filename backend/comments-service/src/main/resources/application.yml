@@ -10,7 +10,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
@@ -20,12 +20,17 @@ spring:
     change-log: classpath:db/changelog/changelog.yml
     enabled: true
 
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            loggerLevel: FULL
+            connectTimeout: 5000
+            readTimeout: 5000
 
-springdoc:
-  swagger-ui:
-    path: /swagger-ui.html
-  api-docs:
-    path: /v3/api-docs
+custom:
+  profile-service-url: http://localhost:8082
 
 logging:
   level:

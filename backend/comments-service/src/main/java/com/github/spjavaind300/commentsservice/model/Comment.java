@@ -1,6 +1,7 @@
 package com.github.spjavaind300.commentsservice.model;
 
-import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
@@ -12,7 +13,6 @@ import lombok.Setter;
 
 import java.time.Instant;
 
-@Entity
 @Table(name = "comments")
 @Getter
 @Setter
@@ -22,9 +22,10 @@ import java.time.Instant;
 public class Comment {
 
     @Id
-    private Integer id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    private Integer adId;
+    private Long adId;
 
     private String text;
 

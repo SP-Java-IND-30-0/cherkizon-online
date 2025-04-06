@@ -7,12 +7,12 @@ import lombok.Data;
 @Data
 public class ProfileDto {
 
-    @NotNull(message = "Author ID cannot be null")
-    private Integer authorId;
+    @NotNull
+    private Long authorId;
 
-    @NotBlank(message = "Author's first name cannot be blank")
+    @NotBlank
     private String authorFirstName;
 
-    @NotBlank(message = "Author's image cannot be blank")
+    @NotBlank
     private String authorImage;
 }
