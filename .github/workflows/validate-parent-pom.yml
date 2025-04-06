@@ -38,8 +38,8 @@ jobs:
             echo "❌ Missing dependencyManagement section"
             exit 1
                 fi
-
-
+                
+         
       - name: Verify Java version
         run: |
           JAVA_VERSION=$(mvn help:evaluate -Dexpression=java.version -q -DforceStdout)
@@ -49,5 +49,6 @@ jobs:
             echo "❌ Invalid Java version: $JAVA_VERSION (expected 21)"
             exit 1
           fi
+
           echo "✅ Java version OK: $JAVA_VERSION"
 

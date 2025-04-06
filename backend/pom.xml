@@ -19,11 +19,9 @@
 
     <modules>
         <module>notification-service</module>
-        <module>auth-service</module>
-        <module>comments-service</module>
         <module>ads-service</module>
+        <module>comments-service</module>
     </modules>
-
 
     <properties>
         <java.version>21</java.version>
