@@ -13,14 +13,4 @@ public class FeignConfig {
     public Logger.Level feignLoggerLevel() {
         return Logger.Level.BASIC;
     }
-
-    @Bean
-    public RequestInterceptor requestInterceptor() {
-        return template -> {
-            String token = SecurityUtils.getCurrentToken();
-            if (token != null && !template.request().url().contains("/internal/")) {
-                template.header("Authorization", "Bearer " + token);
-            }
-        };
-    }
 }
