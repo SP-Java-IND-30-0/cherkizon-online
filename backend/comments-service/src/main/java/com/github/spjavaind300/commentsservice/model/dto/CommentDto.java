@@ -6,15 +6,15 @@ import lombok.Data;
 @Data
 public class CommentDto {
 
-    @Schema(description = "ID комментария", accessMode = Schema.AccessMode.READ_ONLY)
-    private Long id;
+    private Long pk;
 
-    @Schema(description = "Текст комментария")
     private String text;
 
-    @Schema(description = "Дата и время создания комментария")
-    private Long createdAt;
+    private Instant createdAt;
 
-    @Schema(description = "Информация об авторе комментария")
-    private UserDto author;
+    private ProfileDto authorId;
+
+    private ProfileDto authorFirstName;
+
+    private ProfileDto authorImage;
 }
