@@ -25,13 +25,16 @@ spring:
       client:
         config:
           default:
-            loggerLevel: FULL
+            loggerLevel: basic
             connectTimeout: 5000
             readTimeout: 5000
 
 custom:
   profile-service-url: http://localhost:8082
 
+server:
+  port: 8084
+  
 logging:
   level:
     root: INFO
