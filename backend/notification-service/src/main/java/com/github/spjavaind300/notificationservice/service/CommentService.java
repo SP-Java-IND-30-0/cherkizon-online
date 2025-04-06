@@ -4,6 +4,6 @@ import java.util.List;
 
 public interface CommentService {
 
-    List<Integer> getCommentsAuthorIdsOfAdv(Integer advId);
+    List<Integer> getCommentsAuthorIdsOfAdv(int advId);
 
 }

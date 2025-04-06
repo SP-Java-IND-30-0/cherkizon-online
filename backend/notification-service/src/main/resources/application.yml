@@ -31,7 +31,22 @@ spring:
       auto-offset-reset: earliest
       properties:
         spring.json.trusted.packages: "*"
-
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connect-timeout: 5000
+            read-timeout: 5000
+            logger-level: basic
+          comments-service:
+            url: http://localhost:8081
+          profile-service:
+            url: http://localhost:8082
+          ads-service:
+            url: http://localhost:8083
+server:
+  port: 8090
 
 management:
   endpoints:
