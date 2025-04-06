@@ -8,15 +8,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import java.util.List;
 
 
-@FeignClient(name = "profile-service-internal", url = "${custom.profile-service-url}")
+@FeignClient(name = "profile-service", url = "${custom.profile-service-url}")
 public interface ProfileFeignClientInternal {
 
     @GetMapping("/internal/profile/me")
     ProfileDto getCurrentProfileInternal();
 
     @GetMapping("/internal/profile/{profileId}")
-    ProfileDto getProfileByIdInternal(@PathVariable("profileId") Long profileId);
+    ProfileDto getProfileByIdInternal(@PathVariable("profileId") long profileId);
 
     @GetMapping("/internal/profile/comments/{announcementId}")
-    List<ProfileDto> getProfilesByAnnouncementId(@PathVariable("announcementId") Long announcementId);
+    List<ProfileDto> getProfilesByAnnouncementId(@PathVariable("announcementId") long announcementId);
 }
