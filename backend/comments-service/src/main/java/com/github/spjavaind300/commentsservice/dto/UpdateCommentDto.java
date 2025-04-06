@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 public class UpdateCommentDto {
 
-    @NotBlank(message = "Text cannot be empty")
+    @NotBlank
     private String text;
 }

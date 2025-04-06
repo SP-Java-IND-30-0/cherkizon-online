@@ -23,7 +23,7 @@ public class Comment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long pk;
 
     private Long adId;
 
@@ -45,11 +45,11 @@ public class Comment {
 
         Comment comment = (Comment) o;
 
-        return id != null && id.equals(comment.id);
+        return pk != null && pk.equals(comment.pk);
     }
 
     @Override
     public int hashCode() {
-        return id != null ? id.hashCode() : 0;
+        return pk != null ? pk.hashCode() : 0;
     }
 }
