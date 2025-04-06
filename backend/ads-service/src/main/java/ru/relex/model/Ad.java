@@ -1,7 +1,7 @@
 package ru.relex.model;
 
-import jakarta.persistence.*;
-import lombok.EqualsAndHashCode;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,27 +12,33 @@ import java.util.Objects;
 @Getter
 @Setter
 @NoArgsConstructor
-@Table(name = "ads")
-@EqualsAndHashCode
 public class Ad {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false, unique = true)
-    private int id;
-
-    @Column(name = "title", nullable = false, unique = true)
-    private String title;
-
-    @Column(name = "description", nullable = false)
+    private int prise;
     private String description;
 
-    @Column(name = "price", nullable = false)
-    private int price;
+    @Id
+    private String title;
+    private int id;
 
-    @Column(name = "image")
-    private String image;
-
-
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Ad that = (Ad) o;
+        return Double.compare(prise, that.prise) == 0 && id == that.id && Objects.equals(title, that.title);
+    }
+    @Override
+    public int hashCode() {
+        return Objects.hash(title, prise, id);
+    }
+    @Override
+    public String toString() {
+        return "Ad{" +
+                "title='" + title + '\'' +
+                ", prise=" + prise +
+                ", id=" + id +
+                '}';
+    }
 }
 
