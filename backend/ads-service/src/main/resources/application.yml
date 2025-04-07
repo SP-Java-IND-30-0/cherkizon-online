@@ -21,4 +21,4 @@ spring:
       root: INFO
 
   liquibase:
-    change-log: classpath:db/changelog-master.yml
+    change-log: classpath:liquibase/changelog-master.yml
