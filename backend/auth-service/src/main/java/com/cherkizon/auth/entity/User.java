@@ -14,6 +14,7 @@ import org.springframework.security.core.GrantedAuthority;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
     @Column(unique = true, nullable = false, length = 32)
