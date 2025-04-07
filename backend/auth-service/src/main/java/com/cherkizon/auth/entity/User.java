@@ -2,11 +2,15 @@ package com.cherkizon.auth.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
 
 @Entity
 @Table(name = "users")
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(exclude = "password")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,7 +27,7 @@ public class User {
     private Role role;
 
     public enum Role implements GrantedAuthority {
-        USER, ADMIN;
+        ADMIN, USER;
 
         @Override
         public String getAuthority() {
