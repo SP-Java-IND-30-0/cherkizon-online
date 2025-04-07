@@ -15,6 +15,20 @@ spring:
       password: test
       roles: ACTUATOR
 
+  kafka:
+    enabled: false
+    bootstrap-servers: ""
+    listener:
+      auto-startup: false
+
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+
+  main:
+    allow-bean-definition-overriding: true #      - org.springframework.boot.autoconfigure.kafka.KafkaAnnotationDrivenConfiguration
+
+
 management:
   endpoints:
     web:
@@ -35,3 +49,5 @@ logging:
 email:
   templates:
     dir: ${EMAIL_TEMPLATES_DIR:file:${user.dir}/email-templates}
+    support-link: "#"
+    caption: Cherkizon-Online

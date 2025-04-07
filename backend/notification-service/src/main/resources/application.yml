@@ -23,7 +23,30 @@ spring:
       roles: ACTUATOR
 
   kafka:
-    bootstrap-servers: localhost:29092
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
+    listener:
+      auto-startup: true
+    consumer:
+      group-id: email-notification-group
+      auto-offset-reset: earliest
+      properties:
+        spring.json.trusted.packages: "*"
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connect-timeout: 5000
+            read-timeout: 5000
+            logger-level: basic
+          comments-service:
+            url: http://localhost:8081
+          profile-service:
+            url: http://localhost:8082
+          ads-service:
+            url: http://localhost:8083
+server:
+  port: 8090
 
 management:
   endpoints:
@@ -45,3 +68,5 @@ management:
 email:
   templates:
     dir: ${EMAIL_TEMPLATES_DIR:file:${user.dir}/email-templates}
+    support-link: "#"
+    caption: Cherkizon-Online

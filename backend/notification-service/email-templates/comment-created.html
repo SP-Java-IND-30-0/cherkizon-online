@@ -2,7 +2,7 @@
 <html lang="ru" xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>{{subject}}</title>
+    <title>%s</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -49,19 +49,18 @@
 <body>
 <div class="container">
     <h1 class="header">Кто-то оставил вам комментарий! 💬</h1>
-    <p>Привет, {{username}}!</p>
-    <p>Пользователь <span class="user-badge">{{commentAuthor}}</span> только что оставил комментарий к вашему объявлению
-        <strong>"{{adTitle}}"</strong>:</p>
+    <p>Привет, %s!</p>
+    <p>Пользователь <span class="user-badge">%s</span> только что оставил комментарий к вашему объявлению
+        <strong>"%s"</strong>:</p>
 
     <div class="comment-card">
-        <p><em>"{{commentPreview}}..."</em></p>
-        <p><a href="{{commentLink}}">Читать полностью и ответить →</a></p>
+        <p><a href="%s">Читать полностью и ответить →</a></p>
     </div>
 
     <p>Не оставляйте его без внимания — возможно, это начало интересного диалога!</p>
-    <p>С наилучшими пожеланиями,<br>Команда {{serviceName}}</p>
+    <p>С наилучшими пожеланиями,<br>Команда %s</p>
     <div class="footer">
-        <p><a href="{{unsubscribeLink}}">Отписаться от уведомлений о комментариях</a></p>
+        <p><a href="%s">Написать в поддержку</a></p>
     </div>
 </div>
 </body>

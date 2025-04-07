@@ -1,7 +1,8 @@
-package com.github.spjavaind300.notificationservice.servive;
+package com.github.spjavaind300.notificationservice.service.imp;
 
 import com.github.spjavaind300.notificationservice.exception.EmailException;
 import com.github.spjavaind300.notificationservice.model.dto.EmailDto;
+import com.github.spjavaind300.notificationservice.service.EmailService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -13,10 +14,10 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
-@Slf4j
-public class EmailService {
+public class EmailServiceImp implements EmailService {
 
     private final JavaMailSender mailSender;
 
@@ -26,6 +27,7 @@ public class EmailService {
             backoff = @Backoff(delay = 1000, multiplier = 2),
             retryFor = {MessagingException.class, EmailException.class}
     )
+    @Override
     public void sendEmailAsync(EmailDto emailDto) {
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
@@ -42,10 +44,6 @@ public class EmailService {
             log.error("Failed to send email to {}", emailDto.getEmail(), e);
             throw new EmailException("Failed to send email to: " + emailDto.getEmail(), e);
         }
-    }
-
-    public void sendEmailFallback(EmailDto emailDto, Throwable t) {
-        log.error("Failed to send email to {}", emailDto.getEmail(), t);
     }
 
 }
