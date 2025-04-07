@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AdvDto {
 
-    private int id;
+    private long id;
     private String title;
 }

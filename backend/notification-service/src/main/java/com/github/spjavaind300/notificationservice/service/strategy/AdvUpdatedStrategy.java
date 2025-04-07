@@ -48,7 +48,7 @@ public class AdvUpdatedStrategy implements NotificationStrategy<AdvUpdatedEvent>
 
     @Override
     public List<EmailDto> prepareEmail(AdvUpdatedEvent event) {
-        List<Integer> commentAuthorIds = commentService.getCommentsAuthorIdsOfAdv(event.id());
+        List<Long> commentAuthorIds = commentService.getCommentsAuthorIdsOfAdv(event.id());
         List<UserDto> users = profileService.getProfiles(commentAuthorIds);
         List<EmailDto> emails = new ArrayList<>();
         for (UserDto user : users) {

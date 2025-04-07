@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface ProfileService {
 
-    List<UserDto> getProfiles(List<Integer> userIds);
+    List<UserDto> getProfiles(List<Long> userIds);
 }

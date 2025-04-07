@@ -31,12 +31,12 @@ class ProfileServiceImpTest {
     @Test
     void test_getProfiles() {
 
-        UserDto user1 = new UserDto(1,"user1_firstName", "user1_lastName", "user1@test.com");
-        UserDto user2 = new UserDto(2,"user2_firstName", "user2_lastName", "user2@test.com");
+        UserDto user1 = new UserDto(1L,"user1_firstName", "user1_lastName", "user1@test.com");
+        UserDto user2 = new UserDto(2L,"user2_firstName", "user2_lastName", "user2@test.com");
 
-        when(profileServiceClient.getProfiles(List.of(1,2))).thenReturn(Set.of(user1,user2));
+        when(profileServiceClient.getProfiles(List.of(1L,2L))).thenReturn(Set.of(user1,user2));
 
-        List<UserDto> users = profileService.getProfiles(List.of(1,2));
+        List<UserDto> users = profileService.getProfiles(List.of(1L,2L));
 
         assertNotNull(users);
         assertEquals(2, users.size());
