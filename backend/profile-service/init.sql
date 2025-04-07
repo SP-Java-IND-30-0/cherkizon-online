@@ -1,0 +1,16 @@
+DROP DATABASE IF EXISTS profile_service_db;
+DROP ROLE IF EXISTS dev;
+CREATE USER dev WITH PASSWORD '1';
+
+CREATE DATABASE profile_service_db;
+GRANT ALL PRIVILEGES ON DATABASE profile_service_db TO dev;
+
+\c profile_service_db
+
+CREATE SCHEMA IF NOT EXISTS app;
+GRANT ALL PRIVILEGES ON SCHEMA app TO dev;
+
+CREATE SCHEMA IF NOT EXISTS service;
+GRANT ALL PRIVILEGES ON SCHEMA service TO dev;
+
+ALTER ROLE dev SET search_path TO app, public;
