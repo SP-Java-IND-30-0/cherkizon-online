@@ -10,5 +10,5 @@ import java.util.Set;
 public interface CommentServiceClient {
 
     @GetMapping("/internal/comment/{id}")
-    Set<Integer> getCommentAuthorIds(@PathVariable("id") int id);
+    Set<Long> getCommentAuthorIds(@PathVariable("id") long id);
 }

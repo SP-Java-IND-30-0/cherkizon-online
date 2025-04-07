@@ -13,5 +13,5 @@ public interface ProfileServiceClient {
 
 
     @GetMapping("/internal/profile")
-    Set<UserDto> getProfiles(@RequestParam(value = "ids") List<Integer> ids);
+    Set<UserDto> getProfiles(@RequestParam(value = "ids") List<Long> ids);
 }

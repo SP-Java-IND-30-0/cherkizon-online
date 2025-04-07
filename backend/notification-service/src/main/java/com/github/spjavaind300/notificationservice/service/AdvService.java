@@ -4,6 +4,6 @@ import com.github.spjavaind300.notificationservice.model.dto.AdvDto;
 
 public interface AdvService {
 
-    AdvDto getAdv(int advId);
+    AdvDto getAdv(long advId);
 
 }

@@ -29,11 +29,11 @@ class CommentServiceImpTest {
     @Test
     void getCommentsAuthorIdsOfAdv() {
 
-        Set<Integer> expectedResult = Set.of(1,2);
+        Set<Long> expectedResult = Set.of(1L,2L);
 
         when(client.getCommentAuthorIds(1)).thenReturn(expectedResult);
 
-        List<Integer> result = commentServiceImp.getCommentsAuthorIdsOfAdv(1);
+        List<Long> result = commentServiceImp.getCommentsAuthorIdsOfAdv(1);
 
         assertNotNull(result);
         assertEquals(expectedResult.size(), result.size());

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.spjavaind300.notificationservice.model.NotificationType;
 
 public record UserRegisteredEvent
-        (@JsonProperty("id") int id,
+        (@JsonProperty("id") long id,
          @JsonProperty("username") String email,
          @JsonProperty("first_name") String firstName,
          @JsonProperty("last_name") String lastName,

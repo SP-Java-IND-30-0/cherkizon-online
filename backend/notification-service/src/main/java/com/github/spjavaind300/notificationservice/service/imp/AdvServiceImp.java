@@ -13,7 +13,7 @@ public class AdvServiceImp implements AdvService {
     private final AdvServiceClient client;
 
     @Override
-    public AdvDto getAdv(int advId) {
+    public AdvDto getAdv(long advId) {
         return client.getAdv(advId);
     }
 }
