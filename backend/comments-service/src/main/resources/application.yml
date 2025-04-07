@@ -2,6 +2,17 @@ spring:
   application:
     name: comments-service
 
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connect-timeout: 5000
+            read-timeout: 5000
+            logger-level: basic
+          profile-service:
+            url: http://localhost:8082
+
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/comments_service_db
@@ -19,13 +30,15 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/changelog.yml
     enabled: true
-   
 
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
   api-docs:
     path: /v3/api-docs
+
+server:
+  port: 8084
 
 logging:
   level:
