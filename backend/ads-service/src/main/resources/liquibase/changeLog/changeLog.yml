@@ -5,7 +5,6 @@ databaseChangeLog:
       changes:
         - createTable:
             tableName: ads
-            schemaName: app
             columns:
               - column:
                   name: id
