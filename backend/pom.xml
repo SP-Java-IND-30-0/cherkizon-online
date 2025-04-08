@@ -21,6 +21,7 @@
         <module>notification-service</module>
         <module>auth-service</module>
         <module>comments-service</module>
+        <module>profile-service</module>
     </modules>
 
 
