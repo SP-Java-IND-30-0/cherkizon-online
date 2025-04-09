@@ -4,6 +4,7 @@ import com.cherkizon.auth.dto.request.LoginRequest;
 import com.cherkizon.auth.dto.request.RegisterRequest;
 import com.cherkizon.auth.dto.request.response.JwtResponse;
 import com.cherkizon.auth.dto.request.response.UserResponse;
+import com.cherkizon.auth.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,7 +29,7 @@ public class AuthController {
     @PostMapping("/register")
     public UserResponse register(
             @Valid @RequestBody RegisterRequest request) {
-        Long userId = authService.register(request);
+        Long userId = authService.register(request).getId();
         return authService.getUserById(userId);
     }
 
