@@ -26,7 +26,7 @@ public class Ad {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     @EqualsAndHashCode.Include
-    long id;
+    int id;
 
     @Column(name = "title", nullable = false,  length = 32)
     String title;
