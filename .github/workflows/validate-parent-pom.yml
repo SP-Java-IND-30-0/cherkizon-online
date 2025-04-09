@@ -39,7 +39,7 @@ jobs:
             exit 1
                 fi
 
-  
+
       - name: Verify Java version
         run: |
           JAVA_VERSION=$(mvn help:evaluate -Dexpression=java.version -q -DforceStdout)
