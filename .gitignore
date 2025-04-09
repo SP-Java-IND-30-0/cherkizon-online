@@ -23,13 +23,12 @@
 hs_err_pid*
 replay_pid*
 
-# Игнорировать .env во ВСЕХ подпапках
 **/.env
 **/.env*
 
 /.idea/.gitignore
 /.idea/*
-
+/backend/abs-service/.env
 /backend/comments-service/target/
 /backend/notification-service/target/
 /backend/comments-service/.env
@@ -37,3 +36,5 @@ replay_pid*
 /target/*
 /backend/comments-service/target/
 /backend/notification-service/target/
+/backend/abs-service/.env
+
