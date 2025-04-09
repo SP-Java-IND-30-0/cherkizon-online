@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: ads-service
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/ads_service_db
+    username: dev
+    password: ${DB_PASSWORD}
+
+  sql:
+    init:
+      mode: always
+      platform: postgresql
+      encoding: UTF-8
+      schema-locations: classpath:db/changelog/init_schema.sql
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+  liquibase:
+    change-log: classpath:db/changelog/changelog-master.yml
+    enabled: true
+    default-schema: app
+    liquibase-schema: service
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
