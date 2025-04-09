@@ -7,12 +7,14 @@ spring:
     url: jdbc:postgresql://localhost:5432/profile_service_db
     username: dev
     password: ${DB_PASSWORD}
+
   sql:
     init:
       mode: always
       platform: postgresql
       encoding: UTF-8
       schema-locations: classpath:db/changelog/init.sql
+
   jpa:
     hibernate:
       ddl-auto: validate
@@ -26,3 +28,7 @@ spring:
     enabled: true
     default-schema: app
     liquibase-schema: service
+
+validation:
+  patterns:
+    password: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[A-Za-z\\d]{8,16}$"
