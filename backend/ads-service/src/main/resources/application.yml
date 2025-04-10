@@ -33,3 +33,9 @@ springdoc:
     path: /swagger-ui.html
   api-docs:
     path: /v3/api-docs
+
+s3:
+  access-key: ${YANDEX_ACCESS_KEY}
+  secret-key: ${YANDEX_SECRET_KEY}
+  uri: "https://storage.yandexcloud.net"
+  region: "ru-central1"
