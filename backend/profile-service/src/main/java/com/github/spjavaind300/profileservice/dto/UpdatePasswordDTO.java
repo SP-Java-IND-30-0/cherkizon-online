@@ -1,5 +1,6 @@
 package com.github.spjavaind300.profileservice.dto;
 
+import com.github.spjavaind300.profileservice.annotation.ValidPassword;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 

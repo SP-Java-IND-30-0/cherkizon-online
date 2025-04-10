@@ -1,4 +1,4 @@
-package com.github.spjavaind300.profileservice.dto;
+package com.github.spjavaind300.profileservice.annotation;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
