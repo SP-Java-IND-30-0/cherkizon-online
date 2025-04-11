@@ -107,6 +107,8 @@ jobs:
       - name: Run tests
         env:
           DB_PASSWORD: ${{ secrets[matrix.secret] }}
+          YANDEX_ACCESS_KEY: ${{ secrets.YANDEX_ACCESS_KEY }}
+          YANDEX_SECRET_KEY: ${{ secrets.YANDEX_SECRET_KEY }}
         run: |
           echo "SPRING_DATASOURCE_PASSWORD_LENGTH: ${#SPRING_DATASOURCE_PASSWORD}"
           

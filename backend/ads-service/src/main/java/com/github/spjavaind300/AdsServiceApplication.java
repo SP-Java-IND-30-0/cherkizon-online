@@ -1,4 +1,4 @@
-package ru.relex;
+package com.github.spjavaind300;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

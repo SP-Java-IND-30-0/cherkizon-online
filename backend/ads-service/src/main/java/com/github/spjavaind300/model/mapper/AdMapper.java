@@ -1,12 +1,12 @@
-package ru.relex.model.mapper;
+package com.github.spjavaind300.model.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import ru.relex.model.dto.AdExtraInfoDto;
-import ru.relex.model.dto.AdRequestDto;
-import ru.relex.model.dto.AdResponseDto;
-import ru.relex.model.dto.UserDto;
-import ru.relex.model.entity.Ad;
+import com.github.spjavaind300.model.dto.AdExtraInfoDto;
+import com.github.spjavaind300.model.dto.AdRequestDto;
+import com.github.spjavaind300.model.dto.AdResponseDto;
+import com.github.spjavaind300.model.dto.UserDto;
+import com.github.spjavaind300.model.entity.Ad;
 
 @Mapper(componentModel = "spring")
 public interface AdMapper {

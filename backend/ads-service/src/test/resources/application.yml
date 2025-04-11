@@ -19,8 +19,12 @@ spring:
      platform: postgresq
      encoding: UTF-8
      schema-locations: classpath:init_schema.sql
-
-
-
   liquibase:
     enabled: false
+
+s3:
+  access-key: ${YANDEX_ACCESS_KEY}
+  secret-key: ${YANDEX_SECRET_KEY}
+  uri: https://storage.yandexcloud.net
+  region: ru-central1
+  bucket-name: cherkizon-test

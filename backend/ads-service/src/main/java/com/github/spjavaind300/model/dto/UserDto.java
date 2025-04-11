@@ -1,4 +1,4 @@
-package ru.relex.model.dto;
+package com.github.spjavaind300.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
