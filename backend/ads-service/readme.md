@@ -2,7 +2,7 @@
 Запустить скрипт init.sql из корневой папки модуля
 
 ```
-$ psql -U postgres -f init_schema.sql
+$ psql -U postgres -f init.sql
 ```
 Создает БД и схемы
 

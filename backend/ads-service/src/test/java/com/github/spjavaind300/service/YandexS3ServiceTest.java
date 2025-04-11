@@ -1,5 +1,6 @@
 package com.github.spjavaind300.service;
 
+import com.github.spjavaind300.service.imp.YandexS3Service;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

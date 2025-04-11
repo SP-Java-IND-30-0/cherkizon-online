@@ -1,5 +1,6 @@
-package com.github.spjavaind300.service;
+package com.github.spjavaind300.service.imp;
 
+import com.github.spjavaind300.service.ImageStorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
