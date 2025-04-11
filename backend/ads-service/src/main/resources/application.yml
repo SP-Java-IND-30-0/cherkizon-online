@@ -28,6 +28,17 @@ spring:
     default-schema: app
     liquibase-schema: service
 
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connect-timeout: 5000
+            read-timeout: 5000
+            logger-level: basic
+          profile-service:
+            url: http://localhost:8082
+
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
@@ -40,3 +51,6 @@ s3:
   uri: https://storage.yandexcloud.net
   region: ru-central1
   bucket-name: cherkizon-ads
+
+server:
+  port: 8083
