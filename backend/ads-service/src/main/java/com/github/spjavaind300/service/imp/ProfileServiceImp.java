@@ -3,6 +3,7 @@ package com.github.spjavaind300.service.imp;
 import com.github.spjavaind300.client.ProfileServiceClient;
 import com.github.spjavaind300.exception.ProfileRequestFailedException;
 import com.github.spjavaind300.model.dto.UserDto;
+import com.github.spjavaind300.service.ProfileService;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ProfileServiceImp implements com.github.spjavaind300.service.ProfileService {
+public class ProfileServiceImp implements ProfileService {
 
     private final ProfileServiceClient client;
 
