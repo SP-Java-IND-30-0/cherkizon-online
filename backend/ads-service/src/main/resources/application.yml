@@ -37,5 +37,6 @@ springdoc:
 s3:
   access-key: ${YANDEX_ACCESS_KEY}
   secret-key: ${YANDEX_SECRET_KEY}
-  uri: "https://storage.yandexcloud.net"
-  region: "ru-central1"
+  uri: https://storage.yandexcloud.net
+  region: ru-central1
+  bucket-name: cherkizon-ads
