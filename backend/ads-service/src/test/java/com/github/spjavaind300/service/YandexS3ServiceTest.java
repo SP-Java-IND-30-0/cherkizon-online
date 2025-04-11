@@ -1,5 +1,6 @@
 package com.github.spjavaind300.service;
 
+import com.github.spjavaind300.model.dto.ImageDto;
 import com.github.spjavaind300.service.imp.YandexS3Service;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
@@ -47,7 +48,7 @@ class YandexS3ServiceTest {
     @Value("${s3.bucket-name}")
     private String bucketName;
 
-    private String uploadKey;
+    private ImageDto imageDto;
     private MultipartFile testFile;
 
     @BeforeEach
@@ -65,9 +66,9 @@ class YandexS3ServiceTest {
 
     @AfterEach
     void tearDown() {
-        if (uploadKey != null) {
+        if (imageDto != null) {
             try {
-                s3Client.deleteObject(b -> b.bucket(bucketName).key(uploadKey));
+                s3Client.deleteObject(b -> b.bucket(bucketName).key(imageDto.url()));
             } catch (S3Exception e) {
                 log.error("failed to delete test file: {}", e.getMessage());
             }
@@ -76,20 +77,20 @@ class YandexS3ServiceTest {
 
     @Test
     void test_uploadFile_successAndReturnKey() {
-        uploadKey = yandexS3Service.uploadFile(testFile);
+        imageDto = yandexS3Service.uploadFile(testFile);
 
-        HeadObjectResponse response = s3Client.headObject(b -> b.bucket(bucketName).key(uploadKey));
+        HeadObjectResponse response = s3Client.headObject(b -> b.bucket(bucketName).key(imageDto.url()));
 
         assertNotNull(response);
-        assertNotNull(uploadKey);
+        assertNotNull(imageDto);
 
-        assertTrue(uploadKey.startsWith("images/"));
+        assertTrue(imageDto.url().startsWith("images/"));
         assertTrue(response.contentType().startsWith("image/jpeg"));
 
-        String url = yandexS3Service.getPreSignedUrl(uploadKey, Duration.ofMinutes(5));
+        String url = yandexS3Service.getPreSignedUrl(imageDto.url(), Duration.ofMinutes(5));
 
         assertTrue(url.contains(bucketName));
-        assertTrue(url.contains(uploadKey));
+        assertTrue(url.contains(imageDto.url()));
 
         URI uri = URI.create(url);
 
@@ -110,9 +111,9 @@ class YandexS3ServiceTest {
                 (InputStream) null
         );
 
-        String result = yandexS3Service.uploadFile(invalidFile);
+        imageDto = yandexS3Service.uploadFile(invalidFile);
 
-        assertEquals(DEFAULT_IMAGE_KEY, result);
+        assertEquals(DEFAULT_IMAGE_KEY, imageDto.url());
     }
 
 }

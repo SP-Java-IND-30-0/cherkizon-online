@@ -1,5 +1,6 @@
 package com.github.spjavaind300.service.imp;
 
+import com.github.spjavaind300.model.dto.ImageDto;
 import com.github.spjavaind300.service.ImageStorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,7 @@ import java.util.UUID;
 public class YandexS3Service implements ImageStorageService {
 
     private static final String DEFAULT_IMAGE_KEY = "images/default.png";
+    private static final String DEFAULT_IMAGE_NAME = "default.png";
     private static final String IMAGE_KEY = "images/";
     private static final Set<String> ALLOW_CONTENT_TYPES = Set.of("image/png", "image/jpeg", "image/jpg");
 
@@ -37,7 +39,7 @@ public class YandexS3Service implements ImageStorageService {
 
 
     @Override
-    public String uploadFile(MultipartFile file) {
+    public ImageDto uploadFile(MultipartFile file) {
         String imageKey = IMAGE_KEY + UUID.randomUUID() + "." + FilenameUtils.getExtension(file.getOriginalFilename());
 
         try {
@@ -52,10 +54,10 @@ public class YandexS3Service implements ImageStorageService {
                             .build(),
                     RequestBody.fromInputStream(file.getInputStream(), file.getSize())
             );
-            return imageKey;
+            return new ImageDto(imageKey, file.getOriginalFilename());
         } catch (IOException | IllegalArgumentException e) {
             log.warn("Failed to upload file {}, reason {}", file.getOriginalFilename(), e.getMessage());
-            return DEFAULT_IMAGE_KEY;
+            return new ImageDto(DEFAULT_IMAGE_KEY, DEFAULT_IMAGE_NAME);
         }
 
     }
@@ -73,6 +75,16 @@ public class YandexS3Service implements ImageStorageService {
                 .build();
 
         return s3Presigner.presignGetObject(getObjectPresignRequest).url().toString();
+    }
+
+    @Override
+    public byte[] getFile(String imageKey) {
+        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                .bucket(bucketName)
+                .key(imageKey)
+                .build();
+
+        return s3Client.getObjectAsBytes(getObjectRequest).asByteArray();
     }
 
 }
