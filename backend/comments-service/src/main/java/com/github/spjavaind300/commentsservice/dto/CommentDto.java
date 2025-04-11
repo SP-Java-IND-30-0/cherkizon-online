@@ -10,7 +10,7 @@ import java.time.Instant;
 public class CommentDto {
 
     @JsonProperty("pk")
-    private long id;
+    private int id;
 
     @Size(min = 1, max = 255, message = "Text length should be in the range from 1 to 255 characters")
     private String text;

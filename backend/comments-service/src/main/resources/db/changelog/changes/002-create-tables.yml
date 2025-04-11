@@ -9,14 +9,14 @@ databaseChangeLog:
             columns:
               - column:
                   name: id
-                  type: BIGINT
+                  type: INT
                   autoIncrement: true
                   constraints:
                     primaryKey: true
                     nullable: false
               - column:
                   name: ad_id
-                  type: BIGINT
+                  type: INT
                   constraints:
                     nullable: false
               - column:
@@ -36,9 +36,9 @@ databaseChangeLog:
       author: k.pravdina
       changes:
         - createIndex:
-            indexName: idx_comments_id
+            indexName: idx_comments_ad_id
             tableName: comments
             schemaName: app
             columns:
               - column:
-                  name: id
+                  name: ad_id

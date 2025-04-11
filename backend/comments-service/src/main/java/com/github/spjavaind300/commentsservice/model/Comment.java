@@ -18,7 +18,7 @@ import java.time.Instant;
 @Table(name = "comments")
 @Getter
 @Setter
-@EqualsAndHashCode
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -26,10 +26,11 @@ public class Comment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private long id;
 
     @NotNull
-    private long adId;
+    private int adId;
 
     @NotNull
     private String text;
