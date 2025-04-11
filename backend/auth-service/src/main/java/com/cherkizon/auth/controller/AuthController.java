@@ -30,7 +30,7 @@ public class AuthController {
     public UserResponse register(
             @Valid @RequestBody RegisterRequest request) {
         // TODO: Реализовать регистрацию
-        
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Operation(summary = "Аутентификация пользователя",
@@ -41,7 +41,7 @@ public class AuthController {
     public JwtResponse login(
             @Valid @RequestBody LoginRequest request) {
         // TODO: Реализовать аутентификацию
-    
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Operation(summary = "Обновление токена",
@@ -52,6 +52,6 @@ public class AuthController {
     public JwtResponse refreshToken(
             @RequestHeader("Authorization") String refreshToken) {
         // TODO: Реализовать обновление токена
-        
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 }
