@@ -44,16 +44,7 @@ databaseChangeLog:
                   type: VARCHAR(256)
                   constraints:
                     nullable: false
-              - column:
-                  name: image_size
-                  type: INT
-                  constraints:
-                    nullable: false
-              - column:
-                  name: image_type
-                  type: VARCHAR(32)
-                  constraints:
-                    nullable: false
+
 
   - changeSet:
       id: 002

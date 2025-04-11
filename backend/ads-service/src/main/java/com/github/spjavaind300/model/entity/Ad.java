@@ -41,16 +41,12 @@ public class Ad {
     long userId;
 
     @Column(name = "image_url", nullable = false, length = 256)
-    String imageUrl;
+    String imageKey;
 
     @Column(name = "original_image_filename", nullable = false, length = 256)
     String originalFilename;
 
-    @Column(name = "image_size", nullable = false)
-    int imageSize;
 
-    @Column(name = "image_type", nullable = false, length = 32)
-    String imageType;
 
 }
 
