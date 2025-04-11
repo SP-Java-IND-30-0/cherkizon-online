@@ -29,8 +29,8 @@ public class AuthController {
     @PostMapping("/register")
     public UserResponse register(
             @Valid @RequestBody RegisterRequest request) {
-        Long userId = authService.register(request).getId();
-        return authService.getUserById(userId);
+        // TODO: Реализовать регистрацию
+        
     }
 
     @Operation(summary = "Аутентификация пользователя",
@@ -40,8 +40,10 @@ public class AuthController {
     @PostMapping("/login")
     public JwtResponse login(
             @Valid @RequestBody LoginRequest request) {
-        return authService.login(request);
+        // TODO: Реализовать аутентификацию
+    
     }
+
     @Operation(summary = "Обновление токена",
             description = "Возвращает новый access-токен по refresh-токену")
     @ApiResponse(responseCode = "200", description = "Токен обновлен")
@@ -49,6 +51,7 @@ public class AuthController {
     @PostMapping("/refresh")
     public JwtResponse refreshToken(
             @RequestHeader("Authorization") String refreshToken) {
-        return authService.refreshToken(refreshToken);
+        // TODO: Реализовать обновление токена
+        
     }
 }
