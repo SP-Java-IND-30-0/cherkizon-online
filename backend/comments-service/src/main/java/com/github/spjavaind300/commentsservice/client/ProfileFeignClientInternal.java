@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import java.util.List;
 
 
-@FeignClient(name = "profile-service", configuration = FeignConfig.class)
+@FeignClient(name = "profile-service", url = "${profile-service.url:http://localhost:8082}", configuration = FeignConfig.class)
 public interface ProfileFeignClientInternal {
 
     @GetMapping("/internal/profile/me")
