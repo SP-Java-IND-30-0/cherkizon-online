@@ -26,6 +26,9 @@ public interface AdMapper {
     @Mapping(target = "originalFilename", source = "imageDto.name")
     Ad fromAdRequestDto(AdRequestDto dto, ImageDto imageDto);
 
-    Ad updateAd(AdRequestDto dto);
+    @Mapping(target = "title", source = "dto.title")
+    @Mapping(target = "price", source = "dto.price")
+    @Mapping(target = "description", source = "dto.description")
+    Ad updateAd(Ad ad, AdRequestDto dto);
 
 }

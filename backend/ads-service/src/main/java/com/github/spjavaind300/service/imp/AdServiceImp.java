@@ -10,6 +10,7 @@ import com.github.spjavaind300.model.dto.UserDto;
 import com.github.spjavaind300.model.entity.Ad;
 import com.github.spjavaind300.model.mapper.AdMapper;
 import com.github.spjavaind300.repository.AdRepository;
+import com.github.spjavaind300.service.AdService;
 import com.github.spjavaind300.service.ImageStorageService;
 import com.github.spjavaind300.service.ProfileService;
 import jakarta.transaction.Transactional;
@@ -24,7 +25,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class AdServiceImp {
+public class AdServiceImp implements AdService {
 
     private final AdRepository adRepository;
     private final AdMapper adMapper;
@@ -32,6 +33,7 @@ public class AdServiceImp {
     private final ProfileService profileService;
 
 
+    @Override
     public ListAdsDto getAllAds() {
         List<Ad> ads = adRepository.findAll();
         return ListAdsDto.builder()
@@ -45,6 +47,7 @@ public class AdServiceImp {
                 .build();
     }
 
+    @Override
     public ListAdsDto getAllAdsForUser(long userId) {
         List<Ad> ads = adRepository.findAllByUserId(userId);
         return ListAdsDto.builder()
@@ -58,6 +61,7 @@ public class AdServiceImp {
                 .build();
     }
 
+    @Override
     public AdExtraInfoDto getAdInfo(int id) {
         Ad ad = adRepository.findById(id).orElseThrow(() -> new NotFoundException(id));
         UserDto userDto = profileService.getUser(ad.getUserId());
@@ -65,6 +69,7 @@ public class AdServiceImp {
     }
 
     @Transactional
+    @Override
     public AdResponseDto createAd(AdRequestDto adRequestDto, MultipartFile image) {
         ImageDto imageDto = imageStorageService.uploadFile(image);
         Ad ad = adMapper.fromAdRequestDto(adRequestDto, imageDto);
@@ -72,18 +77,21 @@ public class AdServiceImp {
     }
 
     @Transactional
+    @Override
     public void deleteAd(int id) {
         adRepository.deleteById(id);
     }
 
     @Transactional
+    @Override
     public AdResponseDto updateAd(int id, AdRequestDto adRequestDto) {
-        adRepository.findById(id).orElseThrow(() -> new NotFoundException(id));
-        Ad ad = adMapper.updateAd(adRequestDto);
-        return saveAd(ad);
+        Ad ad = adRepository.findById(id).orElseThrow(() -> new NotFoundException(id));
+        Ad updateAd = adMapper.updateAd(ad, adRequestDto);
+        return saveAd(updateAd);
     }
 
     @Transactional
+    @Override
     public byte[] updateImage(int id, MultipartFile image) {
         Ad ad = adRepository.findById(id).orElseThrow(() -> new NotFoundException(id));
         ad.setImageKey(imageStorageService.uploadFile(image).url());
