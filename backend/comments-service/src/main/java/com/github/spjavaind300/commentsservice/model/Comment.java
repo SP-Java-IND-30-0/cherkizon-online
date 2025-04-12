@@ -27,7 +27,7 @@ public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
-    private long id;
+    private int id;
 
     @NotNull
     private int adId;
