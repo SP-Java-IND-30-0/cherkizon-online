@@ -10,8 +10,4 @@ public interface AuthService {
 
     JwtResponse login(LoginRequest request);
 
-    JwtResponse refreshToken(String refreshToken);
-
-
-    UserResponse getUserById(Long userId);
 }

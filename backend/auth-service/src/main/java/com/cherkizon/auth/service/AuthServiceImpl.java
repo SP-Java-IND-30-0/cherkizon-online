@@ -22,15 +22,4 @@ public class AuthServiceImpl implements AuthService {
         return null;
     }
 
-    @Override
-    public JwtResponse refreshToken(String refreshToken) {
-        // TODO: Реализовать логику
-        return null;
-    }
-
-    @Override
-    public UserResponse getUserById(Long userId) {
-        // TODO: Реализовать логику
-        return null;
-    }
 }
