@@ -12,6 +12,7 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 
@@ -64,14 +65,10 @@ public class YandexS3Service implements ImageStorageService {
 
     @Override
     public String getPreSignedUrl(String imageKey, Duration expiration) {
-        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
-                .bucket(bucketName)
-                .key(imageKey)
-                .build();
 
         GetObjectPresignRequest getObjectPresignRequest = GetObjectPresignRequest.builder()
                 .signatureDuration(expiration)
-                .getObjectRequest(getObjectRequest)
+                .getObjectRequest(r -> r.bucket(bucketName).key(imageKey))
                 .build();
 
         return s3Presigner.presignGetObject(getObjectPresignRequest).url().toString();
@@ -86,5 +83,18 @@ public class YandexS3Service implements ImageStorageService {
 
         return s3Client.getObjectAsBytes(getObjectRequest).asByteArray();
     }
+
+    @Override
+    public void deleteFile(String imageKey) {
+        if (imageKey.equals(DEFAULT_IMAGE_KEY)) {
+            return;
+        }
+        try {
+        s3Client.deleteObject(r -> r.bucket(bucketName).key(imageKey));
+        } catch (S3Exception e) {
+            log.warn("Failed to delete file {}, reason {}", imageKey, e.getMessage());
+        }
+    }
+
 
 }

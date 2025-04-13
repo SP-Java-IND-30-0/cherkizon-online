@@ -79,7 +79,9 @@ public class AdServiceImp implements AdService {
     @Transactional
     @Override
     public void deleteAd(int id) {
-        adRepository.deleteById(id);
+        Ad ad = adRepository.findById(id).orElseThrow(() -> new NotFoundException(id));
+        imageStorageService.deleteFile(ad.getImageKey());
+        adRepository.delete(ad);
     }
 
     @Transactional

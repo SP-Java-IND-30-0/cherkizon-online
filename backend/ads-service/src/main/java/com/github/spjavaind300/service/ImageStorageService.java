@@ -12,4 +12,6 @@ public interface ImageStorageService {
     String getPreSignedUrl(String imageKey, Duration expiration);
 
     byte[] getFile(String imageKey);
+
+    void deleteFile(String imageKey);
 }
