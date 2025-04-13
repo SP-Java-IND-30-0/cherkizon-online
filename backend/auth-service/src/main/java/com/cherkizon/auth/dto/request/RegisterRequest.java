@@ -13,11 +13,11 @@ public class RegisterRequest {
     @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[A-Za-z\\d]{8,16}$")
     private String password;
 
-    @NotBlank
+    @NotNull
     @Size(min = 2, max = 16)
     private String firstName;
 
-    @NotBlank
+    @NotNull
     @Size(min = 2, max = 16)
     private String lastName;
 
