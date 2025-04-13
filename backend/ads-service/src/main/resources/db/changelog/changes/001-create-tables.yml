@@ -66,3 +66,37 @@ databaseChangeLog:
             columns:
               - column:
                   name: user_id
+
+  - changeSet:
+      id: 003
+      author: belousov_eu
+      changes:
+        - createTable:
+            tableName: outbox_events
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: event_id
+                  type: VARCHAR(14)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: event_type
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: payload
+                  type: TEXT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: processed
+                  type: BOOLEAN
+                  defaultValue: "false"
