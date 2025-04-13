@@ -3,7 +3,6 @@ package com.cherkizon.auth.service;
 import com.cherkizon.auth.dto.request.LoginRequest;
 import com.cherkizon.auth.dto.request.RegisterRequest;
 import com.cherkizon.auth.dto.request.response.JwtResponse;
-import com.cherkizon.auth.dto.request.response.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -11,9 +10,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
     @Override
-    public UserResponse register(RegisterRequest request) {
+    public void register(RegisterRequest request) {
         // TODO: Реализовать логику
-        return null;
     }
 
     @Override

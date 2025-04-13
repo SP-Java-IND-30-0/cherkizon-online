@@ -6,7 +6,7 @@ import com.cherkizon.auth.dto.request.response.JwtResponse;
 import com.cherkizon.auth.dto.request.response.UserResponse;
 
 public interface AuthService {
-    UserResponse register(RegisterRequest request);
+    void register(RegisterRequest request);
 
     JwtResponse login(LoginRequest request);
 
