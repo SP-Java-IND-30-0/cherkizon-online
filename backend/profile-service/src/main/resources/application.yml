@@ -32,3 +32,11 @@ spring:
 validation:
   patterns:
     password: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[A-Za-z\\d]{8,16}$"
+
+aws:
+  s3:
+    bucket-name: cherkizon-avatars
+    access-key: ${YANDEX_ACCESS_KEY}
+    secret-key: ${YANDEX_SECRET_KEY}
+    region: ru-central1
+    endpoint: https://storage.yandexcloud.net

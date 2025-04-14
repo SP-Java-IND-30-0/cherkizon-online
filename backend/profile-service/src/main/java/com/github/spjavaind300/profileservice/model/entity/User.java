@@ -1,9 +1,6 @@
 package com.github.spjavaind300.profileservice.model.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 
 
@@ -34,8 +31,8 @@ public class User {
     @Column(name = "phone")
     private String phone;
 
+
     @Column(name = "image")
     private String image;
-
 
 }

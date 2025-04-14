@@ -1,6 +1,6 @@
 spring:
   application:
-    name: profile-service
+    name: ads-service
 
   datasource:
     driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
@@ -15,10 +15,10 @@ spring:
         show_sql: true
   sql:
     init:
-     mode: always
-     platform: postgresq
-     encoding: UTF-8
-     schema-locations: classpath:init_schema.sql
+      mode: always
+      platform: postgresql
+      encoding: UTF-8
+      schema-locations: classpath:init_schema.sql
   liquibase:
     enabled: false
 
