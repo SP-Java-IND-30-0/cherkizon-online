@@ -38,6 +38,17 @@ spring:
             logger-level: basic
           profile-service:
             url: http://localhost:8082
+  kafka:
+    bootstrap-servers: localhost:29092
+    admin:
+      auto-create: true
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      retries: 3
+      acks: all
+    consumer:
+      auto-offset-reset: earliest
 
 springdoc:
   swagger-ui:
