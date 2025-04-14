@@ -47,6 +47,8 @@ public class OutboxEventServiceImp implements OutboxEventService {
         } catch (JsonProcessingException e) {
             log.error("JSON parse failed for event {}. Event: {}. Error: {}",
                     event.eventId(), event, e.getMessage());
+            throw new IllegalArgumentException("JSON parse failed for event %s. Event: %s. Error: %s"
+                    .formatted(event.eventId(), event, e.getMessage()));
         }
     }
 
@@ -62,7 +64,7 @@ public class OutboxEventServiceImp implements OutboxEventService {
                         .exceptionally(ex -> {
                             log.error("Kafka send failed for event {}. Error: {}", event.getEventId(), ex.getMessage());
                             return null;
-                            });
+                        });
             } catch (IllegalArgumentException | JsonProcessingException e) {
                 log.error("JSON parse failed for event {}. Payload: {}. Error: {}",
                         event.getEventId(), event.getPayload(), e.getMessage());

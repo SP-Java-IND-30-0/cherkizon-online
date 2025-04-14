@@ -19,6 +19,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -72,7 +73,7 @@ class OutboxEventServiceImpTest {
         when(objectMapper.writeValueAsString(event)).thenThrow(new JsonProcessingException("Error") {
         });
 
-        outboxEventService.saveOutboxEvent(event);
+        assertThrows(IllegalArgumentException.class, () -> outboxEventService.saveOutboxEvent(event));
 
         verify(outboxEventRepository, never()).save(any());
     }
