@@ -31,7 +31,6 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
-import java.time.Duration;
 import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -39,7 +38,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -195,13 +193,12 @@ class AdServiceImpTest {
         ImageDto imageDto = new ImageDto("key1", "image1.png");
 
         when(imageStorageService.uploadFile(image)).thenReturn(imageDto);
-        when(imageStorageService.getPreSignedUrl(any(String.class), any(Duration.class))).thenReturn("/test-image-url");
 
         AdResponseDto actual = adService.createAd(1L, requestDto, image);
 
         assertNotNull(actual);
         assertEquals(requestDto.title(), actual.getTitle());
-        assertEquals("/test-image-url", actual.getImage());
+        assertEquals(imageDto.url(), actual.getImage());
 
     }
 
