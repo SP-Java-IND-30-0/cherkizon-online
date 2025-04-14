@@ -53,6 +53,8 @@ spring:
       properties:
         spring.json.trusted.packages: "*"
 
+
+
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
