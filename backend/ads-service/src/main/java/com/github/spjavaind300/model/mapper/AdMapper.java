@@ -16,8 +16,8 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 )
 public interface AdMapper {
 
-    @Mapping(target = "image", source = "imageUrl")
-    AdResponseDto toAdResponseDto(Ad ad,String imageUrl);
+    @Mapping(target = "image", source = "imageKey")
+    AdResponseDto toAdResponseDto(Ad ad);
 
     @Mapping(target = "image", source = "ad.imageKey")
     AdExtraInfoDto toAdExtraInfoDto(Ad ad, UserDto userDto);
