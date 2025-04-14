@@ -1,6 +1,8 @@
 package com.cherkizon.auth.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -17,7 +19,8 @@ public class User {
     @EqualsAndHashCode.Include
     private Long id;
 
-    @Column(unique = true, nullable = false, length = 32)
+    @Column(unique = true, nullable = false, length = 254)
+    @Email
     private String username;
 
     @Column(nullable = false, length = 64)
