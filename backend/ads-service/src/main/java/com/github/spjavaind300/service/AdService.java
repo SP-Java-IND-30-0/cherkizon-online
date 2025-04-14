@@ -15,7 +15,7 @@ public interface AdService {
     AdExtraInfoDto getAdInfo(int id);
 
     @Transactional
-    AdResponseDto createAd(AdRequestDto adRequestDto, MultipartFile image);
+    AdResponseDto createAd(long userId, AdRequestDto adRequestDto, MultipartFile image);
 
     @Transactional
     void deleteAd(int id);

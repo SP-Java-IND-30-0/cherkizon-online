@@ -70,9 +70,10 @@ public class AdServiceImp implements AdService {
 
     @Transactional
     @Override
-    public AdResponseDto createAd(AdRequestDto adRequestDto, MultipartFile image) {
+    public AdResponseDto createAd(long userId, AdRequestDto adRequestDto, MultipartFile image) {
         ImageDto imageDto = imageStorageService.uploadFile(image);
         Ad ad = adMapper.fromAdRequestDto(adRequestDto, imageDto);
+        ad.setUserId(userId);
         return saveAd(ad);
     }
 

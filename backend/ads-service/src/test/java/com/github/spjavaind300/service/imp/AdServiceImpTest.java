@@ -190,7 +190,7 @@ class AdServiceImpTest {
         when(imageStorageService.uploadFile(image)).thenReturn(imageDto);
         when(imageStorageService.getPreSignedUrl(any(String.class), any(Duration.class))).thenReturn("/test-image-url");
 
-        AdResponseDto actual = adService.createAd(requestDto, image);
+        AdResponseDto actual = adService.createAd(1L, requestDto, image);
 
         assertNotNull(actual);
         assertEquals(requestDto.title(), actual.getTitle());
