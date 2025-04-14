@@ -87,6 +87,13 @@ public class AdServiceImp implements AdService {
 
     @Transactional
     @Override
+    public void deleteAllByUserId(long id) {
+        List<Ad> ads = adRepository.findAllByUserId(id);
+        ads.forEach(ad -> deleteAd(ad.getId()));
+    }
+
+    @Transactional
+    @Override
     public AdResponseDto updateAd(int id, AdRequestDto adRequestDto) {
         Ad ad = adRepository.findById(id).orElseThrow(() -> new NotFoundException(id));
         Ad updateAd = adMapper.updateAd(ad, adRequestDto);

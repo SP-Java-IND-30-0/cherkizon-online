@@ -1,5 +1,6 @@
 package com.github.spjavaind300.service.imp;
 
+import com.github.spjavaind300.config.TestKafkaConfig;
 import com.github.spjavaind300.exception.NotFoundException;
 import com.github.spjavaind300.model.dto.AdExtraInfoDto;
 import com.github.spjavaind300.model.dto.AdRequestDto;
@@ -21,6 +22,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -37,9 +39,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
+@Import(TestKafkaConfig.class)
 @Testcontainers
 class AdServiceImpTest {
 
@@ -242,7 +248,7 @@ class AdServiceImpTest {
         Ad ad1 = new Ad(0, "test_ad1", 100, "description ad1", 1L, "key1", "image1.png");
         Ad savedAd1 = adRepository.save(ad1);
 
-        MockMultipartFile image = new MockMultipartFile("file", "new_image1.png", "image/png","test image".getBytes());
+        MockMultipartFile image = new MockMultipartFile("file", "new_image1.png", "image/png", "test image".getBytes());
         ImageDto imageDto = new ImageDto("new_key1", "new_image1.png");
         when(imageStorageService.uploadFile(image)).thenReturn(imageDto);
         when(imageStorageService.getFile(imageDto.url())).thenReturn("test image".getBytes());
@@ -267,5 +273,37 @@ class AdServiceImpTest {
 
         assertThrows(NotFoundException.class, () -> adService.updateImage(0, image));
     }
+
+    @Test
+    void test_deleteAllByUserId_success() {
+        Ad ad1 = new Ad(0, "test_ad1", 100, "description ad1", 1L, "key1", "image1.png");
+        adRepository.save(ad1);
+        Ad ad2 = new Ad(0, "test_ad2", 120, "description ad2", 1L, "key2", "image2.png");
+        adRepository.save(ad2);
+        Ad ad3 = new Ad(0, "test_ad3", 130, "description ad3", 2L, "key3", "image3.png");
+        adRepository.save(ad3);
+
+        assertEquals(3, adRepository.count());
+
+        adService.deleteAllByUserId(1L);
+
+        assertEquals(1, adRepository.count());
+        verify(imageStorageService, times(2)).deleteFile(any(String.class));
+
+    }
+
+    @Test
+    void test_deleteAllByUserId_whenUserHasNotAds() {
+        Ad ad3 = new Ad(0, "test_ad3", 130, "description ad3", 2L, "key3", "image3.png");
+        adRepository.save(ad3);
+        assertEquals(1, adRepository.count());
+
+        adService.deleteAllByUserId(1L);
+
+        assertEquals(1, adRepository.count());
+        verify(imageStorageService, never()).deleteFile(any(String.class));
+
+    }
+
 
 }
