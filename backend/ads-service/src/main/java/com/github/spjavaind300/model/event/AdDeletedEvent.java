@@ -1,7 +1,7 @@
 package com.github.spjavaind300.model.event;
 
 public record AdDeletedEvent(int id) implements AdEvent {
-    private static final String TOPIC = "adv.deleted";
+    public static final String TOPIC = "adv.deleted";
 
     @Override
     public String eventId() {
@@ -11,6 +11,11 @@ public record AdDeletedEvent(int id) implements AdEvent {
     @Override
     public String topic() {
         return TOPIC;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Event: %s, id: %d", TOPIC, id);
     }
 
 }

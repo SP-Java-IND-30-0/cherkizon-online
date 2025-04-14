@@ -1,6 +1,6 @@
 spring:
   application:
-    name: profile-service
+    name: ads-service
 
   datasource:
     driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver

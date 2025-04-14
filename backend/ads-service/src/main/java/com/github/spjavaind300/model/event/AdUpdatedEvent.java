@@ -2,6 +2,7 @@ package com.github.spjavaind300.model.event;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+
 public record AdUpdatedEvent(
         int id,
         String title,
@@ -10,7 +11,7 @@ public record AdUpdatedEvent(
         @JsonProperty("adv_uri") String advUri
 ) implements AdEvent {
 
-    private static final String TOPIC = "adv.updated";
+    public static final String TOPIC = "adv.updated";
 
     @Override
     public String eventId() {
@@ -20,6 +21,11 @@ public record AdUpdatedEvent(
     @Override
     public String topic() {
         return TOPIC;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Event: %s, id: %d", TOPIC, id);
     }
 
 }
