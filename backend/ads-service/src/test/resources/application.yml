@@ -22,15 +22,20 @@ spring:
   liquibase:
     enabled: false
   kafka:
-#    enabled: false
     bootstrap-servers: localhost:29092
+    admin:
+      auto-create: true
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      retries: 3
+      acks: all
     consumer:
       group-id: ads-group
       auto-offset-reset: earliest
       properties:
         spring.json.trusted.packages: "*"
-#  autoconfigure:
-#    exclude: org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+
 s3:
   access-key: ${YANDEX_ACCESS_KEY}
   secret-key: ${YANDEX_SECRET_KEY}

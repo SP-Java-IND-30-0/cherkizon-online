@@ -1,6 +1,5 @@
 package com.github.spjavaind300.service.imp;
 
-import com.github.spjavaind300.config.TestKafkaConfig;
 import com.github.spjavaind300.exception.NotFoundException;
 import com.github.spjavaind300.model.dto.AdExtraInfoDto;
 import com.github.spjavaind300.model.dto.AdRequestDto;
@@ -22,7 +21,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -45,7 +43,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
-@Import(TestKafkaConfig.class)
 @Testcontainers
 class AdServiceImpTest {
 
