@@ -133,7 +133,7 @@ class AdControllerTest {
         when(jwtUtils.getUserContext(any(HttpServletRequest.class))).thenReturn(new UserContext(1L, Role.USER));
         when(adService.createAd(1L, requestDto, file)).thenReturn(adDto1);
 
-        MockPart jsonPart = new MockPart("adRequestDto", jsonRequest.getBytes());
+        MockPart jsonPart = new MockPart("properties", jsonRequest.getBytes());
         jsonPart.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
         mockMvc.perform(MockMvcRequestBuilders.multipart(BASE_URI)
@@ -156,7 +156,7 @@ class AdControllerTest {
         when(jwtUtils.getUserContext(any(HttpServletRequest.class))).thenReturn(new UserContext(1L, Role.USER));
 
 
-        MockPart jsonPart = new MockPart("adRequestDto", jsonRequest.getBytes());
+        MockPart jsonPart = new MockPart("properties", jsonRequest.getBytes());
         jsonPart.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
         mockMvc.perform(MockMvcRequestBuilders.multipart(BASE_URI)
@@ -198,7 +198,7 @@ class AdControllerTest {
                         .file(file))
                 .andExpect((status().isOk()))
                 .andExpect(MockMvcResultMatchers.content().bytes(imageBytes))
-                .andExpect(MockMvcResultMatchers.content().contentType("application/octet-stream"));
+                .andExpect(MockMvcResultMatchers.content().contentType("image/png"));
 
     }
 
@@ -226,10 +226,10 @@ class AdControllerTest {
         byte[] imageBytes = "test image".getBytes();
         when(imageStorageService.getFile(anyString())).thenReturn(imageBytes);
 
-        mockMvc.perform(MockMvcRequestBuilders.get(BASE_URI + "/image/{imageKey}", "file.png"))
+        mockMvc.perform(MockMvcRequestBuilders.get(BASE_URI + "/images/{imageKey}", "file.jpg"))
                 .andExpect((status().isOk()))
                 .andExpect(MockMvcResultMatchers.content().bytes(imageBytes))
-                .andExpect(MockMvcResultMatchers.content().contentType("application/octet-stream"));
+                .andExpect(MockMvcResultMatchers.content().contentType("image/jpeg"));
 
     }
 }
