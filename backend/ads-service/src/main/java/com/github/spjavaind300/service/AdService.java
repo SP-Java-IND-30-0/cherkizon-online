@@ -25,4 +25,7 @@ public interface AdService {
 
     @Transactional
     byte[] updateImage(int id, MultipartFile image);
+
+    @Transactional
+    void deleteAllByUserId(long id);
 }
