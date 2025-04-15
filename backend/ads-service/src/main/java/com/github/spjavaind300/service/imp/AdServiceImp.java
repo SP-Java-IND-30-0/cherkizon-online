@@ -8,10 +8,12 @@ import com.github.spjavaind300.model.dto.ImageDto;
 import com.github.spjavaind300.model.dto.ListAdsDto;
 import com.github.spjavaind300.model.dto.UserDto;
 import com.github.spjavaind300.model.entity.Ad;
+import com.github.spjavaind300.model.event.AdDeletedEvent;
 import com.github.spjavaind300.model.mapper.AdMapper;
 import com.github.spjavaind300.repository.AdRepository;
 import com.github.spjavaind300.service.AdService;
 import com.github.spjavaind300.service.ImageStorageService;
+import com.github.spjavaind300.service.OutboxEventService;
 import com.github.spjavaind300.service.ProfileService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +33,7 @@ public class AdServiceImp implements AdService {
     private final AdMapper adMapper;
     private final ImageStorageService imageStorageService;
     private final ProfileService profileService;
+    private final OutboxEventService outboxEventService;
 
 
     @Override
@@ -83,6 +86,7 @@ public class AdServiceImp implements AdService {
         Ad ad = adRepository.findById(id).orElseThrow(() -> new NotFoundException(id));
         imageStorageService.deleteFile(ad.getImageKey());
         adRepository.delete(ad);
+        outboxEventService.saveOutboxEvent(new AdDeletedEvent(id));
     }
 
     @Transactional

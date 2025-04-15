@@ -8,10 +8,12 @@ import com.github.spjavaind300.model.dto.ImageDto;
 import com.github.spjavaind300.model.dto.ListAdsDto;
 import com.github.spjavaind300.model.dto.UserDto;
 import com.github.spjavaind300.model.entity.Ad;
+import com.github.spjavaind300.model.event.AdEvent;
 import com.github.spjavaind300.model.mapper.AdMapper;
 import com.github.spjavaind300.repository.AdRepository;
 import com.github.spjavaind300.service.AdService;
 import com.github.spjavaind300.service.ImageStorageService;
+import com.github.spjavaind300.service.OutboxEventService;
 import com.github.spjavaind300.service.ProfileService;
 import feign.FeignException;
 import feign.Request;
@@ -37,6 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -61,6 +64,9 @@ class AdServiceImpTest {
     @MockitoBean
     private ProfileService profileService;
 
+    @MockitoBean
+    private OutboxEventService outboxEventService;
+
     private AdService adService;
 
     static {
@@ -73,7 +79,7 @@ class AdServiceImpTest {
 
     @BeforeEach
     void setUp() {
-        adService = new AdServiceImp(adRepository, adMapper, imageStorageService, profileService);
+        adService = new AdServiceImp(adRepository, adMapper, imageStorageService, profileService, outboxEventService);
 
     }
 
@@ -206,11 +212,15 @@ class AdServiceImpTest {
         Ad ad1 = new Ad(0, "test_ad1", 100, "description ad1", 1L, "key1", "image1.png");
         Ad savedAd1 = adRepository.save(ad1);
 
+
         assertEquals(1, adRepository.count());
+
+        doNothing().when(outboxEventService).saveOutboxEvent(any(AdEvent.class));
 
         adService.deleteAd(savedAd1.getId());
 
         assertEquals(0, adRepository.count());
+        verify(outboxEventService, times(1)).saveOutboxEvent(any(AdEvent.class));
     }
 
     @Test
