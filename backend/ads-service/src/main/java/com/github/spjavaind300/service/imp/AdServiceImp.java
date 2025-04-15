@@ -1,5 +1,6 @@
 package com.github.spjavaind300.service.imp;
 
+import com.github.spjavaind300.exception.AccessDeniedException;
 import com.github.spjavaind300.exception.NotFoundException;
 import com.github.spjavaind300.model.dto.AdExtraInfoDto;
 import com.github.spjavaind300.model.dto.AdForNotificationService;
@@ -7,6 +8,8 @@ import com.github.spjavaind300.model.dto.AdRequestDto;
 import com.github.spjavaind300.model.dto.AdResponseDto;
 import com.github.spjavaind300.model.dto.ImageDto;
 import com.github.spjavaind300.model.dto.ListAdsDto;
+import com.github.spjavaind300.model.dto.Role;
+import com.github.spjavaind300.model.dto.UserContext;
 import com.github.spjavaind300.model.dto.UserDto;
 import com.github.spjavaind300.model.entity.Ad;
 import com.github.spjavaind300.model.mapper.AdMapper;
@@ -20,8 +23,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.Duration;
 import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
@@ -40,10 +43,7 @@ public class AdServiceImp implements AdService {
         return ListAdsDto.builder()
                 .count(ads.size())
                 .items(ads.stream()
-                        .map(ad -> adMapper.toAdResponseDto(
-                                ad,
-                                imageStorageService.getPreSignedUrl(ad.getImageKey(), Duration.ofMinutes(15)))
-                        )
+                        .map(adMapper::toAdResponseDto)
                         .toList())
                 .build();
     }
@@ -54,10 +54,7 @@ public class AdServiceImp implements AdService {
         return ListAdsDto.builder()
                 .count(ads.size())
                 .items(ads.stream()
-                        .map(ad -> adMapper.toAdResponseDto(
-                                ad,
-                                imageStorageService.getPreSignedUrl(ad.getImageKey(), Duration.ofMinutes(15)))
-                        )
+                        .map(adMapper::toAdResponseDto)
                         .toList())
                 .build();
     }
@@ -80,31 +77,34 @@ public class AdServiceImp implements AdService {
 
     @Transactional
     @Override
-    public void deleteAd(int id) {
+    public void deleteAd(int id, UserContext userContext) {
         Ad ad = adRepository.findById(id).orElseThrow(() -> new NotFoundException(id));
+        checkUserAccess(ad.getUserId(), userContext);
         imageStorageService.deleteFile(ad.getImageKey());
         adRepository.delete(ad);
     }
 
     @Transactional
     @Override
-    public void deleteAllByUserId(long id) {
+    public void deleteAllByUserId(long id, UserContext userContext) {
         List<Ad> ads = adRepository.findAllByUserId(id);
-        ads.forEach(ad -> deleteAd(ad.getId()));
+        ads.forEach(ad -> deleteAd(ad.getId(),userContext));
     }
 
     @Transactional
     @Override
-    public AdResponseDto updateAd(int id, AdRequestDto adRequestDto) {
+   public AdResponseDto updateAd(int id, AdRequestDto adRequestDto, UserContext userContext) {
         Ad ad = adRepository.findById(id).orElseThrow(() -> new NotFoundException(id));
-        Ad updateAd = adMapper.updateAd(ad, adRequestDto);
-        return saveAd(updateAd);
+        checkUserAccess(ad.getUserId(), userContext);
+        adMapper.updateAd(ad, adRequestDto);
+        return saveAd(ad);
     }
 
     @Transactional
     @Override
-    public byte[] updateImage(int id, MultipartFile image) {
+    public byte[] updateImage(int id, MultipartFile image, UserContext userContext) {
         Ad ad = adRepository.findById(id).orElseThrow(() -> new NotFoundException(id));
+        checkUserAccess(ad.getUserId(), userContext);
         ad.setImageKey(imageStorageService.uploadFile(image).url());
         ad.setOriginalFilename(image.getOriginalFilename());
         adRepository.save(ad);
@@ -119,8 +119,13 @@ public class AdServiceImp implements AdService {
     private AdResponseDto saveAd(Ad ad) {
 
         return adMapper.toAdResponseDto(
-                adRepository.save(ad),
-                imageStorageService.getPreSignedUrl(ad.getImageKey(), Duration.ofMinutes(15))
+                adRepository.save(ad)
         );
+    }
+
+    private void checkUserAccess(long userId, UserContext userContext) {
+        if (userContext.role() == Role.USER && userContext.userId() != userId) {
+            throw new AccessDeniedException();
+        }
     }
 }

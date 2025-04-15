@@ -1,11 +1,14 @@
 package com.github.spjavaind300.service.imp;
 
+import com.github.spjavaind300.exception.AccessDeniedException;
 import com.github.spjavaind300.exception.NotFoundException;
 import com.github.spjavaind300.model.dto.AdExtraInfoDto;
 import com.github.spjavaind300.model.dto.AdRequestDto;
 import com.github.spjavaind300.model.dto.AdResponseDto;
 import com.github.spjavaind300.model.dto.ImageDto;
 import com.github.spjavaind300.model.dto.ListAdsDto;
+import com.github.spjavaind300.model.dto.Role;
+import com.github.spjavaind300.model.dto.UserContext;
 import com.github.spjavaind300.model.dto.UserDto;
 import com.github.spjavaind300.model.entity.Ad;
 import com.github.spjavaind300.model.mapper.AdMapper;
@@ -28,7 +31,6 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
-import java.time.Duration;
 import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -36,10 +38,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -62,6 +66,10 @@ class AdServiceImpTest {
     private ProfileService profileService;
 
     private AdService adService;
+
+    private final UserContext userContext = new UserContext(1, Role.USER);
+    private final UserContext adminContext = new UserContext(10, Role.ADMIN);
+    private final UserContext serviceContext = new UserContext(999, Role.SERVICE);
 
     static {
         postgres = new PostgreSQLContainer<>(DockerImageName.parse("postgres:17-alpine"))
@@ -191,37 +199,113 @@ class AdServiceImpTest {
         ImageDto imageDto = new ImageDto("key1", "image1.png");
 
         when(imageStorageService.uploadFile(image)).thenReturn(imageDto);
-        when(imageStorageService.getPreSignedUrl(any(String.class), any(Duration.class))).thenReturn("/test-image-url");
 
         AdResponseDto actual = adService.createAd(1L, requestDto, image);
 
         assertNotNull(actual);
         assertEquals(requestDto.title(), actual.getTitle());
-        assertEquals("/test-image-url", actual.getImage());
+        assertEquals(imageDto.url(), actual.getImage());
 
     }
 
     @Test
-    void test_deleteAd() {
+    void test_deleteAd_whenUserIsOwner_success() {
         Ad ad1 = new Ad(0, "test_ad1", 100, "description ad1", 1L, "key1", "image1.png");
         Ad savedAd1 = adRepository.save(ad1);
 
         assertEquals(1, adRepository.count());
 
-        adService.deleteAd(savedAd1.getId());
+        adService.deleteAd(savedAd1.getId(), userContext);
 
         assertEquals(0, adRepository.count());
     }
 
     @Test
-    void test_updateAd_success() {
+    void test_deleteAd_whenUserIsNotOwner_thenThrows() {
+        Ad ad1 = new Ad(0, "test_ad1", 100, "description ad1", 5L, "key1", "image1.png");
+        Ad savedAd1 = adRepository.save(ad1);
+
+        assertEquals(1, adRepository.count());
+
+        assertThrows(AccessDeniedException.class, () -> adService.deleteAd(savedAd1.getId(), userContext));
+
+    }
+
+    @Test
+    void test_deleteAd_whenAdminRole_success() {
+        Ad ad1 = new Ad(0, "test_ad1", 100, "description ad1", 1L, "key1", "image1.png");
+        Ad savedAd1 = adRepository.save(ad1);
+
+        assertEquals(1, adRepository.count());
+
+        adService.deleteAd(savedAd1.getId(), adminContext);
+
+        assertEquals(0, adRepository.count());
+    }
+
+    @Test
+    void test_deleteAd_whenServiceRole_success() {
+        Ad ad1 = new Ad(0, "test_ad1", 100, "description ad1", 1L, "key1", "image1.png");
+        Ad savedAd1 = adRepository.save(ad1);
+
+        assertEquals(1, adRepository.count());
+
+        adService.deleteAd(savedAd1.getId(), serviceContext);
+
+        assertEquals(0, adRepository.count());
+    }
+
+    @Test
+    void test_updateAd_whenUserIsOwner_success() {
 
         Ad ad1 = new Ad(0, "test_ad1", 100, "description ad1", 1L, "key1", "image1.png");
         Ad savedAd1 = adRepository.save(ad1);
 
         AdRequestDto requestDto = new AdRequestDto("test title 1", 100, "description 1");
 
-        AdResponseDto actual = adService.updateAd(savedAd1.getId(), requestDto);
+        AdResponseDto actual = adService.updateAd(savedAd1.getId(), requestDto, userContext);
+
+        assertNotNull(actual);
+        assertEquals(requestDto.title(), actual.getTitle());
+
+    }
+
+    @Test
+    void test_updateAd_whenUserIsNotOwner_thenThrows() {
+
+        Ad ad1 = new Ad(0, "test_ad1", 100, "description ad1", 5L, "key1", "image1.png");
+        Ad savedAd1 = adRepository.save(ad1);
+
+        AdRequestDto requestDto = new AdRequestDto("test title 1", 100, "description 1");
+
+        assertThrows(AccessDeniedException.class, () -> adService.updateAd(savedAd1.getId(), requestDto, userContext));
+
+    }
+
+    @Test
+    void test_updateAd_whenAdminRole_success() {
+
+        Ad ad1 = new Ad(0, "test_ad1", 100, "description ad1", 1L, "key1", "image1.png");
+        Ad savedAd1 = adRepository.save(ad1);
+
+        AdRequestDto requestDto = new AdRequestDto("test title 1", 100, "description 1");
+
+        AdResponseDto actual = adService.updateAd(savedAd1.getId(), requestDto, adminContext);
+
+        assertNotNull(actual);
+        assertEquals(requestDto.title(), actual.getTitle());
+
+    }
+
+    @Test
+    void test_updateAd_whenServiceRole_success() {
+
+        Ad ad1 = new Ad(0, "test_ad1", 100, "description ad1", 1L, "key1", "image1.png");
+        Ad savedAd1 = adRepository.save(ad1);
+
+        AdRequestDto requestDto = new AdRequestDto("test title 1", 100, "description 1");
+
+        AdResponseDto actual = adService.updateAd(savedAd1.getId(), requestDto, serviceContext);
 
         assertNotNull(actual);
         assertEquals(requestDto.title(), actual.getTitle());
@@ -236,12 +320,12 @@ class AdServiceImpTest {
 
         AdRequestDto requestDto = new AdRequestDto("test title 1", 100, "description 1");
 
-        assertThrows(NotFoundException.class, () -> adService.updateAd(0, requestDto));
+        assertThrows(NotFoundException.class, () -> adService.updateAd(0, requestDto, userContext));
 
     }
 
     @Test
-    void test_updateImage_success() {
+    void test_updateImage_whenUserIsOwner_success() {
         Ad ad1 = new Ad(0, "test_ad1", 100, "description ad1", 1L, "key1", "image1.png");
         Ad savedAd1 = adRepository.save(ad1);
 
@@ -250,7 +334,63 @@ class AdServiceImpTest {
         when(imageStorageService.uploadFile(image)).thenReturn(imageDto);
         when(imageStorageService.getFile(imageDto.url())).thenReturn("test image".getBytes());
 
-        byte[] actual = adService.updateImage(savedAd1.getId(), image);
+        byte[] actual = adService.updateImage(savedAd1.getId(), image, userContext);
+
+        Ad updatedAd = adRepository.findById(savedAd1.getId()).orElseThrow();
+
+        assertNotNull(actual);
+        assertArrayEquals("test image".getBytes(), actual);
+
+        assertEquals("new_key1", updatedAd.getImageKey());
+        assertEquals("new_image1.png", updatedAd.getOriginalFilename());
+    }
+
+    @Test
+    void test_updateImage_whenUserIsNotOwner_thenThrows() {
+        Ad ad1 = new Ad(0, "test_ad1", 100, "description ad1", 5L, "key1", "image1.png");
+        Ad savedAd1 = adRepository.save(ad1);
+
+        MockMultipartFile image = new MockMultipartFile("file", "new_image1.png", "image/png", "test image".getBytes());
+        ImageDto imageDto = new ImageDto("new_key1", "new_image1.png");
+        when(imageStorageService.uploadFile(image)).thenReturn(imageDto);
+        when(imageStorageService.getFile(imageDto.url())).thenReturn("test image".getBytes());
+
+        assertThrows(AccessDeniedException.class, () -> adService.updateImage(savedAd1.getId(), image, userContext));
+
+    }
+
+    @Test
+    void test_updateImage_whenAdminRole_success() {
+        Ad ad1 = new Ad(0, "test_ad1", 100, "description ad1", 1L, "key1", "image1.png");
+        Ad savedAd1 = adRepository.save(ad1);
+
+        MockMultipartFile image = new MockMultipartFile("file", "new_image1.png", "image/png", "test image".getBytes());
+        ImageDto imageDto = new ImageDto("new_key1", "new_image1.png");
+        when(imageStorageService.uploadFile(image)).thenReturn(imageDto);
+        when(imageStorageService.getFile(imageDto.url())).thenReturn("test image".getBytes());
+
+        byte[] actual = adService.updateImage(savedAd1.getId(), image, adminContext);
+
+        Ad updatedAd = adRepository.findById(savedAd1.getId()).orElseThrow();
+
+        assertNotNull(actual);
+        assertArrayEquals("test image".getBytes(), actual);
+
+        assertEquals("new_key1", updatedAd.getImageKey());
+        assertEquals("new_image1.png", updatedAd.getOriginalFilename());
+    }
+
+    @Test
+    void test_updateImage_whenServiceRole_success() {
+        Ad ad1 = new Ad(0, "test_ad1", 100, "description ad1", 1L, "key1", "image1.png");
+        Ad savedAd1 = adRepository.save(ad1);
+
+        MockMultipartFile image = new MockMultipartFile("file", "new_image1.png", "image/png", "test image".getBytes());
+        ImageDto imageDto = new ImageDto("new_key1", "new_image1.png");
+        when(imageStorageService.uploadFile(image)).thenReturn(imageDto);
+        when(imageStorageService.getFile(imageDto.url())).thenReturn("test image".getBytes());
+
+        byte[] actual = adService.updateImage(savedAd1.getId(), image, serviceContext);
 
         Ad updatedAd = adRepository.findById(savedAd1.getId()).orElseThrow();
 
@@ -268,7 +408,7 @@ class AdServiceImpTest {
 
         MockMultipartFile image = new MockMultipartFile("image1.png", "test image".getBytes());
 
-        assertThrows(NotFoundException.class, () -> adService.updateImage(0, image));
+        assertThrows(NotFoundException.class, () -> adService.updateImage(0, image, userContext));
     }
 
     @Test
@@ -282,7 +422,7 @@ class AdServiceImpTest {
 
         assertEquals(3, adRepository.count());
 
-        adService.deleteAllByUserId(1L);
+        adService.deleteAllByUserId(1L,serviceContext);
 
         assertEquals(1, adRepository.count());
         verify(imageStorageService, times(2)).deleteFile(any(String.class));
@@ -295,7 +435,7 @@ class AdServiceImpTest {
         adRepository.save(ad3);
         assertEquals(1, adRepository.count());
 
-        adService.deleteAllByUserId(1L);
+        adService.deleteAllByUserId(1L,serviceContext);
 
         assertEquals(1, adRepository.count());
         verify(imageStorageService, never()).deleteFile(any(String.class));
