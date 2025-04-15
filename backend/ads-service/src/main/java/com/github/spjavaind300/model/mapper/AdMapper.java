@@ -8,6 +8,7 @@ import com.github.spjavaind300.model.dto.UserDto;
 import com.github.spjavaind300.model.entity.Ad;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
 @Mapper(
@@ -16,8 +17,8 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 )
 public interface AdMapper {
 
-    @Mapping(target = "image", source = "imageUrl")
-    AdResponseDto toAdResponseDto(Ad ad,String imageUrl);
+    @Mapping(target = "image", source = "imageKey")
+    AdResponseDto toAdResponseDto(Ad ad);
 
     @Mapping(target = "image", source = "ad.imageKey")
     AdExtraInfoDto toAdExtraInfoDto(Ad ad, UserDto userDto);
@@ -26,9 +27,6 @@ public interface AdMapper {
     @Mapping(target = "originalFilename", source = "imageDto.name")
     Ad fromAdRequestDto(AdRequestDto dto, ImageDto imageDto);
 
-    @Mapping(target = "title", source = "dto.title")
-    @Mapping(target = "price", source = "dto.price")
-    @Mapping(target = "description", source = "dto.description")
-    Ad updateAd(Ad ad, AdRequestDto dto);
+    void updateAd(@MappingTarget Ad ad, AdRequestDto dto);
 
 }
