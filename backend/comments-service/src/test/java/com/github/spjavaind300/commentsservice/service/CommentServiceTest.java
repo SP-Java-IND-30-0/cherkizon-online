@@ -307,4 +307,12 @@ public class CommentServiceTest {
 
         verify(authorProfileCache, times(2)).put(testProfile.getAuthorId(), testProfile);
     }
+
+    @Test
+    @DisplayName("Получение комментариев для объявления — отсутствие комментариев → NotFoundException")
+    void test_getCommentsForAd_noComments_throwsNotFound() {
+        when(authorProfileCache.get(testProfile.getAuthorId())).thenReturn(testProfile);
+
+        assertThrows(NotFoundException.class, () -> commentService.getCommentsForAd(1, 0, 10));
+    }
 }

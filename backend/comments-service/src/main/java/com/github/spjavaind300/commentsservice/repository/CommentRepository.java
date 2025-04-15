@@ -14,6 +14,4 @@ public interface CommentRepository extends JpaRepository<Comment, Integer> {
     Optional<Comment> findByIdAndAdId(int commentId, int adId);
 
     Page<Comment> findByAdId(int adId, Pageable pageable);
-
-    boolean existsByAdId(int adId);
 }

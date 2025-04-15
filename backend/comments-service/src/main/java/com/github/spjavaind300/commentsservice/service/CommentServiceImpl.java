@@ -17,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -42,12 +41,11 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public Map<String, List<CommentDto>> getCommentsForAd(int adId, int page, int size) {
 
-        if (!commentRepository.existsByAdId(adId)) {
+        Page<Comment> commentPage = commentRepository.findByAdId(adId, PageRequest.of(page, size));
+
+        if (commentPage.isEmpty()) {
             throw new NotFoundException("Объявление", adId);
         }
-
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Comment> commentPage = commentRepository.findByAdId(adId, pageable);
 
         List<CommentDto> commentDtos = commentPage.stream()
                 .map(comment -> {
@@ -69,7 +67,9 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public CommentDto addComment(int adId, CommentTextDto commentTextDto) {
 
-        if (!commentRepository.existsByAdId(adId)) {
+        Page<Comment> commentPage = commentRepository.findByAdId(adId, PageRequest.of(0, 1));
+
+        if (commentPage.isEmpty()) {
             throw new NotFoundException("Объявление", adId);
         }
 
