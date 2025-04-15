@@ -83,11 +83,11 @@ public class AdServiceImp implements AdService {
         adRepository.delete(ad);
     }
 
-
+    @Transactional
     @Override
-    public void deleteAllByUserId(long id) {
+    public void deleteAllByUserId(long id, UserContext userContext) {
         List<Ad> ads = adRepository.findAllByUserId(id);
-        ads.forEach(ad -> deleteAd(ad.getId()));
+        ads.forEach(ad -> deleteAd(ad.getId(),userContext));
     }
 
     @Transactional

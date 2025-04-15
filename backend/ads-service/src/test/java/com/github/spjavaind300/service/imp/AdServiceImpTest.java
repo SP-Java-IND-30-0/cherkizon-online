@@ -422,7 +422,7 @@ class AdServiceImpTest {
 
         assertEquals(3, adRepository.count());
 
-        adService.deleteAllByUserId(1L);
+        adService.deleteAllByUserId(1L,serviceContext);
 
         assertEquals(1, adRepository.count());
         verify(imageStorageService, times(2)).deleteFile(any(String.class));
@@ -435,7 +435,7 @@ class AdServiceImpTest {
         adRepository.save(ad3);
         assertEquals(1, adRepository.count());
 
-        adService.deleteAllByUserId(1L);
+        adService.deleteAllByUserId(1L,serviceContext);
 
         assertEquals(1, adRepository.count());
         verify(imageStorageService, never()).deleteFile(any(String.class));
