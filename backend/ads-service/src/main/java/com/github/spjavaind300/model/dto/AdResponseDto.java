@@ -2,9 +2,13 @@ package com.github.spjavaind300.model.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class AdResponseDto {
 
     @JsonProperty("pk")
@@ -15,7 +19,7 @@ public class AdResponseDto {
     private int price;
 
     @JsonProperty("author")
-    private int userId;
+    private long userId;
 
     private String image;
 
