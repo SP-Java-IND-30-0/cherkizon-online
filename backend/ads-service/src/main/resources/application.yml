@@ -53,8 +53,15 @@ spring:
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+    doc-expansion: none
+    enabled: true
   api-docs:
     path: /v3/api-docs
+  default-consumes-media-type: multipart/form-data
+  default-produces-media-type: application/json
+  show-actuator: false
 
 s3:
   access-key: ${YANDEX_ACCESS_KEY}

@@ -88,8 +88,8 @@ public class AdServiceImp implements AdService {
     public AdResponseDto updateAd(int id, AdRequestDto adRequestDto, UserContext userContext) {
         Ad ad = adRepository.findById(id).orElseThrow(() -> new NotFoundException(id));
         checkUserAccess(ad.getUserId(), userContext);
-        Ad updateAd = adMapper.updateAd(ad, adRequestDto);
-        return saveAd(updateAd);
+        adMapper.updateAd(ad, adRequestDto);
+        return saveAd(ad);
     }
 
     @Transactional

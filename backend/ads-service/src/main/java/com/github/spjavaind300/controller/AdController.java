@@ -8,11 +8,19 @@ import com.github.spjavaind300.model.dto.UserContext;
 import com.github.spjavaind300.service.AdService;
 import com.github.spjavaind300.service.ImageStorageService;
 import com.github.spjavaind300.service.JwtUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,6 +36,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/api/ads")
 @RequiredArgsConstructor
+@Slf4j
 public class AdController {
 
     private final AdService adService;
@@ -51,22 +60,66 @@ public class AdController {
         return adService.getAdInfo(id);
     }
 
-    @PostMapping
-    public ResponseEntity<AdResponseDto> createAd(HttpServletRequest request, @RequestPart @Valid AdRequestDto adRequestDto, @RequestPart @NotNull MultipartFile image) {
+    @Operation(summary = "Create new advertisement",
+            description = "Create new ad with image upload")
+    @ApiResponse(responseCode = "201", description = "Ad created successfully",
+            content = @Content(schema = @Schema(implementation = AdResponseDto.class)))
+    @ApiResponse(responseCode = "400", description = "Invalid input data")
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<AdResponseDto> createAd(
+            @Parameter(hidden = true)
+            HttpServletRequest request,
+
+            @Parameter(description = "Ad properties",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = AdRequestDto.class)))
+            @RequestPart(value = "properties")
+            @Valid
+            AdRequestDto adRequestDto,
+
+            @Parameter(description = "Image file",
+                    content = @Content(mediaType = "image/*",
+                            schema = @Schema(type = "string", format = "binary")))
+            @RequestPart("image")
+            @NotNull
+            MultipartFile image) {
+
+        if (image.getContentType() == null || !image.getContentType().startsWith("image/")) {
+            throw new IllegalArgumentException("Invalid image file type");
+        }
+
         UserContext userContext = jwtUtils.getUserContext(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(adService.createAd(userContext.userId(), adRequestDto, image));
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(adService.createAd(userContext.userId(), adRequestDto, image));
     }
 
     @PatchMapping("/{id}")
-    public AdResponseDto updateAd(HttpServletRequest request, @PathVariable int id, @RequestBody @Valid AdRequestDto adRequestDto) {
+    public AdResponseDto updateAd(HttpServletRequest request,
+                                  @PathVariable int id,
+                                  @RequestBody @Valid AdRequestDto adRequestDto) {
         UserContext userContext = jwtUtils.getUserContext(request);
         return adService.updateAd(id, adRequestDto, userContext);
     }
 
-    @PatchMapping("/{id}/image")
-    public byte[] updateAdImage(HttpServletRequest request, @PathVariable int id, @RequestPart @NotNull MultipartFile image) {
+    @PatchMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<byte[]> updateAdImage(HttpServletRequest request,
+                                @PathVariable int id,
+                                @RequestPart("image") @NotNull MultipartFile image) {
+
+        if (image.getContentType() == null || !image.getContentType().startsWith("image/")) {
+            throw new IllegalArgumentException("Invalid image file type");
+        }
+
         UserContext userContext = jwtUtils.getUserContext(request);
-        return adService.updateImage(id, image, userContext);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.valueOf(image.getContentType()));
+        byte[] imageData= adService.updateImage(id, image, userContext);
+        headers.setContentLength(imageData.length);
+        return ResponseEntity.ok().headers(headers).body(imageData);
     }
 
     @DeleteMapping("/{id}")
@@ -76,9 +129,14 @@ public class AdController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/image/{imageKey}")
-    public byte[] getAdImage(@PathVariable String imageKey) {
-        return imageStorageService.getFile("image/" + imageKey);
+    @GetMapping("/images/{imageKey}")
+    public ResponseEntity<byte[]> getAdImage(@PathVariable String imageKey) {
+        byte[] imageData= imageStorageService.getFile("images/" + imageKey);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.IMAGE_JPEG);
+        headers.setContentLength(imageData.length);
+        return ResponseEntity.ok().headers(headers).body(imageData);
+
     }
 
 
