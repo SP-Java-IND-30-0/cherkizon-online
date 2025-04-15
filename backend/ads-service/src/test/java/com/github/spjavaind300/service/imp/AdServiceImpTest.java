@@ -38,6 +38,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -404,5 +410,37 @@ class AdServiceImpTest {
 
         assertThrows(NotFoundException.class, () -> adService.updateImage(0, image, userContext));
     }
+
+    @Test
+    void test_deleteAllByUserId_success() {
+        Ad ad1 = new Ad(0, "test_ad1", 100, "description ad1", 1L, "key1", "image1.png");
+        adRepository.save(ad1);
+        Ad ad2 = new Ad(0, "test_ad2", 120, "description ad2", 1L, "key2", "image2.png");
+        adRepository.save(ad2);
+        Ad ad3 = new Ad(0, "test_ad3", 130, "description ad3", 2L, "key3", "image3.png");
+        adRepository.save(ad3);
+
+        assertEquals(3, adRepository.count());
+
+        adService.deleteAllByUserId(1L);
+
+        assertEquals(1, adRepository.count());
+        verify(imageStorageService, times(2)).deleteFile(any(String.class));
+
+    }
+
+    @Test
+    void test_deleteAllByUserId_whenUserHasNotAds() {
+        Ad ad3 = new Ad(0, "test_ad3", 130, "description ad3", 2L, "key3", "image3.png");
+        adRepository.save(ad3);
+        assertEquals(1, adRepository.count());
+
+        adService.deleteAllByUserId(1L);
+
+        assertEquals(1, adRepository.count());
+        verify(imageStorageService, never()).deleteFile(any(String.class));
+
+    }
+
 
 }
