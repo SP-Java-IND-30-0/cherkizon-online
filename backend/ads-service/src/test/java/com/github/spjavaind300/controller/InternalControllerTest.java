@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -87,12 +89,14 @@ class InternalControllerTest {
 
         adRepository.save(ad);
 
-        ResponseEntity<AdForNotificationService> response
-                = restTemplate.getForEntity(uri + ad.getId() + 1, AdForNotificationService.class);
+        ResponseEntity<String> response = restTemplate.exchange(
+                uri + ad.getId() + 1,
+                HttpMethod.GET,
+                null,
+                String.class  // Принимаем ответ как строку
+        );
 
-        assertNotNull(response);
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertTrue(response.getStatusCode().is5xxServerError()); // TODO переделать после добавления ControllerAdvice
-
     }
 }

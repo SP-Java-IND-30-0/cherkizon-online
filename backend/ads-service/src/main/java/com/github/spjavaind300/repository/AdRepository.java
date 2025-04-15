@@ -15,6 +15,6 @@ public interface AdRepository extends JpaRepository<Ad, Integer> {
 
     List<Ad> findAllByUserId(long userId);
 
-    @Query("SELECT new com.github.spjavaind300.model.dto.AdForNotificationService(a.id, a.title) FROM Ad a WHERE a.id = ?1")
+    @Query("SELECT new com.github.spjavaind300.model.dto.AdForNotificationService(a.id, a.userId, a.title) FROM Ad a WHERE a.id = ?1")
     Optional<AdForNotificationService> getAdForNotifications(int id);
 }
