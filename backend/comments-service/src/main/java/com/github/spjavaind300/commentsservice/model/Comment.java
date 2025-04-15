@@ -32,6 +32,9 @@ public class Comment {
     private int id;
 
     @NotNull
+    private long authorId;
+
+    @NotNull
     private int adId;
 
     @NotNull

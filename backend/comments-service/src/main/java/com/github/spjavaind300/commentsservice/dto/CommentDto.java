@@ -1,6 +1,7 @@
 package com.github.spjavaind300.commentsservice.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -17,7 +18,9 @@ public class CommentDto {
 
     private Instant createdAt;
 
-    private long author;
+    @NotNull
+    @JsonProperty("author")
+    private long authorId;
 
     private String authorFirstName;
 
