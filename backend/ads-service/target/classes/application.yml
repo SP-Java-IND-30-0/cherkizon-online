@@ -1,0 +1,67 @@
+spring:
+  application:
+    name: ads-service
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/ads_service_db
+    username: dev
+    password: ${DB_PASSWORD}
+
+  sql:
+    init:
+      mode: always
+      platform: postgresql
+      encoding: UTF-8
+      schema-locations: classpath:db/changelog/init_schema.sql
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+  liquibase:
+    change-log: classpath:db/changelog/changelog-master.yml
+    enabled: true
+    default-schema: app
+    liquibase-schema: service
+
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connect-timeout: 5000
+            read-timeout: 5000
+            logger-level: basic
+          profile-service:
+            url: http://localhost:8082
+  kafka:
+    bootstrap-servers: localhost:29092
+    admin:
+      auto-create: true
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      retries: 3
+      acks: all
+    consumer:
+      auto-offset-reset: earliest
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+s3:
+  access-key: ${YANDEX_ACCESS_KEY}
+  secret-key: ${YANDEX_SECRET_KEY}
+  uri: https://storage.yandexcloud.net
+  region: ru-central1
+  bucket-name: cherkizon-ads
+
+server:
+  port: 8083

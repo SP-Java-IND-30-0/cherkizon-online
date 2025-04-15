@@ -1,0 +1,42 @@
+spring:
+  application:
+    name: profile-service
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/profile_service_db
+    username: dev
+    password: ${DB_PASSWORD}
+
+  sql:
+    init:
+      mode: always
+      platform: postgresql
+      encoding: UTF-8
+      schema-locations: classpath:db/changelog/init.sql
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        show_sql: true
+
+  liquibase:
+    change-log: classpath:db/changelog/changelog-master.yml
+    enabled: true
+    default-schema: app
+    liquibase-schema: service
+
+validation:
+  patterns:
+    password: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[A-Za-z\\d]{8,16}$"
+
+aws:
+  s3:
+    bucket-name: cherkizon-avatars
+    access-key: ${YANDEX_ACCESS_KEY}
+    secret-key: ${YANDEX_SECRET_KEY}
+    region: ru-central1
+    endpoint: https://storage.yandexcloud.net
