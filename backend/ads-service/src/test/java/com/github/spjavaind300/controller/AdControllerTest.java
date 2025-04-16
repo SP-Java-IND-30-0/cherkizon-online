@@ -1,17 +1,17 @@
 package com.github.spjavaind300.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.spjavaind300.SecurityTestUtils;
 import com.github.spjavaind300.exception.NotFoundException;
 import com.github.spjavaind300.model.dto.AdExtraInfoDto;
 import com.github.spjavaind300.model.dto.AdRequestDto;
 import com.github.spjavaind300.model.dto.AdResponseDto;
 import com.github.spjavaind300.model.dto.ListAdsDto;
 import com.github.spjavaind300.model.dto.Role;
-import com.github.spjavaind300.model.dto.UserContext;
+import com.github.spjavaind300.security.CustomUserDetails;
 import com.github.spjavaind300.service.AdService;
 import com.github.spjavaind300.service.ImageStorageService;
-import com.github.spjavaind300.service.JwtUtils;
-import jakarta.servlet.http.HttpServletRequest;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -21,6 +21,11 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.mock.web.MockPart;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -36,6 +41,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -55,9 +62,6 @@ class AdControllerTest {
     @MockitoBean
     private ImageStorageService imageStorageService;
 
-    @MockitoBean
-    private JwtUtils jwtUtils;
-
     private AdResponseDto adDto1, adDto2, adDto3;
 
     private final String BASE_URI = "/api/ads";
@@ -67,9 +71,16 @@ class AdControllerTest {
         adDto1 = new AdResponseDto(1, "title1", 100, 1L, "image1");
         adDto2 = new AdResponseDto(2, "title2", 120, 1L, "image2");
         adDto3 = new AdResponseDto(3, "title3", 150, 2L, "image3");
+        SecurityTestUtils.setupMockUser(1L, Role.USER);
+    }
+
+    @AfterEach
+    void tearDown() {
+        SecurityTestUtils.clearSecurityContext();
     }
 
     @Test
+    @WithMockUser
     void test_getAllAds() throws Exception {
         ListAdsDto adsDto = ListAdsDto.builder().count(3).items(List.of(adDto1, adDto2, adDto3)).build();
 
@@ -89,10 +100,11 @@ class AdControllerTest {
     @Test
     void test_getAllAdsForUser() throws Exception {
         ListAdsDto adsDto = ListAdsDto.builder().count(2).items(List.of(adDto1, adDto2)).build();
-        when(jwtUtils.getUserContext(any(HttpServletRequest.class))).thenReturn(new UserContext(1L, Role.USER));
         when(adService.getAllAdsForUser(1L)).thenReturn(adsDto);
 
-        mockMvc.perform(MockMvcRequestBuilders.get(BASE_URI + "/me"))
+        mockMvc.perform(MockMvcRequestBuilders.get(BASE_URI + "/me")
+                        .with(SecurityMockMvcRequestPostProcessors.securityContext(
+                                SecurityContextHolder.getContext())))
                 .andExpect((status().isOk()))
                 .andExpect(jsonPath("$.count").value(2))
                 .andExpect(jsonPath("$.items").isArray())
@@ -109,7 +121,11 @@ class AdControllerTest {
 
         when(adService.getAdInfo(anyInt())).thenReturn(adExtraInfoDto);
 
-        mockMvc.perform(MockMvcRequestBuilders.get(BASE_URI + "/{id}", adExtraInfoDto.getId()))
+        mockMvc.perform(MockMvcRequestBuilders.get(BASE_URI + "/{id}", adExtraInfoDto.getId())
+                        .with(SecurityMockMvcRequestPostProcessors.securityContext(
+                                SecurityContextHolder.getContext()))
+                        .with(csrf())
+                )
                 .andExpect((status().isOk()))
                 .andExpect(jsonPath("$.pk").value(1))
                 .andExpect(jsonPath("$.title").value("title1"));
@@ -120,7 +136,11 @@ class AdControllerTest {
 
         when(adService.getAdInfo(1)).thenThrow(NotFoundException.class);
 
-        mockMvc.perform(MockMvcRequestBuilders.get(BASE_URI + "/{id}", 1))
+        mockMvc.perform(MockMvcRequestBuilders.get(BASE_URI + "/{id}", 1)
+                        .with(SecurityMockMvcRequestPostProcessors.securityContext(
+                                SecurityContextHolder.getContext()))
+                        .with(csrf())
+                )
                 .andExpect((status().isNotFound()));
     }
 
@@ -130,7 +150,6 @@ class AdControllerTest {
         AdRequestDto requestDto = new AdRequestDto("title1", 100, "description");
         String jsonRequest = objectMapper.writeValueAsString(requestDto);
 
-        when(jwtUtils.getUserContext(any(HttpServletRequest.class))).thenReturn(new UserContext(1L, Role.USER));
         when(adService.createAd(1L, requestDto, file)).thenReturn(adDto1);
 
         MockPart jsonPart = new MockPart("properties", jsonRequest.getBytes());
@@ -141,6 +160,9 @@ class AdControllerTest {
                         .part(jsonPart)
                         .contentType(MediaType.MULTIPART_FORM_DATA)
                         .header("Content-Type", "multipart/form-data")
+                        .with(SecurityMockMvcRequestPostProcessors.securityContext(
+                                SecurityContextHolder.getContext()))
+                        .with(csrf())
                 )
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.pk").value(1))
@@ -153,8 +175,6 @@ class AdControllerTest {
 
         AdRequestDto invalidDto = new AdRequestDto("t", -100, "");
         String jsonRequest = objectMapper.writeValueAsString(invalidDto);
-        when(jwtUtils.getUserContext(any(HttpServletRequest.class))).thenReturn(new UserContext(1L, Role.USER));
-
 
         MockPart jsonPart = new MockPart("properties", jsonRequest.getBytes());
         jsonPart.getHeaders().setContentType(MediaType.APPLICATION_JSON);
@@ -162,7 +182,11 @@ class AdControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.multipart(BASE_URI)
                         .file(new MockMultipartFile("image", "test.png", "image/png", "test".getBytes()))
                         .part(jsonPart)
-                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .with(SecurityMockMvcRequestPostProcessors.securityContext(
+                                SecurityContextHolder.getContext()))
+                        .with(csrf())
+                )
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.violations").isArray())
                 .andExpect(jsonPath("$.violations.length()").value(3));
@@ -173,13 +197,16 @@ class AdControllerTest {
         AdRequestDto requestDto = new AdRequestDto("newTitle", 100, "description");
         String jsonRequest = objectMapper.writeValueAsString(requestDto);
 
-        when(jwtUtils.getUserContext(any(HttpServletRequest.class))).thenReturn(new UserContext(1L, Role.USER));
         adDto1.setTitle("newTitle");
-        when(adService.updateAd(1, requestDto, new UserContext(1L, Role.USER))).thenReturn(adDto1);
+        when(adService.updateAd(1, requestDto)).thenReturn(adDto1);
 
         mockMvc.perform(MockMvcRequestBuilders.patch(BASE_URI + "/{id}", 1)
                         .contentType("application/json")
-                        .content(jsonRequest))
+                        .content(jsonRequest)
+                        .with(SecurityMockMvcRequestPostProcessors.securityContext(
+                                SecurityContextHolder.getContext()))
+                        .with(csrf())
+                )
                 .andExpect((status().isOk()))
                 .andExpect(jsonPath("$.pk").value(1))
                 .andExpect(jsonPath("$.title").value("newTitle"));
@@ -191,11 +218,14 @@ class AdControllerTest {
         MockMultipartFile file = new MockMultipartFile("image", "test.png", "image/png", "test image".getBytes());
 
         byte[] imageBytes = "test image".getBytes();
-        when(adService.updateImage(anyInt(), any(MultipartFile.class), any(UserContext.class))).thenReturn(imageBytes);
-        when(jwtUtils.getUserContext(any(HttpServletRequest.class))).thenReturn(new UserContext(1L, Role.USER));
+        when(adService.updateImage(anyInt(), any(MultipartFile.class))).thenReturn(imageBytes);
 
         mockMvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PATCH, BASE_URI + "/{id}/image", 1)
-                        .file(file))
+                        .file(file)
+                        .with(SecurityMockMvcRequestPostProcessors.securityContext(
+                                SecurityContextHolder.getContext()))
+                        .with(csrf())
+                )
                 .andExpect((status().isOk()))
                 .andExpect(MockMvcResultMatchers.content().bytes(imageBytes))
                 .andExpect(MockMvcResultMatchers.content().contentType("image/png"));
@@ -204,24 +234,35 @@ class AdControllerTest {
 
     @Test
     void test_deleteAd_success() throws Exception {
-        when(jwtUtils.getUserContext(any(HttpServletRequest.class))).thenReturn(new UserContext(1L, Role.USER));
-        doNothing().when(adService).deleteAd(anyInt(), any(UserContext.class));
 
-        mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URI + "/{id}", 1))
+        CustomUserDetails userDetails = new CustomUserDetails(1L, Role.USER);
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+                userDetails, null, userDetails.getAuthorities());
+
+        doNothing().when(adService).deleteAd(anyInt());
+
+        mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URI + "/{id}", 1)
+                        .with(authentication(auth))
+                        .with(csrf())
+                )
                 .andExpect((status().isNoContent()));
     }
 
     @Test
     void test_deleteAd_NotFound_returns404() throws Exception {
-        when(jwtUtils.getUserContext(any(HttpServletRequest.class))).thenReturn(new UserContext(1L, Role.USER));
-        doThrow(NotFoundException.class).when(adService).deleteAd(anyInt(), any(UserContext.class));
+        doThrow(NotFoundException.class).when(adService).deleteAd(anyInt());
 
-        mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URI + "/{id}", 1))
+        mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URI + "/{id}", 1)
+                        .with(SecurityMockMvcRequestPostProcessors.securityContext(
+                                SecurityContextHolder.getContext()))
+                        .with(csrf())
+                )
                 .andExpect((status().isNotFound()));
     }
 
 
     @Test
+    @WithMockUser
     void getAdImage() throws Exception {
         byte[] imageBytes = "test image".getBytes();
         when(imageStorageService.getFile(anyString())).thenReturn(imageBytes);

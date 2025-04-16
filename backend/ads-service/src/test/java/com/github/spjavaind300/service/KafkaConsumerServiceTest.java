@@ -1,8 +1,7 @@
 package com.github.spjavaind300.service;
 
 import com.github.spjavaind300.model.UserDeletedEvent;
-import com.github.spjavaind300.model.dto.Role;
-import com.github.spjavaind300.model.dto.UserContext;
+import com.github.spjavaind300.security.SecurityService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,6 +17,9 @@ class KafkaConsumerServiceTest {
     @Mock
     private AdService adService;
 
+    @Mock
+    private SecurityService securityService;
+
     @InjectMocks
     private KafkaConsumerService kafkaConsumerService;
 
@@ -25,13 +27,13 @@ class KafkaConsumerServiceTest {
     void test_handleEvent() {
 
         UserDeletedEvent event = new UserDeletedEvent(1L);
-        UserContext userContext = new UserContext(1L, Role.SERVICE);
 
-        doNothing().when(adService).deleteAllByUserId(event.id(), userContext);
+        doNothing().when(securityService).serviceAuthentication(event.id());
+        doNothing().when(adService).deleteAllByUserId(event.id());
 
         kafkaConsumerService.handleEvent(event);
 
-        verify(adService).deleteAllByUserId(event.id(), userContext);
+        verify(adService).deleteAllByUserId(event.id());
 
     }
 }

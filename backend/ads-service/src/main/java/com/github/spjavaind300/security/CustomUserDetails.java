@@ -1,7 +1,6 @@
 package com.github.spjavaind300.security;
 
 import com.github.spjavaind300.model.dto.Role;
-import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -9,7 +8,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
-@Getter
 public record CustomUserDetails(long userId, Role role) implements UserDetails {
 
     @Override

@@ -1,4 +1,4 @@
-package com.github.spjavaind300.config;
+package com.github.spjavaind300.security;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
