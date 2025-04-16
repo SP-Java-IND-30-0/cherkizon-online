@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Подтверждение регистрации</title>
+</head>
+<body>
+<h2>Добро пожаловать!</h2>
+<p>Для завершения регистрации введите следующий код подтверждения:</p>
+<h3 th:text="${activationCode}">123456</h3>
+<p>Если вы не регистрировались, проигнорируйте это письмо.</p>
+</body>
+</html>

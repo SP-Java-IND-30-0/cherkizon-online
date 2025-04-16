@@ -12,6 +12,20 @@ spring:
       ddl-auto: validate
   liquibase:
     change-log: classpath:/db/changelog-master.xml
+    mail:
+      host: smtp.mail.ru
+      port: 465
+      username: ${MAIL_USERNAME}
+      password: ${MAIL_PASSWORD}
+      properties:
+        mail.smtp.auth: true
+        mail.smtp.ssl.enable: true
+        mail.smtp.socketFactory.class: javax.net.ssl.SSLSocketFactory
+
+    jwt:
+      secret: ${JWT_SECRET}
+      access-expiration: 86400000 # 24 часа
+      refresh-expiration: 604800000 # 7 дней
 
 logging:
   level:
