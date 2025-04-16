@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-import static com.cherkizon.auth.service.logs.ServiceLogger.JWT;
+import static com.cherkizon.auth.service.loggerService.ServiceLogger.JWT;
 
 @Service
 public class JwtServiceImpl implements JwtService {

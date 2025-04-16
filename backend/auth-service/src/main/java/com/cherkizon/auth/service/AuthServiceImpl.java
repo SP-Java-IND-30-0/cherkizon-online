@@ -16,7 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.cherkizon.auth.service.logs.ServiceLogger.AUTH;
+import static com.cherkizon.auth.service.loggerService.ServiceLogger.AUTH;
 
 @Service
 @RequiredArgsConstructor
