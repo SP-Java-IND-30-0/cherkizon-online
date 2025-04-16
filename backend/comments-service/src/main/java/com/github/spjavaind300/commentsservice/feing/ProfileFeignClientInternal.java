@@ -1,4 +1,4 @@
-package com.github.spjavaind300.commentsservice.client;
+package com.github.spjavaind300.commentsservice.feing;
 
 import com.github.spjavaind300.commentsservice.config.FeignConfig;
 import com.github.spjavaind300.commentsservice.dto.ProfileDto;

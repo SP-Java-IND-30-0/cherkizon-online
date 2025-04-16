@@ -1,7 +1,7 @@
 package com.github.spjavaind300.commentsservice.service;
 
-import com.github.spjavaind300.commentsservice.component.AuthorProfileCache;
-import com.github.spjavaind300.commentsservice.client.ProfileFeignClientInternal;
+import com.github.spjavaind300.commentsservice.cache.ProfileCacheService;
+import com.github.spjavaind300.commentsservice.feing.AdsFeignClientInternal;
 import com.github.spjavaind300.commentsservice.dto.CommentDto;
 import com.github.spjavaind300.commentsservice.dto.ProfileDto;
 import com.github.spjavaind300.commentsservice.dto.Role;
@@ -15,15 +15,10 @@ import com.github.spjavaind300.commentsservice.repository.CommentRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,46 +27,31 @@ import java.util.stream.Collectors;
 public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository commentRepository;
-    private final ProfileFeignClientInternal profileFeignClient;
     private final CommentMapper commentMapper;
-    private final AuthorProfileCache authorProfileCache;
+    private final AdsFeignClientInternal adsFeignClientInternal;
     private final JwtUtils jwtUtils;
     private final HttpServletRequest request;
+    private final ProfileCacheService profileCacheService;
 
     @Override
-    public Map<String, List<CommentDto>> getCommentsForAd(int adId, int page, int size) {
+    public List<CommentDto> getCommentsForAd(int adId) {
+        List<Comment> comments = commentRepository.findByAdId(adId);
 
-        Page<Comment> commentPage = commentRepository.findByAdId(adId, PageRequest.of(page, size));
-
-        if (commentPage.isEmpty()) {
+        if (comments.isEmpty()) {
             throw new NotFoundException("Объявление", adId);
         }
 
-        List<CommentDto> commentDtos = commentPage.stream()
+        return comments.stream()
                 .map(comment -> {
-                    ProfileDto profile = Optional.ofNullable(authorProfileCache.get(comment.getAuthorId()))
-                            .orElseGet(() -> {
-                                ProfileDto fetchedProfile = profileFeignClient.getProfileByIdInternal(comment.getAuthorId());
-                                authorProfileCache.put(comment.getAuthorId(), fetchedProfile);
-                                return fetchedProfile;
-                            });
+                    ProfileDto profile = profileCacheService.getProfile(comment.getAuthorId());
                     return commentMapper.toDto(comment, profile);
                 })
                 .collect(Collectors.toList());
-
-        Map<String, List<CommentDto>> result = new HashMap<>();
-        result.put("results", commentDtos);
-        return result;
     }
 
     @Override
     public CommentDto addComment(int adId, CommentTextDto commentTextDto) {
-
-        Page<Comment> commentPage = commentRepository.findByAdId(adId, PageRequest.of(0, 1));
-
-        if (commentPage.isEmpty()) {
-            throw new NotFoundException("Объявление", adId);
-        }
+        adsFeignClientInternal.checkAdExists(adId);
 
         ProfileDto currentProfile = getCurrentProfile();
 
@@ -83,22 +63,21 @@ public class CommentServiceImpl implements CommentService {
                 .build();
 
         Comment savedComment = commentRepository.save(comment);
-        authorProfileCache.put(savedComment.getAuthorId(), currentProfile);
 
-        log.info("Профиль автора с id: {} добавлен в кэш для комментария с id: {}",
-                currentProfile.getAuthorId(), savedComment.getId());
+        log.info("Комментарий с id: {} был сохранен для объявления с id: {}.",
+                savedComment.getId(), adId);
 
         return commentMapper.toDto(savedComment, currentProfile);
     }
 
     @Override
     public CommentDto updateComment(int adId, int commentId, CommentTextDto commentTextDto) {
-
         Comment comment = commentRepository.findByIdAndAdId(commentId, adId)
                 .orElseThrow(() -> new NotFoundException("Комментарий", commentId));
 
+        validateCommentAccessRights(comment);
+
         ProfileDto currentProfile = getCurrentProfile();
-        validateCommentAccessRights(comment, currentProfile);
 
         comment.setText(commentTextDto.getText());
         Comment updatedComment = commentRepository.save(comment);
@@ -108,43 +87,38 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public void deleteComment(int adId, int commentId) {
-
         Comment comment = commentRepository.findByIdAndAdId(commentId, adId)
                 .orElseThrow(() -> new NotFoundException("Комментарий", commentId));
 
-        ProfileDto currentProfile = getCurrentProfile();
-        validateCommentAccessRights(comment, currentProfile);
+        validateCommentAccessRights(comment);
 
         commentRepository.delete(comment);
-        authorProfileCache.remove(comment.getAuthorId());
     }
 
-    private void validateCommentAccessRights(Comment comment, ProfileDto currentProfile) {
+    private void validateCommentAccessRights(Comment comment) {
         UserContext currentUser = jwtUtils.getUserContext(request);
 
         if (currentUser.getRole() == Role.ADMIN || currentUser.getRole() == Role.SERVICE) {
             return;
         }
 
-        if (comment.getAuthorId() != currentProfile.getAuthorId()) {
-            throw new ForbiddenException(comment.getId());
+        if (comment.getAuthorId() != currentUser.getAuthorId()) {
+            throw new ForbiddenException(
+                    currentUser.getAuthorId(),
+                    currentUser.getRole(),
+                    comment.getAuthorId(),
+                    comment.getId()
+            );
         }
     }
 
     private ProfileDto getCurrentProfile() {
-
         UserContext userContext = jwtUtils.getUserContext(request);
         if (userContext == null) {
             throw new NotFoundException("Пользователь", "не найден в контексте");
         }
 
         long authorId = userContext.getAuthorId();
-
-        return Optional.ofNullable(authorProfileCache.get(authorId))
-                .orElseGet(() -> {
-                    ProfileDto profile = profileFeignClient.getProfileByIdInternal(authorId);
-                    authorProfileCache.put(authorId, profile);
-                    return profile;
-                });
+        return profileCacheService.getProfile(authorId);
     }
 }

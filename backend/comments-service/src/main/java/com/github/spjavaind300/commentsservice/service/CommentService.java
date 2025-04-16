@@ -4,11 +4,10 @@ import com.github.spjavaind300.commentsservice.dto.CommentDto;
 import com.github.spjavaind300.commentsservice.dto.CommentTextDto;
 
 import java.util.List;
-import java.util.Map;
 
 public interface CommentService {
 
-    Map<String, List<CommentDto>> getCommentsForAd(int adId, int page, int size);
+    List<CommentDto> getCommentsForAd(int adId);
 
     CommentDto addComment(int adId, CommentTextDto commentTextDto);
 
