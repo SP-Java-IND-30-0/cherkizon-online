@@ -9,14 +9,19 @@ import com.github.spjavaind300.model.dto.AdResponseDto;
 import com.github.spjavaind300.model.dto.ListAdsDto;
 import com.github.spjavaind300.model.dto.Role;
 import com.github.spjavaind300.security.CustomUserDetails;
+import com.github.spjavaind300.security.JwtAuthenticationFilter;
+import com.github.spjavaind300.security.JwtConfig;
 import com.github.spjavaind300.service.AdService;
 import com.github.spjavaind300.service.ImageStorageService;
+import com.github.spjavaind300.service.JwtUtils;
+import com.github.spjavaind300.service.imp.JwtUtilsImp;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -48,6 +53,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = AdController.class)
+@Import({SecurityTestUtils.class,
+        JwtUtilsImp.class,
+        JwtConfig.class,
+        JwtAuthenticationFilter.class
+})
 class AdControllerTest {
 
     @Autowired

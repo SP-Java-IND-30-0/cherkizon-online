@@ -1,7 +1,8 @@
-package com.github.spjavaind300.security;
+package com.github.spjavaind300.service.imp;
 
 import com.github.spjavaind300.exception.InvalidJwtException;
 import com.github.spjavaind300.model.dto.Role;
+import com.github.spjavaind300.security.CustomUserDetails;
 import com.github.spjavaind300.service.JwtUtils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
