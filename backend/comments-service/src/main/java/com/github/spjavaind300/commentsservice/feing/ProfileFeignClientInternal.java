@@ -1,4 +1,4 @@
-package com.github.spjavaind300.commentsservice.client;
+package com.github.spjavaind300.commentsservice.feing;
 
 import com.github.spjavaind300.commentsservice.config.FeignConfig;
 import com.github.spjavaind300.commentsservice.dto.ProfileDto;
@@ -6,18 +6,9 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import java.util.List;
-
-
-@FeignClient(name = "profile-service", url = "${profile-service.url:http://localhost:8082}", configuration = FeignConfig.class)
+@FeignClient(name = "profile-service", configuration = FeignConfig.class)
 public interface ProfileFeignClientInternal {
-
-    @GetMapping("/internal/profile/me")
-    ProfileDto getCurrentProfileInternal();
 
     @GetMapping("/internal/profile/{profileId}")
     ProfileDto getProfileByIdInternal(@PathVariable("profileId") long profileId);
-
-    @GetMapping("/internal/profile/comments/{announcementId}")
-    List<ProfileDto> getProfilesByAnnouncementId(@PathVariable("announcementId") long announcementId);
 }

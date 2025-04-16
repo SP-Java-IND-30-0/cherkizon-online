@@ -21,6 +21,7 @@ class CommentMapperTest {
         comment.setAdId(100);
         comment.setText("Test comment");
         comment.setCreatedAt(Instant.parse("2025-04-12T12:00:00Z"));
+        comment.setAuthorId(42L);
 
         ProfileDto profileDto = new ProfileDto();
         profileDto.setAuthorId(42L);
@@ -34,7 +35,7 @@ class CommentMapperTest {
         assertThat(dto.getId()).isEqualTo(1);
         assertThat(dto.getText()).isEqualTo("Test comment");
         assertThat(dto.getCreatedAt()).isEqualTo(Instant.parse("2025-04-12T12:00:00Z"));
-        assertThat(dto.getAuthor()).isEqualTo(42L);
+        assertThat(dto.getAuthorId()).isEqualTo(42L);
         assertThat(dto.getAuthorFirstName()).isEqualTo("Alice");
         assertThat(dto.getAuthorImage()).isEqualTo("image-url");
     }

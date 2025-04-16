@@ -12,6 +12,8 @@ spring:
             logger-level: basic
           profile-service:
             url: http://localhost:8082
+          ads-service:
+            url: http://localhost:8083
 
   datasource:
     driver-class-name: org.postgresql.Driver
