@@ -2,7 +2,6 @@ package com.cherkizon.auth.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -37,7 +36,6 @@ public class User implements UserDetails {
     @Column(name = "is_active", nullable = false)
     private boolean isActive = false;
 
-
     public enum Role implements GrantedAuthority {
         ADMIN, USER;
 
@@ -54,19 +52,31 @@ public class User implements UserDetails {
 
     @Override
     public String getPassword() {
-        return password; // уже есть поле
+        return password;
     }
 
     @Override
     public String getUsername() {
-        return username; // уже есть поле
+        return username;
     }
+
     @Override
     public boolean isAccountNonLocked() {
-        return true; // если нужна блокировка аккаунта
+        return true;
     }
+
     @Override
     public boolean isEnabled() {
-        return isActive; // связываем с нашим полем isActive
+        return isActive;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true; // Не используется
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true; // Не используется
     }
 }
