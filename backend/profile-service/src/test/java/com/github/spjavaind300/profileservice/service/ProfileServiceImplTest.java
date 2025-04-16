@@ -3,6 +3,7 @@ package com.github.spjavaind300.profileservice.service;
 import com.github.spjavaind300.profileservice.dto.JwtUserInfo;
 import com.github.spjavaind300.profileservice.dto.UpdateUserDTO;
 import com.github.spjavaind300.profileservice.dto.UserDTO;
+import com.github.spjavaind300.profileservice.exception.AccessDeniedProfileException;
 import com.github.spjavaind300.profileservice.exception.UserAuthException;
 import com.github.spjavaind300.profileservice.mapper.UserMapper;
 import com.github.spjavaind300.profileservice.model.entity.User;
@@ -239,7 +240,7 @@ class ProfileServiceImplTest {
         when(jwtService.parseToken(token)).thenReturn(jwtUserInfo);
 
         assertThatThrownBy(() -> profileService.deleteProfile(targetUserId, token))
-                .isInstanceOf(AccessDeniedException.class)
+                .isInstanceOf(AccessDeniedProfileException.class)
                 .hasMessageContaining("У вас нет прав");
     }
 
