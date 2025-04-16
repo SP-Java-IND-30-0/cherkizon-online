@@ -10,14 +10,14 @@ spring:
             - Path=/login
             - Method=POST
           filters:
-            - ReWritePath=/login, /api/auth/login
+            - RewritePath=/login, /api/auth/login
         - id: register-route
           uri: http://localhost:8081
           predicates:
             - Path=/register
             - Method=POST
           filters:
-            - ReWritePath=/register, /api/auth/register
+            - RewritePath=/register, /api/auth/register
 
         - id: profile-service-route
           uri: http://localhost:8082
