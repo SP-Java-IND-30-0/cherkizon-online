@@ -1,0 +1,45 @@
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: login-route
+          uri: http://localhost:8081
+          predicates:
+            - Path=/login
+            - Method=POST
+          filters:
+            - RewritePath=/login, /api/auth/login
+        - id: register-route
+          uri: http://localhost:8081
+          predicates:
+            - Path=/register
+            - Method=POST
+          filters:
+            - RewritePath=/register, /api/auth/register
+
+        - id: profile-service-route
+          uri: http://localhost:8082
+          predicates:
+            - Path=/users/**,/users
+          filters:
+            - RewritePath=/users/(?<id>/?.*), /api/profile/$\{id}
+
+        - id: comments-service-route
+          uri: http://localhost:8084
+          predicates:
+            - Path=/ads/{id}/comments,/ads/{adId}/comments/{commentId}
+          filters:
+            - RewritePath=/ads/(?<id>\d+)/comments(?<segment>/?.*), /api/comments/$\{id}$\{segment}
+
+        - id: ads-service-route
+          uri: http://localhost:8083
+          predicates:
+            - Path=/ads,/ads/me,/ads/{id}/image,/ads/{id}
+          filters:
+            - RewritePath=/ads(?<segment>/?.*), /api/ads$\{segment}
+
+
+server:
+  port:

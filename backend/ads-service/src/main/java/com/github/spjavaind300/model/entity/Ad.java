@@ -28,7 +28,7 @@ public class Ad {
     @EqualsAndHashCode.Include
     int id;
 
-    @Column(name = "title", nullable = false,  length = 32)
+    @Column(name = "title", nullable = false, length = 32)
     String title;
 
     @Column(name = "price", nullable = false)
@@ -45,7 +45,6 @@ public class Ad {
 
     @Column(name = "original_image_filename", nullable = false, length = 256)
     String originalFilename;
-
 
 
 }

@@ -77,3 +77,6 @@ s3:
 
 server:
   port: 8083
+
+jwt:
+  secret-key: ${JWT_SECRET_KEY}

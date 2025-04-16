@@ -90,7 +90,7 @@ public class YandexS3Service implements ImageStorageService {
             return;
         }
         try {
-        s3Client.deleteObject(r -> r.bucket(bucketName).key(imageKey));
+            s3Client.deleteObject(r -> r.bucket(bucketName).key(imageKey));
         } catch (S3Exception e) {
             log.warn("Failed to delete file {}, reason {}", imageKey, e.getMessage());
         }
