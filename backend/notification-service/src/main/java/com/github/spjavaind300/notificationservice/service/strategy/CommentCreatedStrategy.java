@@ -46,7 +46,7 @@ public class CommentCreatedStrategy implements NotificationStrategy<CommentCreat
     @Override
     public List<EmailDto> prepareEmail(CommentCreatedEvent event) {
         AdvDto adv = advService.getAdv(event.advId());
-        UserDto user = profileService.getProfiles(List.of(adv.getId())).getFirst();
+        UserDto user = profileService.getProfiles(List.of(adv.getUserId())).getFirst();
         return List.of(
                 EmailDto.builder()
                         .email(user.getEmail())

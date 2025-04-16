@@ -27,7 +27,7 @@ class AdvServiceImpTest {
     @Test
     void getAdv() {
 
-        AdvDto advDto = new AdvDto(1, "adv_title");
+        AdvDto advDto = new AdvDto(1, 1L,"adv_title");
         when(client.getAdv(1)).thenReturn(advDto);
 
         AdvDto result = advServiceImp.getAdv(1);
