@@ -12,6 +12,6 @@ import java.util.Set;
 public interface ProfileServiceClient {
 
 
-    @GetMapping("/internal/profile")
+    @GetMapping("/internal/users")
     Set<UserDto> getProfiles(@RequestParam(value = "ids") List<Long> ids);
 }

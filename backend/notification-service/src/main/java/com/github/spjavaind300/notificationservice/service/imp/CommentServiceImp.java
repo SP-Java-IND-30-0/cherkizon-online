@@ -15,8 +15,8 @@ public class CommentServiceImp implements CommentService {
     private final CommentServiceClient client;
 
     @Override
-    public List<Long> getCommentsAuthorIdsOfAdv(long advId) {
+    public List<Long> getCommentsAuthorIdsOfAdv(int adId) {
 
-        return new ArrayList<>(client.getCommentAuthorIds(advId));
+        return new ArrayList<>(client.getCommentAuthorIds(adId));
     }
 }

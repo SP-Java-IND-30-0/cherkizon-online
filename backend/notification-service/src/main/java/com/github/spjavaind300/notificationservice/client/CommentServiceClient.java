@@ -9,6 +9,6 @@ import java.util.Set;
 @FeignClient(name = "comments-service")
 public interface CommentServiceClient {
 
-    @GetMapping("/internal/comment/{id}")
-    Set<Long> getCommentAuthorIds(@PathVariable("id") long id);
+    @GetMapping("/internal/comment/{adId}/authors")
+    Set<Long> getCommentAuthorIds(@PathVariable("adId") int adId);
 }

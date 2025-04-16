@@ -4,6 +4,6 @@ import java.util.List;
 
 public interface CommentService {
 
-    List<Long> getCommentsAuthorIdsOfAdv(long advId);
+    List<Long> getCommentsAuthorIdsOfAdv(int adId);
 
 }
