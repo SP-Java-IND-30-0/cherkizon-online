@@ -40,3 +40,6 @@ aws:
     secret-key: ${YANDEX_SECRET_KEY}
     region: ru-central1
     endpoint: https://storage.yandexcloud.net
+
+server:
+  port: 8082

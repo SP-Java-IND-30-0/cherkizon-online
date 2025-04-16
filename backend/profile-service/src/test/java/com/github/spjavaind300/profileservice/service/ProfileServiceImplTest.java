@@ -3,7 +3,7 @@ package com.github.spjavaind300.profileservice.service;
 import com.github.spjavaind300.profileservice.dto.JwtUserInfo;
 import com.github.spjavaind300.profileservice.dto.UpdateUserDTO;
 import com.github.spjavaind300.profileservice.dto.UserDTO;
-import com.github.spjavaind300.profileservice.exception.UserNotFoundAuthException;
+import com.github.spjavaind300.profileservice.exception.UserAuthException;
 import com.github.spjavaind300.profileservice.mapper.UserMapper;
 import com.github.spjavaind300.profileservice.model.entity.User;
 import com.github.spjavaind300.profileservice.repository.UserRepository;
@@ -60,27 +60,31 @@ class ProfileServiceImplTest {
 
     @Test
     void getProfile_whenUserNotFound_throwsException() {
-        Long userId = 1L;
+        long userId = 1L;
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> profileService.getProfile(userId))
-                .isInstanceOf(UserNotFoundAuthException.class)
+                .isInstanceOf(UserAuthException.class)
                 .hasMessageContaining("Пользователь не найден");
     }
 
     @Test
     void updateProfile_whenUserExists_updatesAndReturnsUpdateUserDTO() {
-        Long userId = 1L;
+        long userId = 1L;
 
-        UpdateUserDTO updateUserDTO = new UpdateUserDTO();
-        updateUserDTO.setFirstName("Артём");
-        updateUserDTO.setLastName("Акопян");
-        updateUserDTO.setPhone("+79996311972");
+        UpdateUserDTO inputDTO = new UpdateUserDTO();
+        inputDTO.setFirstName("Артём");
+        inputDTO.setLastName("Акопян");
+        inputDTO.setPhone("+79996311972");
 
         User existingUser = new User();
         existingUser.setId(userId);
+        existingUser.setFirstName("Старое имя");
+        existingUser.setLastName("Старая фамилия");
+        existingUser.setPhone("+79990000000");
 
         User updatedUser = new User();
+        updatedUser.setId(userId);
         updatedUser.setFirstName("Артём");
         updatedUser.setLastName("Акопян");
         updatedUser.setPhone("+79996311972");
@@ -91,31 +95,97 @@ class ProfileServiceImplTest {
         expectedDTO.setPhone("+79996311972");
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
-        when(userRepository.save(any(User.class))).thenReturn(updatedUser);
+        doAnswer(invocation -> {
+            UpdateUserDTO dto = invocation.getArgument(0);
+            User user = invocation.getArgument(1);
+            user.setFirstName(dto.getFirstName());
+            user.setLastName(dto.getLastName());
+            user.setPhone(dto.getPhone());
+            return null;
+        }).when(userMapper).toUpdatedUserEntity(any(UpdateUserDTO.class), any(User.class));
+
+        when(userRepository.save(existingUser)).thenReturn(updatedUser);
         when(userMapper.toUpdateUserDTO(updatedUser)).thenReturn(expectedDTO);
 
-        UpdateUserDTO result = profileService.updateProfile(userId, updateUserDTO);
+        UpdateUserDTO result = profileService.updateProfile(userId, inputDTO);
 
         assertThat(result).isEqualTo(expectedDTO);
+
         verify(userRepository).findById(userId);
-        verify(userRepository).save(any(User.class));
+        verify(userMapper).toUpdatedUserEntity(inputDTO, existingUser); // важно!
+        verify(userRepository).save(existingUser);
         verify(userMapper).toUpdateUserDTO(updatedUser);
     }
 
+
     @Test
     void updateProfile_whenUserNotFound_throwsException() {
-        Long userId = 1L;
+        long userId = 1L;
         UpdateUserDTO updateUserDTO = new UpdateUserDTO();
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> profileService.updateProfile(userId, updateUserDTO))
-                .isInstanceOf(UserNotFoundAuthException.class)
+                .isInstanceOf(UserAuthException.class)
                 .hasMessageContaining("Пользователь не найден");
     }
 
     @Test
+    void updateProfile_whenDtoHasNullFields_shouldNotOverwriteWithNull() {
+        long userId = 1L;
+
+        UpdateUserDTO updateDto = new UpdateUserDTO();
+        updateDto.setFirstName("Новое имя");
+        updateDto.setLastName(null);
+        updateDto.setPhone(null);
+
+        User existingUser = new User();
+        existingUser.setId(userId);
+        existingUser.setFirstName("Старое имя");
+        existingUser.setLastName("Старая фамилия");
+        existingUser.setPhone("+79998887766");
+
+        User updatedUser = new User();
+        updatedUser.setId(userId);
+        updatedUser.setFirstName("Новое имя");
+        updatedUser.setLastName("Старая фамилия");
+        updatedUser.setPhone("+79998887766");
+
+        UpdateUserDTO expectedDto = new UpdateUserDTO();
+        expectedDto.setFirstName("Новое имя");
+        expectedDto.setLastName("Старая фамилия");
+        expectedDto.setPhone("+79998887766");
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+        doAnswer(invocation -> {
+            UpdateUserDTO dto = invocation.getArgument(0);
+            User user = invocation.getArgument(1);
+
+            if (dto.getFirstName() != null) user.setFirstName(dto.getFirstName());
+            if (dto.getLastName() != null) user.setLastName(dto.getLastName());
+            if (dto.getPhone() != null) user.setPhone(dto.getPhone());
+
+            return null;
+        }).when(userMapper).toUpdatedUserEntity(updateDto, existingUser);
+
+        when(userRepository.save(existingUser)).thenReturn(updatedUser);
+        when(userMapper.toUpdateUserDTO(updatedUser)).thenReturn(expectedDto);
+
+        UpdateUserDTO result = profileService.updateProfile(userId, updateDto);
+
+        assertThat(result).isEqualTo(expectedDto);
+        assertThat(existingUser.getFirstName()).isEqualTo("Новое имя");
+        assertThat(existingUser.getLastName()).isEqualTo("Старая фамилия");
+        assertThat(existingUser.getPhone()).isEqualTo("+79998887766");
+
+        verify(userRepository).findById(userId);
+        verify(userMapper).toUpdatedUserEntity(updateDto, existingUser);
+        verify(userRepository).save(existingUser);
+        verify(userMapper).toUpdateUserDTO(updatedUser);
+    }
+
+    @Test
     void deleteProfile_whenAdmin_deletesUser() {
-        Long userId = 1L;
+        long userId = 1L;
         String token = "validToken";
 
         JwtUserInfo jwtUserInfo = new JwtUserInfo();
@@ -137,7 +207,7 @@ class ProfileServiceImplTest {
 
     @Test
     void deleteProfile_whenOwner_deletesOwnProfile() {
-        Long userId = 1L;
+        long userId = 1L;
         String token = "token";
 
         JwtUserInfo jwtUserInfo = new JwtUserInfo();
@@ -159,7 +229,7 @@ class ProfileServiceImplTest {
 
     @Test
     void deleteProfile_whenUnauthorizedUser_throwsAccessDenied() {
-        Long targetUserId = 2L;
+        long targetUserId = 2L;
         String token = "token";
 
         JwtUserInfo jwtUserInfo = new JwtUserInfo();
@@ -174,8 +244,8 @@ class ProfileServiceImplTest {
     }
 
     @Test
-    void saveOrUpdateAvatar_whenUserExistsAndHasOldAvatar_deletesOldAndSavesNew() throws IOException {
-        Long userId = 1L;
+    void updateAvatar_whenUserExistsAndHasOldAvatar_deletesOldAndSavesNew() throws IOException {
+        long userId = 1L;
         MultipartFile file = mock(MultipartFile.class);
 
         User user = new User();
@@ -185,7 +255,7 @@ class ProfileServiceImplTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(avatarService.saveAvatar(file, userId)).thenReturn(userId + "/new-avatar.png");
 
-        String result = profileService.saveOrUpdateAvatar(userId, file);
+        String result = profileService.updateAvatar(userId, file);
 
         assertThat(result).isEqualTo(userId + "/new-avatar.png");
         verify(avatarService).deleteAvatar(userId + "/old-avatar.png");
@@ -194,13 +264,13 @@ class ProfileServiceImplTest {
     }
 
     @Test
-    void saveOrUpdateAvatar_whenUserNotFound_throwsException() {
-        Long userId = 1L;
+    void updateAvatar_whenUserNotFound_throwsException() {
+        long userId = 1L;
         MultipartFile file = mock(MultipartFile.class);
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> profileService.saveOrUpdateAvatar(userId, file))
-                .isInstanceOf(UserNotFoundAuthException.class)
+        assertThatThrownBy(() -> profileService.updateAvatar(userId, file))
+                .isInstanceOf(UserAuthException.class)
                 .hasMessageContaining("User not found");
     }
 }

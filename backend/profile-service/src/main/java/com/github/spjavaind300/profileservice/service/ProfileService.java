@@ -7,11 +7,11 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 
 public interface ProfileService {
-    UserDTO getProfile(Long userId);
+    UserDTO getProfile(long userId);
 
-    UpdateUserDTO updateProfile(Long userId, UpdateUserDTO updatedData);
+    UpdateUserDTO updateProfile(long userId, UpdateUserDTO updatedData);
 
-    void deleteProfile (Long targetUserId, String token);
+    void deleteProfile (long targetUserId, String token);
 
-    String saveOrUpdateAvatar(Long userId, MultipartFile file) throws IOException;
+    String updateAvatar(long userId, MultipartFile file) throws IOException;
 }

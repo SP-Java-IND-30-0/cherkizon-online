@@ -16,3 +16,11 @@ spring:
 
   liquibase:
     enabled: false
+
+aws:
+  s3:
+    bucket-name: dummy-bucket
+    access-key: dummy
+    secret-key: dummy
+    region: ru-central1
+    endpoint: http://localhost

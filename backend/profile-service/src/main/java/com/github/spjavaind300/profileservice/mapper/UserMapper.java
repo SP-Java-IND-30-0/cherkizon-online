@@ -2,6 +2,7 @@ package com.github.spjavaind300.profileservice.mapper;
 
 import com.github.spjavaind300.profileservice.dto.UpdateUserDTO;
 import com.github.spjavaind300.profileservice.dto.UserDTO;
+import com.github.spjavaind300.profileservice.exception.UserAuthException;
 import com.github.spjavaind300.profileservice.model.entity.User;
 import org.springframework.stereotype.Component;
 
@@ -30,8 +31,21 @@ public class UserMapper {
         userDTO.setLastName(user.getLastName());
         userDTO.setPhone(user.getPhone());
         userDTO.setImage(user.getImage());
+        //TODO поменять на значение из JWT
         userDTO.setRole("User");
         return userDTO;
+    }
+
+    public void toUpdatedUserEntity (UpdateUserDTO dto, User user) {
+        if (dto.getFirstName() != null) {
+            user.setFirstName(dto.getFirstName());
+        }
+        if (dto.getLastName() != null) {
+            user.setLastName(dto.getLastName());
+        }
+        if (dto.getPhone() != null) {
+            user.setPhone(dto.getPhone());
+        }
     }
 
 }

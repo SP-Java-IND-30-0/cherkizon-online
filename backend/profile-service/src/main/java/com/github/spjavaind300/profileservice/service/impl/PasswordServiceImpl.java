@@ -3,18 +3,17 @@ package com.github.spjavaind300.profileservice.service.impl;
 import com.github.spjavaind300.profileservice.client.AuthClient;
 import com.github.spjavaind300.profileservice.dto.JwtUserInfo;
 import com.github.spjavaind300.profileservice.dto.UpdatePasswordDTO;
+import com.github.spjavaind300.profileservice.service.JwtService;
 import com.github.spjavaind300.profileservice.service.PasswordService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class PasswordServiceImpl implements PasswordService {
 
-    private final JwtServiceImpl jwtService;
+    private final JwtService jwtService;
     private final AuthClient authClient;
 
-    @Autowired
-    public PasswordServiceImpl(JwtServiceImpl jwtService, AuthClient authClient) {
+    public PasswordServiceImpl(JwtService jwtService, AuthClient authClient) {
         this.jwtService = jwtService;
         this.authClient = authClient;
     }

@@ -1,9 +1,8 @@
 package com.github.spjavaind300.profileservice.config;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import lombok.Data;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import lombok.Data;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
@@ -15,25 +14,26 @@ import software.amazon.awssdk.services.s3.S3Client;
 import java.net.URI;
 
 @Configuration
-@ConfigurationProperties(prefix = "aws.s3")
 @Data
-public class YandexConfig {
-
-    private String bucketName;
-    private String accessKey;
-    private String secretKey;
-    private String region;
-    private String endpoint;
+public class S3Config {
 
     @Bean
-    public S3Client s3Client() {
-        AwsCredentials credentials = AwsBasicCredentials.create(accessKey, secretKey);
+    public S3Client s3Client(S3Properties props) {
+        AwsCredentials credentials = AwsBasicCredentials.create(props.getAccessKey(),
+                props.getSecretKey());
+
         return S3Client.builder()
                 .httpClient(ApacheHttpClient.create())
-                .region(Region.of(region))
-                .endpointOverride(URI.create(endpoint))
+                .region(Region.of(props.getRegion()))
+                .endpointOverride(URI.create(props.getEndpoint()))
                 .credentialsProvider(StaticCredentialsProvider.create(credentials))
                 .overrideConfiguration(ClientOverrideConfiguration.builder().build())
                 .build();
     }
+
+    @Bean
+    public String bucketName(S3Properties props) {
+        return props.getBucketName();
+    }
 }
+

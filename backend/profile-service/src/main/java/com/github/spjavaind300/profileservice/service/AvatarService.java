@@ -6,7 +6,7 @@ import java.io.IOException;
 
 public interface AvatarService {
 
-    String saveAvatar(MultipartFile avatar, Long id) throws IOException;
+    String saveAvatar(MultipartFile avatar, Long id);
 
     void deleteAvatar(String avatarKey);
 }

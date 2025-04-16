@@ -1,7 +1,8 @@
 package com.github.spjavaind300.profileservice.service.impl;
 
-import com.github.spjavaind300.profileservice.config.YandexConfig;
+import com.github.spjavaind300.profileservice.exception.AvatarUploadException;
 import com.github.spjavaind300.profileservice.service.AvatarService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -18,19 +19,15 @@ public class AvatarServiceImpl implements AvatarService {
     private final S3Client s3Client;
     private final String bucketName;
 
-    public AvatarServiceImpl(S3Client s3Client, YandexConfig yandexConfig) {
+    public AvatarServiceImpl(S3Client s3Client, @Qualifier("bucketName") String bucketName) {
         this.s3Client = s3Client;
-        this.bucketName = yandexConfig.getBucketName();
+        this.bucketName = bucketName;
     }
 
 
     @Override
-    public String saveAvatar(MultipartFile avatar, Long id) throws IOException {
+    public String saveAvatar(MultipartFile avatar, Long id) {
         String key = id + "/" + avatar.getOriginalFilename();
-
-        if (!avatar.getContentType().startsWith("image/")) {
-            throw new IllegalArgumentException("Только изображения могут быть загружены.");
-        }
 
         try {
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
@@ -42,8 +39,11 @@ public class AvatarServiceImpl implements AvatarService {
             s3Client.putObject(putObjectRequest, RequestBody.fromBytes(avatar.getBytes()));
 
             return key;
+
+        } catch (IOException e) {
+            throw new AvatarUploadException("Ошибка чтения изображения", e);
         } catch (S3Exception e) {
-            throw new RuntimeException("Ошибка загрузки аватара в S3: " +
+            throw new AvatarUploadException("Ошибка загрузки аватара в S3: " +
                     e.awsErrorDetails().errorMessage(), e);
         }
     }
