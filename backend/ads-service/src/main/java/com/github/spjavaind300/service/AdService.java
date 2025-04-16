@@ -1,6 +1,7 @@
 package com.github.spjavaind300.service;
 
 import com.github.spjavaind300.model.dto.AdExtraInfoDto;
+import com.github.spjavaind300.model.dto.AdForNotificationService;
 import com.github.spjavaind300.model.dto.AdRequestDto;
 import com.github.spjavaind300.model.dto.AdResponseDto;
 import com.github.spjavaind300.model.dto.ListAdsDto;
@@ -29,4 +30,7 @@ public interface AdService {
     @Transactional
     void deleteAllByUserId(long id);
 
+
+    AdForNotificationService getAdForNotifications(int id);
+  
 }

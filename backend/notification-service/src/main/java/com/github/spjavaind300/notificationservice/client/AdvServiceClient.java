@@ -9,5 +9,5 @@ import org.springframework.web.bind.annotation.PathVariable;
 public interface AdvServiceClient {
 
     @GetMapping("/internal/adv/{id}")
-    AdvDto getAdv(@PathVariable("id") long id);
+    AdvDto getAdv(@PathVariable("id") int id);
 }

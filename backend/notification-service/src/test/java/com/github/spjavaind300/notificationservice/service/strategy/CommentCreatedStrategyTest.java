@@ -60,12 +60,12 @@ class CommentCreatedStrategyTest {
 
         CommentCreatedEvent event =
                 new CommentCreatedEvent(1, 1, "firstName", "lastName", "commentURI");
-        AdvDto adv = new AdvDto(event.advId(),"test title");
+        AdvDto adv = new AdvDto(event.advId(), 1L, "test title");
         UserDto user = new UserDto(1,"Author FirstName", "Author LastName", "author@test.com");
 
         when(templateCache.getTemplate(NotificationType.COMMENT_CREATED)).thenReturn(TEMPLATE);
         when(advService.getAdv(event.advId())).thenReturn(adv);
-        when(profileService.getProfiles(List.of(adv.getId()))).thenReturn(List.of(user));
+        when(profileService.getProfiles(List.of(adv.getUserId()))).thenReturn(List.of(user));
 
         List<EmailDto> emails = commentCreatedStrategy.prepareEmail(event);
 

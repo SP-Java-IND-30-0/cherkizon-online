@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.spjavaind300.notificationservice.model.NotificationType;
 
 public record AdvUpdatedEvent(
-        @JsonProperty("id") long id,
+        @JsonProperty("id") int id,
         @JsonProperty("title") String title,
         @JsonProperty("author_first_name") String firstName,
         @JsonProperty("author_last_name") String lastName,
