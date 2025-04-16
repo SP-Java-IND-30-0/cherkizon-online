@@ -29,7 +29,7 @@ public class ProfileCacheServiceImpl implements ProfileCacheService {
             return profile;
 
         } catch (FeignException.NotFound e) {
-            throw new NotFoundException("Профиль", authorId);
+            throw new NotFoundException(ProfileDto.class, authorId);
         } catch (FeignException e) {
             throw new ExternalServiceException(e.getMessage(), e);
         }

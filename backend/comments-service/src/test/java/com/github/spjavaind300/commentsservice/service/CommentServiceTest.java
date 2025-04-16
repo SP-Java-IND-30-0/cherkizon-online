@@ -8,12 +8,12 @@ import com.github.spjavaind300.commentsservice.dto.Role;
 import com.github.spjavaind300.commentsservice.dto.UserContext;
 import com.github.spjavaind300.commentsservice.exception.ForbiddenException;
 import com.github.spjavaind300.commentsservice.exception.NotFoundException;
+import com.github.spjavaind300.commentsservice.exception.UnauthorizedException;
 import com.github.spjavaind300.commentsservice.feing.AdsFeignClientInternal;
 import com.github.spjavaind300.commentsservice.feing.ProfileFeignClientInternal;
 import com.github.spjavaind300.commentsservice.mapper.CommentMapper;
 import com.github.spjavaind300.commentsservice.model.Comment;
 import com.github.spjavaind300.commentsservice.repository.CommentRepository;
-import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -68,9 +68,6 @@ public class CommentServiceTest {
     @MockitoBean
     private AuthorProfileCache authorProfileCache;
 
-    @Autowired
-    private HttpServletRequest request;
-
     private CommentServiceImpl commentService;
 
     private ProfileDto testProfile;
@@ -82,7 +79,6 @@ public class CommentServiceTest {
                 commentMapper,
                 adsFeignClientInternal,
                 jwtUtils,
-                request,
                 profileCacheService
         );
 
@@ -98,7 +94,7 @@ public class CommentServiceTest {
     }
 
     @Test
-    @DisplayName("Получение комментариев для объявления")
+    @DisplayName("Получение комментариев для объявления — комментарии найдены")
     void test_getCommentsForAd_returnsList() {
         Comment comment = commentRepository.save(Comment.builder()
                 .adId(1)
@@ -117,6 +113,17 @@ public class CommentServiceTest {
     }
 
     @Test
+    @DisplayName("Получение комментариев для объявления — нет комментариев")
+    void test_getCommentsForAd_noComments_returnsEmptyList() {
+        when(profileCacheService.getProfile(testProfile.getAuthorId())).thenReturn(testProfile);
+
+        var result = commentService.getCommentsForAd(1);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
     @DisplayName("Добавление комментария — успешное")
     void test_addComment_success() {
         CommentTextDto commentTextDto = new CommentTextDto();
@@ -130,7 +137,7 @@ public class CommentServiceTest {
                 .build());
 
         when(profileCacheService.getProfile(testProfile.getAuthorId())).thenReturn(testProfile);
-        when(jwtUtils.getUserContext(request)).thenReturn(new UserContext(testProfile.getAuthorId(), Role.USER));
+        when(jwtUtils.getUserContext()).thenReturn(new UserContext(testProfile.getAuthorId(), Role.USER));
 
         var result = commentService.addComment(1, commentTextDto);
 
@@ -158,7 +165,7 @@ public class CommentServiceTest {
 
         when(profileCacheService.getProfile(testProfile.getAuthorId())).thenReturn(null);
         when(profileFeignClient.getProfileByIdInternal(testProfile.getAuthorId())).thenReturn(testProfile);
-        when(jwtUtils.getUserContext(request)).thenReturn(new UserContext(testProfile.getAuthorId(), Role.USER));
+        when(jwtUtils.getUserContext()).thenReturn(new UserContext(testProfile.getAuthorId(), Role.USER));
 
         when(profileCacheService.getProfile(testProfile.getAuthorId())).thenReturn(testProfile);
 
@@ -168,16 +175,15 @@ public class CommentServiceTest {
         assertEquals("Новый комментарий", result.getText());
     }
 
-
     @Test
-    @DisplayName("Добавление комментария — юзер контекст отсутствует → NotFoundException")
-    void test_addComment_noUserContext_throwsNotFound() {
-        when(jwtUtils.getUserContext(request)).thenReturn(null);
+    @DisplayName("Добавление комментария — юзер контекст отсутствует → UnauthorizedException")
+    void test_addComment_noUserContext_throwsUnauthorized() {
+        when(jwtUtils.getUserContext()).thenReturn(null);
 
         CommentTextDto commentTextDto = new CommentTextDto();
         commentTextDto.setText("Ошибка");
 
-        assertThrows(NotFoundException.class, () -> commentService.addComment(1, commentTextDto));
+        assertThrows(UnauthorizedException.class, () -> commentService.addComment(1, commentTextDto));
     }
 
     @Test
@@ -193,7 +199,7 @@ public class CommentServiceTest {
         CommentTextDto commentTextDto = new CommentTextDto();
         commentTextDto.setText("Новый");
 
-        when(jwtUtils.getUserContext(request)).thenReturn(new UserContext(testProfile.getAuthorId(), Role.USER));
+        when(jwtUtils.getUserContext()).thenReturn(new UserContext(testProfile.getAuthorId(), Role.USER));
         when(profileCacheService.getProfile(testProfile.getAuthorId())).thenReturn(testProfile);
 
         var result = commentService.updateComment(1, saved.getId(), commentTextDto);
@@ -218,7 +224,7 @@ public class CommentServiceTest {
         CommentTextDto commentTextDto = new CommentTextDto();
         commentTextDto.setText("Обновить");
 
-        when(jwtUtils.getUserContext(request)).thenReturn(new UserContext(2L, Role.USER));
+        when(jwtUtils.getUserContext()).thenReturn(new UserContext(2L, Role.USER));
         when(profileCacheService.getProfile(2L)).thenReturn(other);
 
         assertThrows(ForbiddenException.class, () -> commentService.updateComment(1, saved.getId(), commentTextDto));
@@ -234,7 +240,7 @@ public class CommentServiceTest {
                 .createdAt(Instant.now())
                 .build());
 
-        when(jwtUtils.getUserContext(request)).thenReturn(new UserContext(testProfile.getAuthorId(), Role.USER));
+        when(jwtUtils.getUserContext()).thenReturn(new UserContext(testProfile.getAuthorId(), Role.USER));
         when(profileCacheService.getProfile(testProfile.getAuthorId())).thenReturn(testProfile);
 
         commentService.deleteComment(1, saved.getId());
@@ -256,10 +262,21 @@ public class CommentServiceTest {
         other.setAuthorId(2L);
         other.setAuthorFirstName("Нет доступа");
 
-        when(jwtUtils.getUserContext(request)).thenReturn(new UserContext(2L, Role.USER));
+        when(jwtUtils.getUserContext()).thenReturn(new UserContext(2L, Role.USER));
         when(profileCacheService.getProfile(2L)).thenReturn(other);
 
         assertThrows(ForbiddenException.class, () -> commentService.deleteComment(1, saved.getId()));
+    }
+
+    @Test
+    @DisplayName("Удаление комментария — комментарий не найден, ничего не делаем")
+    void test_deleteComment_commentNotFound() {
+        when(jwtUtils.getUserContext()).thenReturn(new UserContext(testProfile.getAuthorId(), Role.USER));
+        when(profileCacheService.getProfile(testProfile.getAuthorId())).thenReturn(testProfile);
+
+        commentService.deleteComment(1, 999);
+
+        assertTrue(commentRepository.findAll().isEmpty());
     }
 
     @Test
@@ -275,7 +292,7 @@ public class CommentServiceTest {
                 .createdAt(Instant.now())
                 .build());
 
-        when(jwtUtils.getUserContext(request))
+        when(jwtUtils.getUserContext())
                 .thenReturn(new UserContext(testProfile.getAuthorId(), Role.USER));
 
         when(authorProfileCache.get(testProfile.getAuthorId())).thenReturn(null);
@@ -292,13 +309,5 @@ public class CommentServiceTest {
         commentService.addComment(1, commentTextDto);
 
         verify(authorProfileCache, times(1)).put(testProfile.getAuthorId(), testProfile);
-    }
-
-    @Test
-    @DisplayName("Получение комментариев для объявления — отсутствие комментариев → NotFoundException")
-    void test_getCommentsForAd_noComments_throwsNotFound() {
-        when(profileCacheService.getProfile(testProfile.getAuthorId())).thenReturn(testProfile);
-
-        assertThrows(NotFoundException.class, () -> commentService.getCommentsForAd(1));
     }
 }

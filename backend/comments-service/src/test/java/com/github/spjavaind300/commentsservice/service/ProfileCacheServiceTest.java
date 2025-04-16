@@ -83,7 +83,7 @@ class ProfileCacheServiceTest {
 
         NotFoundException exception = assertThrows(NotFoundException.class, () -> profileCacheService.getProfile(authorId));
 
-        assertEquals("Профиль с id=42 не найден", exception.getMessage());
+        assertEquals("ProfileDto с id=42 не найден", exception.getMessage());
     }
 
     @Test
