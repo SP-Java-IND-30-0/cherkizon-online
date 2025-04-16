@@ -1,6 +1,7 @@
 package com.github.spjavaind300.service;
 
 import com.github.spjavaind300.model.dto.AdExtraInfoDto;
+import com.github.spjavaind300.model.dto.AdForNotificationService;
 import com.github.spjavaind300.model.dto.AdRequestDto;
 import com.github.spjavaind300.model.dto.AdResponseDto;
 import com.github.spjavaind300.model.dto.ListAdsDto;
@@ -28,6 +29,8 @@ public interface AdService {
     byte[] updateImage(int id, MultipartFile image, UserContext userContext);
 
     @Transactional
-    void deleteAllByUserId(long id, UserContext userContext);
+     void deleteAllByUserId(long id, UserContext userContext);
 
+    AdForNotificationService getAdForNotifications(int id);
+  
 }

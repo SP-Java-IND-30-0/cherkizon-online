@@ -3,6 +3,7 @@ package com.github.spjavaind300.service.imp;
 import com.github.spjavaind300.exception.AccessDeniedException;
 import com.github.spjavaind300.exception.NotFoundException;
 import com.github.spjavaind300.model.dto.AdExtraInfoDto;
+import com.github.spjavaind300.model.dto.AdForNotificationService;
 import com.github.spjavaind300.model.dto.AdRequestDto;
 import com.github.spjavaind300.model.dto.AdResponseDto;
 import com.github.spjavaind300.model.dto.ImageDto;
@@ -112,6 +113,11 @@ public class AdServiceImp implements AdService {
         ad.setOriginalFilename(image.getOriginalFilename());
         adRepository.save(ad);
         return imageStorageService.getFile(ad.getImageKey());
+    }
+
+    @Override
+    public AdForNotificationService getAdForNotifications(int id) {
+        return adRepository.getAdForNotifications(id).orElseThrow(() -> new NotFoundException(id));
     }
 
     private AdResponseDto saveAd(Ad ad) {
