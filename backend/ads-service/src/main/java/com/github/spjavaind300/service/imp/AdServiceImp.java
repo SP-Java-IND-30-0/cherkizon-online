@@ -9,12 +9,12 @@ import com.github.spjavaind300.model.dto.AdResponseDto;
 import com.github.spjavaind300.model.dto.ImageDto;
 import com.github.spjavaind300.model.dto.ListAdsDto;
 import com.github.spjavaind300.model.dto.Role;
-import com.github.spjavaind300.model.dto.UserContext;
 import com.github.spjavaind300.model.dto.UserDto;
 import com.github.spjavaind300.model.entity.Ad;
 import com.github.spjavaind300.model.event.AdDeletedEvent;
 import com.github.spjavaind300.model.mapper.AdMapper;
 import com.github.spjavaind300.repository.AdRepository;
+import com.github.spjavaind300.security.CustomUserDetails;
 import com.github.spjavaind300.service.AdService;
 import com.github.spjavaind300.service.ImageStorageService;
 import com.github.spjavaind300.service.OutboxEventService;
@@ -22,6 +22,7 @@ import com.github.spjavaind300.service.ProfileService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -80,9 +81,9 @@ public class AdServiceImp implements AdService {
 
     @Transactional
     @Override
-    public void deleteAd(int id, UserContext userContext) {
+    public void deleteAd(int id) {
         Ad ad = adRepository.findById(id).orElseThrow(() -> new NotFoundException(id));
-        checkUserAccess(ad.getUserId(), userContext);
+        checkUserAccess(ad.getUserId());
         imageStorageService.deleteFile(ad.getImageKey());
         adRepository.delete(ad);
         outboxEventService.saveOutboxEvent(new AdDeletedEvent(id));
@@ -90,25 +91,25 @@ public class AdServiceImp implements AdService {
 
     @Transactional
     @Override
-    public void deleteAllByUserId(long id, UserContext userContext) {
+    public void deleteAllByUserId(long id) {
         List<Ad> ads = adRepository.findAllByUserId(id);
-        ads.forEach(ad -> deleteAd(ad.getId(),userContext));
+        ads.forEach(ad -> deleteAd(ad.getId()));
     }
 
     @Transactional
     @Override
-   public AdResponseDto updateAd(int id, AdRequestDto adRequestDto, UserContext userContext) {
+    public AdResponseDto updateAd(int id, AdRequestDto adRequestDto) {
         Ad ad = adRepository.findById(id).orElseThrow(() -> new NotFoundException(id));
-        checkUserAccess(ad.getUserId(), userContext);
+        checkUserAccess(ad.getUserId());
         adMapper.updateAd(ad, adRequestDto);
         return saveAd(ad);
     }
 
     @Transactional
     @Override
-    public byte[] updateImage(int id, MultipartFile image, UserContext userContext) {
+    public byte[] updateImage(int id, MultipartFile image) {
         Ad ad = adRepository.findById(id).orElseThrow(() -> new NotFoundException(id));
-        checkUserAccess(ad.getUserId(), userContext);
+        checkUserAccess(ad.getUserId());
         ad.setImageKey(imageStorageService.uploadFile(image).url());
         ad.setOriginalFilename(image.getOriginalFilename());
         adRepository.save(ad);
@@ -127,8 +128,14 @@ public class AdServiceImp implements AdService {
         );
     }
 
-    private void checkUserAccess(long userId, UserContext userContext) {
-        if (userContext.role() == Role.USER && userContext.userId() != userId) {
+    private void checkUserAccess(long userId) {
+
+        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        if (userDetails.role() == Role.USER && userDetails.userId() != userId) {
             throw new AccessDeniedException();
         }
     }

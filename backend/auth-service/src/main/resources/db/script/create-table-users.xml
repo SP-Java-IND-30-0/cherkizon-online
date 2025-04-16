@@ -30,4 +30,11 @@
             );
         </sql>
     </changeSet>
+    <changeSet id="2" author="Goodwin999">
+        <addColumn tableName="users">
+            <column name="is_active" type="boolean" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

@@ -10,7 +10,7 @@ public class ProfileDto {
 
     @NotNull
     @JsonProperty("id")
-    private Long authorId;
+    private long authorId;
 
     @NotBlank
     @JsonProperty("firstName")

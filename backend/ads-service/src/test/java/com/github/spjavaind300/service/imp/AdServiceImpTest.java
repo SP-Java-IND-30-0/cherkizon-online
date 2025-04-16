@@ -1,5 +1,6 @@
 package com.github.spjavaind300.service.imp;
 
+import com.github.spjavaind300.SecurityTestUtils;
 import com.github.spjavaind300.exception.AccessDeniedException;
 import com.github.spjavaind300.exception.NotFoundException;
 import com.github.spjavaind300.model.dto.AdExtraInfoDto;
@@ -8,7 +9,6 @@ import com.github.spjavaind300.model.dto.AdResponseDto;
 import com.github.spjavaind300.model.dto.ImageDto;
 import com.github.spjavaind300.model.dto.ListAdsDto;
 import com.github.spjavaind300.model.dto.Role;
-import com.github.spjavaind300.model.dto.UserContext;
 import com.github.spjavaind300.model.dto.UserDto;
 import com.github.spjavaind300.model.entity.Ad;
 import com.github.spjavaind300.model.event.AdEvent;
@@ -40,13 +40,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -73,10 +71,6 @@ class AdServiceImpTest {
 
     private AdService adService;
 
-    private final UserContext userContext = new UserContext(1, Role.USER);
-    private final UserContext adminContext = new UserContext(10, Role.ADMIN);
-    private final UserContext serviceContext = new UserContext(999, Role.SERVICE);
-
     static {
         postgres = new PostgreSQLContainer<>(DockerImageName.parse("postgres:17-alpine"))
                 .withDatabaseName("db_test")
@@ -87,12 +81,17 @@ class AdServiceImpTest {
 
     @BeforeEach
     void setUp() {
+
+        SecurityTestUtils.setupMockUser(1L, Role.USER);
+
         adService = new AdServiceImp(adRepository, adMapper, imageStorageService, profileService, outboxEventService);
+
 
     }
 
     @AfterEach
     void tearDown() {
+        SecurityTestUtils.clearSecurityContext();
         adRepository.deleteAll();
     }
 
@@ -221,7 +220,7 @@ class AdServiceImpTest {
 
         assertEquals(1, adRepository.count());
 
-        adService.deleteAd(savedAd1.getId(), userContext);
+        adService.deleteAd(savedAd1.getId());
 
         assertEquals(0, adRepository.count());
     }
@@ -233,7 +232,7 @@ class AdServiceImpTest {
 
         assertEquals(1, adRepository.count());
 
-        assertThrows(AccessDeniedException.class, () -> adService.deleteAd(savedAd1.getId(), userContext));
+        assertThrows(AccessDeniedException.class, () -> adService.deleteAd(savedAd1.getId()));
 
     }
 
@@ -244,7 +243,7 @@ class AdServiceImpTest {
 
         assertEquals(1, adRepository.count());
 
-        adService.deleteAd(savedAd1.getId(), adminContext);
+        adService.deleteAd(savedAd1.getId());
 
         assertEquals(0, adRepository.count());
     }
@@ -256,10 +255,9 @@ class AdServiceImpTest {
 
 
         assertEquals(1, adRepository.count());
-
         doNothing().when(outboxEventService).saveOutboxEvent(any(AdEvent.class));
 
-        adService.deleteAd(savedAd1.getId(), serviceContext);
+        adService.deleteAd(savedAd1.getId());
 
         assertEquals(0, adRepository.count());
         verify(outboxEventService, times(1)).saveOutboxEvent(any(AdEvent.class));
@@ -273,7 +271,7 @@ class AdServiceImpTest {
 
         AdRequestDto requestDto = new AdRequestDto("test title 1", 100, "description 1");
 
-        AdResponseDto actual = adService.updateAd(savedAd1.getId(), requestDto, userContext);
+        AdResponseDto actual = adService.updateAd(savedAd1.getId(), requestDto);
 
         assertNotNull(actual);
         assertEquals(requestDto.title(), actual.getTitle());
@@ -288,7 +286,7 @@ class AdServiceImpTest {
 
         AdRequestDto requestDto = new AdRequestDto("test title 1", 100, "description 1");
 
-        assertThrows(AccessDeniedException.class, () -> adService.updateAd(savedAd1.getId(), requestDto, userContext));
+        assertThrows(AccessDeniedException.class, () -> adService.updateAd(savedAd1.getId(), requestDto));
 
     }
 
@@ -300,7 +298,7 @@ class AdServiceImpTest {
 
         AdRequestDto requestDto = new AdRequestDto("test title 1", 100, "description 1");
 
-        AdResponseDto actual = adService.updateAd(savedAd1.getId(), requestDto, adminContext);
+        AdResponseDto actual = adService.updateAd(savedAd1.getId(), requestDto);
 
         assertNotNull(actual);
         assertEquals(requestDto.title(), actual.getTitle());
@@ -315,7 +313,7 @@ class AdServiceImpTest {
 
         AdRequestDto requestDto = new AdRequestDto("test title 1", 100, "description 1");
 
-        AdResponseDto actual = adService.updateAd(savedAd1.getId(), requestDto, serviceContext);
+        AdResponseDto actual = adService.updateAd(savedAd1.getId(), requestDto);
 
         assertNotNull(actual);
         assertEquals(requestDto.title(), actual.getTitle());
@@ -330,7 +328,7 @@ class AdServiceImpTest {
 
         AdRequestDto requestDto = new AdRequestDto("test title 1", 100, "description 1");
 
-        assertThrows(NotFoundException.class, () -> adService.updateAd(0, requestDto, userContext));
+        assertThrows(NotFoundException.class, () -> adService.updateAd(0, requestDto));
 
     }
 
@@ -344,7 +342,7 @@ class AdServiceImpTest {
         when(imageStorageService.uploadFile(image)).thenReturn(imageDto);
         when(imageStorageService.getFile(imageDto.url())).thenReturn("test image".getBytes());
 
-        byte[] actual = adService.updateImage(savedAd1.getId(), image, userContext);
+        byte[] actual = adService.updateImage(savedAd1.getId(), image);
 
         Ad updatedAd = adRepository.findById(savedAd1.getId()).orElseThrow();
 
@@ -365,7 +363,7 @@ class AdServiceImpTest {
         when(imageStorageService.uploadFile(image)).thenReturn(imageDto);
         when(imageStorageService.getFile(imageDto.url())).thenReturn("test image".getBytes());
 
-        assertThrows(AccessDeniedException.class, () -> adService.updateImage(savedAd1.getId(), image, userContext));
+        assertThrows(AccessDeniedException.class, () -> adService.updateImage(savedAd1.getId(), image));
 
     }
 
@@ -379,7 +377,7 @@ class AdServiceImpTest {
         when(imageStorageService.uploadFile(image)).thenReturn(imageDto);
         when(imageStorageService.getFile(imageDto.url())).thenReturn("test image".getBytes());
 
-        byte[] actual = adService.updateImage(savedAd1.getId(), image, adminContext);
+        byte[] actual = adService.updateImage(savedAd1.getId(), image);
 
         Ad updatedAd = adRepository.findById(savedAd1.getId()).orElseThrow();
 
@@ -400,7 +398,7 @@ class AdServiceImpTest {
         when(imageStorageService.uploadFile(image)).thenReturn(imageDto);
         when(imageStorageService.getFile(imageDto.url())).thenReturn("test image".getBytes());
 
-        byte[] actual = adService.updateImage(savedAd1.getId(), image, serviceContext);
+        byte[] actual = adService.updateImage(savedAd1.getId(), image);
 
         Ad updatedAd = adRepository.findById(savedAd1.getId()).orElseThrow();
 
@@ -418,7 +416,7 @@ class AdServiceImpTest {
 
         MockMultipartFile image = new MockMultipartFile("image1.png", "test image".getBytes());
 
-        assertThrows(NotFoundException.class, () -> adService.updateImage(0, image, userContext));
+        assertThrows(NotFoundException.class, () -> adService.updateImage(0, image));
     }
 
     @Test
@@ -432,7 +430,7 @@ class AdServiceImpTest {
 
         assertEquals(3, adRepository.count());
 
-        adService.deleteAllByUserId(1L,serviceContext);
+        adService.deleteAllByUserId(1L);
 
         assertEquals(1, adRepository.count());
         verify(imageStorageService, times(2)).deleteFile(any(String.class));
@@ -445,7 +443,7 @@ class AdServiceImpTest {
         adRepository.save(ad3);
         assertEquals(1, adRepository.count());
 
-        adService.deleteAllByUserId(1L,serviceContext);
+        adService.deleteAllByUserId(1L);
 
         assertEquals(1, adRepository.count());
         verify(imageStorageService, never()).deleteFile(any(String.class));

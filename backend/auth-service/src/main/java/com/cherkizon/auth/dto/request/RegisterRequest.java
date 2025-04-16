@@ -1,5 +1,6 @@
 package com.cherkizon.auth.dto.request;
 
+import com.cherkizon.auth.entity.User;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
@@ -25,5 +26,5 @@ public class RegisterRequest {
     private String phone;
 
     @NotNull
-    private String role;
+    private User.Role role;
 }
