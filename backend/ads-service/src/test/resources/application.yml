@@ -42,3 +42,6 @@ s3:
   uri: https://storage.yandexcloud.net
   region: ru-central1
   bucket-name: cherkizon-test
+
+jwt:
+  secret-key: ${JWT_SECRET_KEY}
