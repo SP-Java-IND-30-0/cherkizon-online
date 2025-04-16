@@ -23,6 +23,7 @@
         <module>ads-service</module>
         <module>comments-service</module>
         <module>profile-service</module>
+        <module>eureka-server</module>
     </modules>
 
     <properties>
