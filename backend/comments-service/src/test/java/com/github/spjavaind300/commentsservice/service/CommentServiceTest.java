@@ -27,6 +27,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -318,26 +319,26 @@ public class CommentServiceTest {
     @Test
     @DisplayName("Получение авторов комментариев для объявления — комментарии найдены")
     void test_getAuthorIdsByAdId_returnsAuthorsSet() {
-        Comment c1 = commentRepository.save(Comment.builder()
-                .adId(1)
-                .authorId(100L)
-                .text("Комментарий 1")
-                .createdAt(Instant.now())
-                .build());
-
-        Comment c2 = commentRepository.save(Comment.builder()
-                .adId(1)
-                .authorId(101L)
-                .text("Комментарий 2")
-                .createdAt(Instant.now())
-                .build());
-
-        Comment c3 = commentRepository.save(Comment.builder()
-                .adId(1)
-                .authorId(100L)
-                .text("Комментарий 3")
-                .createdAt(Instant.now())
-                .build());
+        commentRepository.saveAll(List.of(
+                Comment.builder()
+                        .adId(1)
+                        .authorId(100L)
+                        .text("Комментарий 1")
+                        .createdAt(Instant.now())
+                        .build(),
+                Comment.builder()
+                        .adId(1)
+                        .authorId(101L)
+                        .text("Комментарий 2")
+                        .createdAt(Instant.now())
+                        .build(),
+                Comment.builder()
+                        .adId(1)
+                        .authorId(100L)
+                        .text("Комментарий 3")
+                        .createdAt(Instant.now())
+                        .build()
+        ));
 
         Set<Long> result = commentService.getAuthorIdsByAdId(1);
 
