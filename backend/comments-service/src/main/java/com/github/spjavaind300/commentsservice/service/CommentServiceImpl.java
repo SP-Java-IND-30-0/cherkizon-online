@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,6 +36,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public List<CommentDto> getCommentsForAd(int adId) {
         List<Comment> comments = commentRepository.findByAdId(adId);
+        log.info("Найдено {} комментариев для объявления с id: {}", comments.size(), adId);
 
         return comments.stream()
                 .map(comment -> {
@@ -76,6 +78,7 @@ public class CommentServiceImpl implements CommentService {
 
         comment.setText(commentTextDto.getText());
         Comment updatedComment = commentRepository.save(comment);
+        log.info("Комментарий с id: {} был обновлен для объявления с id: {}", updatedComment.getId(), adId);
 
         return commentMapper.toDto(updatedComment, currentProfile);
     }
@@ -83,12 +86,16 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public void deleteComment(int adId, int commentId) {
         Comment comment = commentRepository.findByIdAndAdId(commentId, adId)
-                .orElse(null);
+                .orElseThrow(() -> new NotFoundException("Комментарий", commentId));
 
-        if (comment != null) {
-            validateCommentAccessRights(comment);
-            commentRepository.delete(comment);
-        }
+        validateCommentAccessRights(comment);
+        commentRepository.delete(comment);
+        log.info("Комментарий с id: {} был удален для объявления с id: {}", commentId, adId);
+    }
+
+    @Override
+    public Set<Long> getAuthorIdsByAdId(int adId) {
+        return commentRepository.findAuthorIdsByAdId(adId);
     }
 
     private void validateCommentAccessRights(Comment comment) {

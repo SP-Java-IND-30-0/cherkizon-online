@@ -4,6 +4,7 @@ import com.github.spjavaind300.commentsservice.dto.CommentDto;
 import com.github.spjavaind300.commentsservice.dto.CommentTextDto;
 
 import java.util.List;
+import java.util.Set;
 
 public interface CommentService {
 
@@ -14,4 +15,6 @@ public interface CommentService {
     CommentDto updateComment(int adId, int commentId, CommentTextDto commentTextDto);
 
     void deleteComment(int adId, int commentId);
+
+    Set<Long> getAuthorIdsByAdId(int adId);
 }

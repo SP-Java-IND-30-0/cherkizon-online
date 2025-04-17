@@ -27,6 +27,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 import java.time.Instant;
+import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -269,14 +271,17 @@ public class CommentServiceTest {
     }
 
     @Test
-    @DisplayName("Удаление комментария — комментарий не найден, ничего не делаем")
+    @DisplayName("Удаление комментария — комментарий не найден, выбрасываем исключение")
     void test_deleteComment_commentNotFound() {
         when(jwtUtils.getUserContext()).thenReturn(new UserContext(testProfile.getAuthorId(), Role.USER));
         when(profileCacheService.getProfile(testProfile.getAuthorId())).thenReturn(testProfile);
 
-        commentService.deleteComment(1, 999);
+        NotFoundException exception = assertThrows(
+                NotFoundException.class,
+                () -> commentService.deleteComment(1, 999)
+        );
 
-        assertTrue(commentRepository.findAll().isEmpty());
+        assertEquals("Комментарий с id=999 не найден", exception.getMessage());
     }
 
     @Test
@@ -309,5 +314,44 @@ public class CommentServiceTest {
         commentService.addComment(1, commentTextDto);
 
         verify(authorProfileCache, times(1)).put(testProfile.getAuthorId(), testProfile);
+    }
+
+    @Test
+    @DisplayName("Получение авторов комментариев для объявления — комментарии найдены")
+    void test_getAuthorIdsByAdId_returnsAuthorsSet() {
+        commentRepository.saveAll(List.of(
+                Comment.builder()
+                        .adId(1)
+                        .authorId(100L)
+                        .text("Комментарий 1")
+                        .createdAt(Instant.now())
+                        .build(),
+                Comment.builder()
+                        .adId(1)
+                        .authorId(101L)
+                        .text("Комментарий 2")
+                        .createdAt(Instant.now())
+                        .build(),
+                Comment.builder()
+                        .adId(1)
+                        .authorId(100L)
+                        .text("Комментарий 3")
+                        .createdAt(Instant.now())
+                        .build()
+        ));
+
+        Set<Long> result = commentService.getAuthorIdsByAdId(1);
+
+        assertNotNull(result);
+        assertEquals(Set.of(100L, 101L), result);
+    }
+
+    @Test
+    @DisplayName("Получение авторов комментариев для объявления — комментарии отсутствуют")
+    void test_getAuthorIdsByAdId_returnsEmptySet() {
+        Set<Long> result = commentService.getAuthorIdsByAdId(999);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 }
