@@ -57,4 +57,6 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
+    //TODO добавить эндпоинт на смену пароля и на удаление пользователя
+
 }

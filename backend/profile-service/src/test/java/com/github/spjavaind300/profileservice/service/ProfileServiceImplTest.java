@@ -1,10 +1,11 @@
 package com.github.spjavaind300.profileservice.service;
 
 import com.github.spjavaind300.profileservice.dto.JwtUserInfo;
+import com.github.spjavaind300.profileservice.dto.Role;
 import com.github.spjavaind300.profileservice.dto.UpdateUserDTO;
 import com.github.spjavaind300.profileservice.dto.UserDTO;
 import com.github.spjavaind300.profileservice.exception.AccessDeniedProfileException;
-import com.github.spjavaind300.profileservice.exception.UserAuthException;
+import com.github.spjavaind300.profileservice.exception.UserNotFoundException;
 import com.github.spjavaind300.profileservice.mapper.UserMapper;
 import com.github.spjavaind300.profileservice.model.entity.User;
 import com.github.spjavaind300.profileservice.repository.UserRepository;
@@ -16,7 +17,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -65,7 +65,7 @@ class ProfileServiceImplTest {
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> profileService.getProfile(userId))
-                .isInstanceOf(UserAuthException.class)
+                .isInstanceOf(UserNotFoundException.class)
                 .hasMessageContaining("Пользователь не найден");
     }
 
@@ -126,7 +126,7 @@ class ProfileServiceImplTest {
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> profileService.updateProfile(userId, updateUserDTO))
-                .isInstanceOf(UserAuthException.class)
+                .isInstanceOf(UserNotFoundException.class)
                 .hasMessageContaining("Пользователь не найден");
     }
 
@@ -191,7 +191,7 @@ class ProfileServiceImplTest {
 
         JwtUserInfo jwtUserInfo = new JwtUserInfo();
         jwtUserInfo.setUserId(10L);
-        jwtUserInfo.setRole("ADMIN");
+        jwtUserInfo.setRole(Role.ADMIN);
 
         User user = new User();
         user.setId(userId);
@@ -213,7 +213,7 @@ class ProfileServiceImplTest {
 
         JwtUserInfo jwtUserInfo = new JwtUserInfo();
         jwtUserInfo.setUserId(userId);
-        jwtUserInfo.setRole("USER");
+        jwtUserInfo.setRole(Role.USER);
 
         User user = new User();
         user.setId(userId);
@@ -235,7 +235,7 @@ class ProfileServiceImplTest {
 
         JwtUserInfo jwtUserInfo = new JwtUserInfo();
         jwtUserInfo.setUserId(1L);
-        jwtUserInfo.setRole("USER");
+        jwtUserInfo.setRole(Role.USER);
 
         when(jwtService.parseToken(token)).thenReturn(jwtUserInfo);
 
@@ -271,8 +271,8 @@ class ProfileServiceImplTest {
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> profileService.updateAvatar(userId, file))
-                .isInstanceOf(UserAuthException.class)
-                .hasMessageContaining("User not found");
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessageContaining("Пользователь не найден: " + userId);
     }
 }
 

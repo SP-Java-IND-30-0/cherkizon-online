@@ -1,6 +1,7 @@
 package com.github.spjavaind300.profileservice.service.impl;
 
-import com.github.spjavaind300.profileservice.exception.AvatarUploadException;
+import com.github.spjavaind300.profileservice.exception.AvatarStorageException;
+import com.github.spjavaind300.profileservice.exception.AvatarReadException;
 import com.github.spjavaind300.profileservice.service.AvatarService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -41,9 +42,9 @@ public class AvatarServiceImpl implements AvatarService {
             return key;
 
         } catch (IOException e) {
-            throw new AvatarUploadException("Ошибка чтения изображения", e);
+            throw new AvatarReadException("Ошибка чтения изображения", e);
         } catch (S3Exception e) {
-            throw new AvatarUploadException("Ошибка загрузки аватара в S3: " +
+            throw new AvatarStorageException("Ошибка загрузки аватара в S3: " +
                     e.awsErrorDetails().errorMessage(), e);
         }
     }

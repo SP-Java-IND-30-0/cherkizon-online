@@ -1,5 +1,6 @@
 package com.github.spjavaind300.profileservice.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,6 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class JwtUserInfo {
     private long userId;
-    private String role;
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private Role role;
 
 }

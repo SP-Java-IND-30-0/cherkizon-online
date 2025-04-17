@@ -2,7 +2,6 @@ package com.github.spjavaind300.profileservice.mapper;
 
 import com.github.spjavaind300.profileservice.dto.UpdateUserDTO;
 import com.github.spjavaind300.profileservice.dto.UserDTO;
-import com.github.spjavaind300.profileservice.exception.UserAuthException;
 import com.github.spjavaind300.profileservice.model.entity.User;
 import org.springframework.stereotype.Component;
 
@@ -47,5 +46,7 @@ public class UserMapper {
             user.setPhone(dto.getPhone());
         }
     }
+
+    //TODO добавить мапинг картинки из гетзапроса для фронта+добавить контроллер с таким гетзапросов
 
 }
