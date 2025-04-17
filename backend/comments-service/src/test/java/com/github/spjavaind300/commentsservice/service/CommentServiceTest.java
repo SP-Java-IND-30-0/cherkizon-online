@@ -7,6 +7,7 @@ import com.github.spjavaind300.commentsservice.dto.ProfileDto;
 import com.github.spjavaind300.commentsservice.dto.Role;
 import com.github.spjavaind300.commentsservice.dto.UserContext;
 import com.github.spjavaind300.commentsservice.exception.ForbiddenException;
+import com.github.spjavaind300.commentsservice.exception.NotFoundException;
 import com.github.spjavaind300.commentsservice.exception.UnauthorizedException;
 import com.github.spjavaind300.commentsservice.feing.AdsFeignClientInternal;
 import com.github.spjavaind300.commentsservice.feing.ProfileFeignClientInternal;
@@ -269,14 +270,17 @@ public class CommentServiceTest {
     }
 
     @Test
-    @DisplayName("Удаление комментария — комментарий не найден, ничего не делаем")
+    @DisplayName("Удаление комментария — комментарий не найден, выбрасываем исключение")
     void test_deleteComment_commentNotFound() {
         when(jwtUtils.getUserContext()).thenReturn(new UserContext(testProfile.getAuthorId(), Role.USER));
         when(profileCacheService.getProfile(testProfile.getAuthorId())).thenReturn(testProfile);
 
-        commentService.deleteComment(1, 999);
+        NotFoundException exception = assertThrows(
+                NotFoundException.class,
+                () -> commentService.deleteComment(1, 999)
+        );
 
-        assertTrue(commentRepository.findAll().isEmpty());
+        assertEquals("Комментарий с id=999 не найден", exception.getMessage());
     }
 
     @Test

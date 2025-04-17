@@ -36,6 +36,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public List<CommentDto> getCommentsForAd(int adId) {
         List<Comment> comments = commentRepository.findByAdId(adId);
+        log.info("Найдено {} комментариев для объявления с id: {}", comments.size(), adId);
 
         return comments.stream()
                 .map(comment -> {
@@ -77,6 +78,7 @@ public class CommentServiceImpl implements CommentService {
 
         comment.setText(commentTextDto.getText());
         Comment updatedComment = commentRepository.save(comment);
+        log.info("Комментарий с id: {} был обновлен для объявления с id: {}", updatedComment.getId(), adId);
 
         return commentMapper.toDto(updatedComment, currentProfile);
     }
@@ -84,21 +86,16 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public void deleteComment(int adId, int commentId) {
         Comment comment = commentRepository.findByIdAndAdId(commentId, adId)
-                .orElse(null);
+                .orElseThrow(() -> new NotFoundException("Комментарий", commentId));
 
-        if (comment != null) {
-            validateCommentAccessRights(comment);
-            commentRepository.delete(comment);
-        }
+        validateCommentAccessRights(comment);
+        commentRepository.delete(comment);
+        log.info("Комментарий с id: {} был удален для объявления с id: {}", commentId, adId);
     }
 
     @Override
     public Set<Long> getAuthorIdsByAdId(int adId) {
-        List<Comment> comments = commentRepository.findByAdId(adId);
-
-        return comments.stream()
-                .map(Comment::getAuthorId)
-                .collect(Collectors.toSet());
+        return commentRepository.findAuthorIdsByAdId(adId);
     }
 
     private void validateCommentAccessRights(Comment comment) {
