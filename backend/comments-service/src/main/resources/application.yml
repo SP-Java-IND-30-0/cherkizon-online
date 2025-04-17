@@ -15,6 +15,22 @@ spring:
           ads-service:
             url: http://localhost:8083
 
+  kafka:
+    bootstrap-servers: localhost:29092
+    admin:
+      auto-create: true
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      retries: 3
+      acks: all
+    consumer:
+      group-id: comments-service-group
+      auto-offset-reset: earliest
+      properties:
+        spring.json.trusted.packages: "*"
+
+
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/comments_service_db
