@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -89,6 +90,15 @@ public class CommentServiceImpl implements CommentService {
             validateCommentAccessRights(comment);
             commentRepository.delete(comment);
         }
+    }
+
+    @Override
+    public Set<Long> getAuthorIdsByAdId(int adId) {
+        List<Comment> comments = commentRepository.findByAdId(adId);
+
+        return comments.stream()
+                .map(Comment::getAuthorId)
+                .collect(Collectors.toSet());
     }
 
     private void validateCommentAccessRights(Comment comment) {

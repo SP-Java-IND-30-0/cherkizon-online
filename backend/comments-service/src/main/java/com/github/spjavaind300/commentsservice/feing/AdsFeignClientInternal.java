@@ -8,6 +8,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 @FeignClient(name = "ads-service", configuration = FeignConfig.class)
 public interface AdsFeignClientInternal {
 
-    @GetMapping("/internal/ads/{adId}")
+    @GetMapping("/internal/ads/check/{adId}")
     void checkAdExists(@PathVariable("adId") int adId);
 }
