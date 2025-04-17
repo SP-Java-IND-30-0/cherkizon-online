@@ -8,7 +8,6 @@ import com.cherkizon.auth.exception.UserAlreadyExistsException;
 import com.cherkizon.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,9 +26,6 @@ public class AuthServiceImpl implements AuthService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
-    /**
-     * Регистрация нового пользователя
-     */
     @Override
     @Transactional
     public void register(RegisterRequest request) {
@@ -41,7 +37,6 @@ public class AuthServiceImpl implements AuthService {
         User user = User.builder()
                 .username(request.getUsername())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .isActive(true)
                 .role(User.Role.USER)
                 .build();
 
@@ -49,9 +44,6 @@ public class AuthServiceImpl implements AuthService {
         AUTH.info("User registered: {}", user.getUsername());
     }
 
-    /**
-     * Аутентификация пользователя
-     */
     @Override
     public JwtResponse login(LoginRequest request) {
         Authentication authentication = authenticationManager.authenticate(
@@ -63,11 +55,6 @@ public class AuthServiceImpl implements AuthService {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         User user = (User) authentication.getPrincipal();
-
-        if (!user.isActive()) {
-            AUTH.warn("Login attempt for inactive account: {}", user.getUsername());
-            throw new DisabledException("Account is not activated");
-        }
 
         AUTH.info("User logged in: {}", user.getUsername());
         return jwtService.generateTokens(user);

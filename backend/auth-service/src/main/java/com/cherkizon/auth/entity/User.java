@@ -35,11 +35,8 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @Column(name = "is_active", nullable = false)
-    private boolean isActive = false;
-
     public enum Role implements GrantedAuthority {
-        ADMIN, USER;
+        ADMIN, USER, SERVICE;
 
         @Override
         public String getAuthority() {
@@ -68,17 +65,12 @@ public class User implements UserDetails {
     }
 
     @Override
-    public boolean isEnabled() {
-        return isActive;
-    }
-
-    @Override
     public boolean isAccountNonExpired() {
-        return true; // Не используется
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true; // Не используется
+        return true;
     }
 }
