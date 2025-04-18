@@ -46,7 +46,7 @@ spring:
           ads-service:
             url: http://localhost:8083
 server:
-  port: 8090
+  port: 8085
 
 management:
   endpoints:
