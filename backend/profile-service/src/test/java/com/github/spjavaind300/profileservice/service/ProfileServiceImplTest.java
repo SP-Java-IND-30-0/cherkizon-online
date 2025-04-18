@@ -10,7 +10,6 @@ import com.github.spjavaind300.profileservice.mapper.UserMapper;
 import com.github.spjavaind300.profileservice.model.entity.User;
 import com.github.spjavaind300.profileservice.repository.UserRepository;
 import com.github.spjavaind300.profileservice.service.impl.AvatarServiceImpl;
-import com.github.spjavaind300.profileservice.service.impl.JwtServiceImpl;
 import com.github.spjavaind300.profileservice.service.impl.ProfileServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,7 +37,7 @@ class ProfileServiceImplTest {
     private UserMapper userMapper;
 
     @Mock
-    private JwtServiceImpl jwtService;
+    private JwtServiceImp jwtService;
 
     @InjectMocks
     private ProfileServiceImpl profileService;
