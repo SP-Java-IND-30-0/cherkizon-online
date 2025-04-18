@@ -3,11 +3,9 @@ package com.github.spjavaind300.controller;
 import com.github.spjavaind300.model.dto.AdExtraInfoDto;
 import com.github.spjavaind300.model.dto.AdRequestDto;
 import com.github.spjavaind300.model.dto.AdResponseDto;
-import com.github.spjavaind300.model.dto.ListAdsDto;
 import com.github.spjavaind300.security.CustomUserDetails;
 import com.github.spjavaind300.service.AdService;
 import com.github.spjavaind300.service.ImageStorageService;
-import com.github.spjavaind300.service.JwtUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -34,6 +32,9 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/ads")
 @RequiredArgsConstructor
@@ -45,15 +46,22 @@ public class AdController {
 
 
     @GetMapping
-    public ListAdsDto getAllAds() {
-        return adService.getAllAds();
+    public Map<String, List<AdResponseDto>> getAllAds() {
+
+        return Map.of(
+                "results",
+                adService.getAllAds().getItems()
+        );
     }
 
     @GetMapping("/me")
-    public ListAdsDto getAllAdsForUser() {
+    public Map<String, List<AdResponseDto>> getAllAdsForUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        return adService.getAllAdsForUser(userDetails.userId());
+        return Map.of(
+                "results",
+                adService.getAllAdsForUser(userDetails.userId()).getItems()
+        );
     }
 
     @GetMapping("/{id}")
