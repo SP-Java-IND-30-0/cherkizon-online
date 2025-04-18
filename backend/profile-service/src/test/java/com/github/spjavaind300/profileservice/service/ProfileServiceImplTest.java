@@ -9,14 +9,18 @@ import com.github.spjavaind300.profileservice.exception.UserNotFoundException;
 import com.github.spjavaind300.profileservice.mapper.UserMapper;
 import com.github.spjavaind300.profileservice.model.entity.User;
 import com.github.spjavaind300.profileservice.repository.UserRepository;
+import com.github.spjavaind300.profileservice.security.CustomUserDetails;
 import com.github.spjavaind300.profileservice.service.impl.AvatarServiceImpl;
-import com.github.spjavaind300.profileservice.service.impl.JwtServiceImpl;
+import com.github.spjavaind300.profileservice.service.impl.JwtUtilsImpl;
 import com.github.spjavaind300.profileservice.service.impl.ProfileServiceImpl;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -38,10 +42,15 @@ class ProfileServiceImplTest {
     private UserMapper userMapper;
 
     @Mock
-    private JwtServiceImpl jwtService;
+    private JwtUtilsImpl jwtService;
 
     @InjectMocks
     private ProfileServiceImpl profileService;
+
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
+    }
 
     @Test
     void getProfile_whenUserExists_returnsUserDTO() {
@@ -186,43 +195,37 @@ class ProfileServiceImplTest {
 
     @Test
     void deleteProfile_whenAdmin_deletesUser() {
-        long userId = 1L;
-        String token = "validToken";
-
-        JwtUserInfo jwtUserInfo = new JwtUserInfo();
-        jwtUserInfo.setUserId(10L);
-        jwtUserInfo.setRole(Role.ADMIN);
+        long targetUserId = 1L;
+        CustomUserDetails admin = new CustomUserDetails(10L, Role.ADMIN);
+        Authentication auth = mock(Authentication.class);
+        when(auth.getPrincipal()).thenReturn(admin);
+        SecurityContextHolder.getContext().setAuthentication(auth);
 
         User user = new User();
-        user.setId(userId);
+        user.setId(targetUserId);
         user.setImage("avatar.png");
+        when(userRepository.findById(targetUserId)).thenReturn(Optional.of(user));
 
-        when(jwtService.parseToken(token)).thenReturn(jwtUserInfo);
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-
-        profileService.deleteProfile(userId, token);
-
+        profileService.deleteProfile(targetUserId);
         verify(avatarService).deleteAvatar("avatar.png");
         verify(userRepository).delete(user);
     }
 
     @Test
     void deleteProfile_whenOwner_deletesOwnProfile() {
-        long userId = 1L;
-        String token = "token";
+        long targetUserId = 1L;
 
-        JwtUserInfo jwtUserInfo = new JwtUserInfo();
-        jwtUserInfo.setUserId(userId);
-        jwtUserInfo.setRole(Role.USER);
+        CustomUserDetails owner = new CustomUserDetails(targetUserId, Role.USER);
+        Authentication auth = mock(Authentication.class);
+        when(auth.getPrincipal()).thenReturn(owner);
+        SecurityContextHolder.getContext().setAuthentication(auth);
 
         User user = new User();
-        user.setId(userId);
+        user.setId(targetUserId);
         user.setImage(null);
+        when(userRepository.findById(targetUserId)).thenReturn(Optional.of(user));
 
-        when(jwtService.parseToken(token)).thenReturn(jwtUserInfo);
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-
-        profileService.deleteProfile(userId, token);
+        profileService.deleteProfile(targetUserId);
 
         verify(userRepository).delete(user);
         verify(avatarService, never()).deleteAvatar(any());
@@ -231,19 +234,20 @@ class ProfileServiceImplTest {
     @Test
     void deleteProfile_whenUnauthorizedUser_throwsAccessDenied() {
         long targetUserId = 2L;
-        String token = "token";
 
-        JwtUserInfo jwtUserInfo = new JwtUserInfo();
-        jwtUserInfo.setUserId(1L);
-        jwtUserInfo.setRole(Role.USER);
+        CustomUserDetails other = new CustomUserDetails(1L, Role.USER);
+        Authentication auth = mock(Authentication.class);
+        when(auth.getPrincipal()).thenReturn(other);
+        SecurityContextHolder.getContext().setAuthentication(auth);
 
-        when(jwtService.parseToken(token)).thenReturn(jwtUserInfo);
+        User user = new User();
+        user.setId(targetUserId);
+        when(userRepository.findById(targetUserId)).thenReturn(Optional.of(user));
 
-        assertThatThrownBy(() -> profileService.deleteProfile(targetUserId, token))
+        assertThatThrownBy(() -> profileService.deleteProfile(targetUserId))
                 .isInstanceOf(AccessDeniedProfileException.class)
                 .hasMessageContaining("У вас нет прав");
     }
-
     @Test
     void updateAvatar_whenUserExistsAndHasOldAvatar_deletesOldAndSavesNew() throws IOException {
         long userId = 1L;

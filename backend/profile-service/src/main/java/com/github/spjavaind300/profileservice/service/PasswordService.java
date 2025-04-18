@@ -4,5 +4,5 @@ import com.github.spjavaind300.profileservice.dto.UpdatePasswordDTO;
 
 public interface PasswordService {
 
-    void changePassword(String token, UpdatePasswordDTO passwordDTO);
+    void changePassword(long userId, UpdatePasswordDTO passwordDTO);
 }

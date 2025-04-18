@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -57,6 +58,16 @@ public class AvatarServiceImpl implements AvatarService {
             throw new RuntimeException("Ошибка удаления аватара: " +
                     e.awsErrorDetails().errorMessage(), e);
         }
+    }
+
+    @Override
+    public byte[] getFile(String imageKey) {
+        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                .bucket(bucketName)
+                .key(imageKey)
+                .build();
+
+        return s3Client.getObjectAsBytes(getObjectRequest).asByteArray();
     }
 
 }

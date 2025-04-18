@@ -11,7 +11,7 @@ public interface ProfileService {
 
     UpdateUserDTO updateProfile(long userId, UpdateUserDTO updatedData);
 
-    void deleteProfile (long targetUserId, String token);
+    void deleteProfile (long targetUserId);
 
-    String updateAvatar(long userId, MultipartFile file) throws IOException;
+    String updateAvatar(long userId, MultipartFile file);
 }
