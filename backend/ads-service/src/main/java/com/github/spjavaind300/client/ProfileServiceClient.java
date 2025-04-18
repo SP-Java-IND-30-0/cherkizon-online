@@ -8,6 +8,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 @FeignClient(name = "profile-service")
 public interface ProfileServiceClient {
 
-    @GetMapping("/internal/ads/user/{userId}")
+    @GetMapping("/internal/user/{userId}")
     UserDto getProfiles(@PathVariable long userId);
 }

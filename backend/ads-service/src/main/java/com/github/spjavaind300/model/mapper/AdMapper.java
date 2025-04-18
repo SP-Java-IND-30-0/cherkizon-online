@@ -6,6 +6,7 @@ import com.github.spjavaind300.model.dto.AdResponseDto;
 import com.github.spjavaind300.model.dto.ImageDto;
 import com.github.spjavaind300.model.dto.UserDto;
 import com.github.spjavaind300.model.entity.Ad;
+import com.github.spjavaind300.model.event.AdUpdatedEvent;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -28,5 +29,9 @@ public interface AdMapper {
     Ad fromAdRequestDto(AdRequestDto dto, ImageDto imageDto);
 
     void updateAd(@MappingTarget Ad ad, AdRequestDto dto);
+
+    @Mapping(target = "advUri", source = "uri")
+    AdUpdatedEvent toAdUpdatedEvent(Ad ad, UserDto userDto, String uri);
+
 
 }
