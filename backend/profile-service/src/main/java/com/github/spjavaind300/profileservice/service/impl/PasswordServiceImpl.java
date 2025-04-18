@@ -10,17 +10,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class PasswordServiceImpl implements PasswordService {
 
-    private final JwtService jwtService;
     private final AuthClient authClient;
 
-    public PasswordServiceImpl(JwtService jwtService, AuthClient authClient) {
-        this.jwtService = jwtService;
+    public PasswordServiceImpl(AuthClient authClient) {
         this.authClient = authClient;
     }
 
     @Override
-    public void changePassword(String token, UpdatePasswordDTO passwordDTO) {
-        JwtUserInfo jwtUser = jwtService.parseToken(token);
-        authClient.changePassword(jwtUser.getUserId(), passwordDTO);
+    public void changePassword(long userId, UpdatePasswordDTO passwordDTO) {
+        authClient.changePassword(userId, passwordDTO);
     }
 }
