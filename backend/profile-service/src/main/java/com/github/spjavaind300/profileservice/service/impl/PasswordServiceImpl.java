@@ -1,9 +1,7 @@
 package com.github.spjavaind300.profileservice.service.impl;
 
 import com.github.spjavaind300.profileservice.client.AuthClient;
-import com.github.spjavaind300.profileservice.dto.JwtUserInfo;
 import com.github.spjavaind300.profileservice.dto.UpdatePasswordDTO;
-import com.github.spjavaind300.profileservice.service.JwtService;
 import com.github.spjavaind300.profileservice.service.PasswordService;
 import org.springframework.stereotype.Service;
 
