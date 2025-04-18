@@ -246,7 +246,7 @@ class ProfileServiceImplTest {
 
         assertThatThrownBy(() -> profileService.deleteProfile(targetUserId))
                 .isInstanceOf(AccessDeniedProfileException.class)
-                .hasMessageContaining("У вас нет прав");
+                .hasMessageContaining("Access denied");
     }
     @Test
     void updateAvatar_whenUserExistsAndHasOldAvatar_deletesOldAndSavesNew() throws IOException {
