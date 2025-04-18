@@ -1,0 +1,7 @@
+<changeSet id="3-drop-expired-fields-add-expiresAt" author="Goodwin999">
+    <dropColumn tableName="tokens" columnName="expired"/>
+    <dropColumn tableName="tokens" columnName="revoked"/>
+    <addColumn tableName="tokens">
+        <column name="expires_at" type="timestamp" defaultValueComputed="NOW()"/>
+    </addColumn>
+</changeSet>
