@@ -11,6 +11,7 @@ import com.github.spjavaind300.commentsservice.exception.NotFoundException;
 import com.github.spjavaind300.commentsservice.exception.UnauthorizedException;
 import com.github.spjavaind300.commentsservice.feing.AdsFeignClientInternal;
 import com.github.spjavaind300.commentsservice.feing.ProfileFeignClientInternal;
+import com.github.spjavaind300.commentsservice.kafka.CommentKafkaProducer;
 import com.github.spjavaind300.commentsservice.mapper.CommentMapper;
 import com.github.spjavaind300.commentsservice.model.Comment;
 import com.github.spjavaind300.commentsservice.repository.CommentRepository;
@@ -70,6 +71,8 @@ public class CommentServiceTest {
     @MockitoBean
     private AuthorProfileCache authorProfileCache;
 
+    private CommentKafkaProducer commentKafkaProducer;
+
     private CommentServiceImpl commentService;
 
     private ProfileDto testProfile;
@@ -81,7 +84,8 @@ public class CommentServiceTest {
                 commentMapper,
                 adsFeignClientInternal,
                 jwtUtils,
-                profileCacheService
+                profileCacheService,
+                commentKafkaProducer
         );
 
         testProfile = new ProfileDto();

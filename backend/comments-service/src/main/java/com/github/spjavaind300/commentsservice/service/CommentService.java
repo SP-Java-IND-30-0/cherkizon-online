@@ -17,4 +17,8 @@ public interface CommentService {
     void deleteComment(int adId, int commentId);
 
     Set<Long> getAuthorIdsByAdId(int adId);
+
+    void deleteCommentsByAuthorId(long authorId);
+
+    void deleteCommentsByAdId(int adId);
 }

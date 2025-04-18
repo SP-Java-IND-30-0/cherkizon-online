@@ -1,6 +1,7 @@
 package com.github.spjavaind300.commentsservice.service;
 
 import com.github.spjavaind300.commentsservice.cache.ProfileCacheService;
+import com.github.spjavaind300.commentsservice.kafka.dto.CommentCreatedEvent;
 import com.github.spjavaind300.commentsservice.exception.UnauthorizedException;
 import com.github.spjavaind300.commentsservice.feing.AdsFeignClientInternal;
 import com.github.spjavaind300.commentsservice.dto.CommentDto;
@@ -10,12 +11,14 @@ import com.github.spjavaind300.commentsservice.dto.CommentTextDto;
 import com.github.spjavaind300.commentsservice.dto.UserContext;
 import com.github.spjavaind300.commentsservice.exception.ForbiddenException;
 import com.github.spjavaind300.commentsservice.exception.NotFoundException;
+import com.github.spjavaind300.commentsservice.kafka.CommentKafkaProducer;
 import com.github.spjavaind300.commentsservice.mapper.CommentMapper;
 import com.github.spjavaind300.commentsservice.model.Comment;
 import com.github.spjavaind300.commentsservice.repository.CommentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
@@ -32,6 +35,7 @@ public class CommentServiceImpl implements CommentService {
     private final AdsFeignClientInternal adsFeignClientInternal;
     private final JwtUtils jwtUtils;
     private final ProfileCacheService profileCacheService;
+    private final CommentKafkaProducer commentKafkaProducer;
 
     @Override
     public List<CommentDto> getCommentsForAd(int adId) {
@@ -46,6 +50,7 @@ public class CommentServiceImpl implements CommentService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     @Override
     public CommentDto addComment(int adId, CommentTextDto commentTextDto) {
         adsFeignClientInternal.checkAdExists(adId);
@@ -63,6 +68,21 @@ public class CommentServiceImpl implements CommentService {
 
         log.info("Комментарий с id: {} был сохранен для объявления с id: {}.",
                 savedComment.getId(), adId);
+
+        CommentCreatedEvent event = new CommentCreatedEvent(
+                savedComment.getId(),
+                adId,
+                savedComment.getAuthorId(),
+                savedComment.getText(),
+                savedComment.getCreatedAt()
+        );
+
+        try {
+            log.info("Отправляем событие в Kafka: {}", event);
+            commentKafkaProducer.sendCommentCreatedEvent(event);
+        } catch (Exception e) {
+            log.error("Ошибка при отправке события в Kafka для комментария с id: {}", savedComment.getId(), e);
+        }
 
         return commentMapper.toDto(savedComment, currentProfile);
     }
@@ -96,6 +116,20 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public Set<Long> getAuthorIdsByAdId(int adId) {
         return commentRepository.findAuthorIdsByAdId(adId);
+    }
+
+    @Transactional
+    @Override
+    public void deleteCommentsByAuthorId(long authorId) {
+        commentRepository.deleteAllByAuthorId(authorId);
+        log.info("Deleted all comments for authorId={}", authorId);
+    }
+
+    @Transactional
+    @Override
+    public void deleteCommentsByAdId(int adId) {
+        commentRepository.deleteAllByAdId(adId);
+        log.info("Deleted all comments for adId={}", adId);
     }
 
     private void validateCommentAccessRights(Comment comment) {

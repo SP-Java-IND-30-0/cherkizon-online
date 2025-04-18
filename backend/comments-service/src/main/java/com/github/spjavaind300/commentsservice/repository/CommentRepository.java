@@ -19,4 +19,8 @@ public interface CommentRepository extends JpaRepository<Comment, Integer> {
 
     @Query("SELECT DISTINCT c.authorId FROM Comment c WHERE c.adId = :adId")
     Set<Long> findAuthorIdsByAdId(@Param("adId") int adId);
+
+    void deleteAllByAuthorId(long authorId);
+
+    void deleteAllByAdId(int adId);
 }

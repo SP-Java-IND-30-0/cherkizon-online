@@ -7,6 +7,23 @@ spring:
     url: jdbc:tc:postgresql:17-alpine:///db_test
     username: test
     password: test
+
+  kafka:
+    bootstrap-servers: localhost:29092
+    admin:
+      auto-create: true
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      retries: 3
+      acks: all
+    consumer:
+      group-id: comments-service-group
+      auto-offset-reset: earliest
+      properties:
+        spring.json.trusted.packages: "*"
+
+
   jpa:
     hibernate:
       ddl-auto: create-drop
