@@ -3,6 +3,8 @@ package com.cherkizon.auth.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.Instant;
+
 @Entity
 @Table(name = "tokens")
 @Data
@@ -22,9 +24,7 @@ public class Token {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = false)
-    private boolean expired;
+    @Column(name = "expires_at", nullable = false)
+    private Instant expiresAt;
 
-    @Column(nullable = false)
-    private boolean revoked;
 }

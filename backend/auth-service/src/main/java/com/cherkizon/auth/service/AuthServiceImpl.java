@@ -7,6 +7,7 @@ import com.cherkizon.auth.entity.User;
 import com.cherkizon.auth.exception.UserAlreadyExistsException;
 import com.cherkizon.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -15,8 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.cherkizon.auth.service.loggerService.ServiceLogger.AUTH;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
@@ -30,7 +30,7 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public void register(RegisterRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
-            AUTH.warn("Registration failed - user exists: {}", request.getUsername());
+            log.warn("Registration failed - user exists: {}", request.getUsername());
             throw new UserAlreadyExistsException("User with email " + request.getUsername() + " already exists");
         }
 
@@ -41,7 +41,7 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         userRepository.save(user);
-        AUTH.info("User registered: {}", user.getUsername());
+        log.info("User registered: {}", user.getUsername());
     }
 
     @Override
@@ -56,7 +56,7 @@ public class AuthServiceImpl implements AuthService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         User user = (User) authentication.getPrincipal();
 
-        AUTH.info("User logged in: {}", user.getUsername());
+        log.info("User logged in: {}", user.getUsername());
         return jwtService.generateTokens(user);
     }
 }
