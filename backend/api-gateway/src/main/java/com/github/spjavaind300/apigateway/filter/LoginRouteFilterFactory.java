@@ -67,7 +67,6 @@ public class LoginRouteFilterFactory extends AbstractGatewayFilterFactory<LoginR
                             String password = json.get(PASSWORD_KEY).asText();
 
                             return authenticateAndCache(username, password, config.getLoginUrl())
-//                                .then(chain.filter(exchange))
                                     .then(Mono.fromRunnable(() -> exchange.getResponse().setStatusCode(HttpStatus.OK)))
                                     .doOnSuccess(v -> log.info("Cached tokens for user: {}", username));
                         } catch (Exception e) {

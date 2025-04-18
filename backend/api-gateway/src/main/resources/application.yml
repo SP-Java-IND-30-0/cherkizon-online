@@ -41,7 +41,9 @@ spring:
             - Path=/ads,/ads/me,/ads/{id}/image,/ads/{id}
           filters:
             - RewritePath=/ads(?<segment>/?.*), /api/ads$\{segment}
-
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin, RETAIN_UNIQUE
+        - AddResponseHeader=Access-Control-Expose-Headers, Authorization
 
 webclient:
   auth:
