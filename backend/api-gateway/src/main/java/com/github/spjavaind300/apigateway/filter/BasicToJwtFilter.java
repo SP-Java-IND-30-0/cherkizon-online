@@ -56,7 +56,8 @@ public class BasicToJwtFilter implements GlobalFilter {
                                         String authHeader) {
         return Mono.just(authHeader)
                 .map(this::extractCredentials)
-                .flatMap(creds -> getOrRefreshToken(creds[0], creds[1]))
+                .flatMap(creds -> getOrRefreshToken(creds[0], creds[1])
+                        .doOnSuccess(jwt -> log.debug("Got Token of {}, token: {}", creds[0], jwt)))
                 .flatMap(jwt -> updateRequestHeaders(exchange, chain, jwt));
     }
 
@@ -75,6 +76,7 @@ public class BasicToJwtFilter implements GlobalFilter {
         TokenDto cached = tokenCache.getIfPresent(cacheKey);
 
         if (cached != null && !isTokenExpired(cached.expiresAt())) {
+            log.debug("Got cached token of {}, token: {}", username, cached.accessToken());
             return Mono.just(cached.accessToken());
         }
         return refreshOrAuthenticate(username, password, cacheKey);
@@ -86,10 +88,12 @@ public class BasicToJwtFilter implements GlobalFilter {
         TokenDto cached = tokenCache.getIfPresent(cacheKey);
 
         if (cached != null && cached.refreshToken() != null) {
+            log.debug("Refreshing token of {}", username);
             return refreshToken(cached.refreshToken(), cacheKey)
                     .onErrorResume(e -> authenticate(username, password, cacheKey));
         }
         return authenticate(username, password, cacheKey);
+
     }
 
     private Mono<String> authenticate(String username,
