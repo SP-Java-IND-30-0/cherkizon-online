@@ -13,7 +13,6 @@ import com.github.spjavaind300.security.JwtAuthenticationFilter;
 import com.github.spjavaind300.security.JwtConfig;
 import com.github.spjavaind300.service.AdService;
 import com.github.spjavaind300.service.ImageStorageService;
-import com.github.spjavaind300.service.JwtUtils;
 import com.github.spjavaind300.service.imp.JwtUtilsImp;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -98,12 +97,11 @@ class AdControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders.get(BASE_URI))
                 .andExpect((status().isOk()))
-                .andExpect(jsonPath("$.count").value(3))
-                .andExpect(jsonPath("$.items").isArray())
-                .andExpect(jsonPath("$.items[0].title").value("title1"))
-                .andExpect(jsonPath("$.items[1].title").value("title2"))
-                .andExpect(jsonPath("$.items[2].title").value("title3"))
-                .andExpect(jsonPath("$.items.length()").value(3));
+                .andExpect(jsonPath("$.results").isArray())
+                .andExpect(jsonPath("$.results.length()").value(3))
+                .andExpect(jsonPath("$.results[0].title").value("title1"))
+                .andExpect(jsonPath("$.results[1].title").value("title2"))
+                .andExpect(jsonPath("$.results[2].title").value("title3"));
 
     }
 
@@ -116,11 +114,10 @@ class AdControllerTest {
                         .with(SecurityMockMvcRequestPostProcessors.securityContext(
                                 SecurityContextHolder.getContext())))
                 .andExpect((status().isOk()))
-                .andExpect(jsonPath("$.count").value(2))
-                .andExpect(jsonPath("$.items").isArray())
-                .andExpect(jsonPath("$.items.length()").value(2))
-                .andExpect(jsonPath("$.items[0].title").value("title1"))
-                .andExpect(jsonPath("$.items[1].title").value("title2"));
+                .andExpect(jsonPath("$.results").isArray())
+                .andExpect(jsonPath("$.results.length()").value(2))
+                .andExpect(jsonPath("$.results[0].title").value("title1"))
+                .andExpect(jsonPath("$.results[1].title").value("title2"));
     }
 
     @Test
