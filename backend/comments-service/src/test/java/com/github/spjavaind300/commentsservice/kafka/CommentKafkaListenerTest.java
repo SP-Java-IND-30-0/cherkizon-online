@@ -10,10 +10,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -26,7 +29,9 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @SpringBootTest
+@Import(TestKafkaProducerConfig.class)
 @ActiveProfiles("test")
+@ContextConfiguration(classes = TestKafkaProducerConfig.class)
 @Testcontainers
 @EmbeddedKafka(partitions = 1, topics = {"profile.user.deleted", "adv.deleted"})
 @TestPropertySource(properties = {
@@ -42,7 +47,10 @@ class CommentKafkaListenerTest {
             .withInitScript("init_schema.sql");
 
     @Autowired
-    private KafkaTemplate<String, Object> kafkaTemplate;
+    private KafkaTemplate<String, UserDeletedEvent> userDeletedKafkaTemplate;
+
+    @Autowired
+    private KafkaTemplate<String, AdDeletedEvent> adDeletedKafkaTemplate;
 
     @Autowired
     private CommentRepository commentRepository;
@@ -78,7 +86,7 @@ class CommentKafkaListenerTest {
     @Test
     @DisplayName("Удаление комментариев по authorId при событии UserDeletedEvent")
     void testHandleUserDeletedEvent_shouldDeleteAllCommentsByAuthorId() {
-        kafkaTemplate.send("profile.user.deleted", new UserDeletedEvent(TEST_AUTHOR_ID));
+        userDeletedKafkaTemplate.send("profile.user.deleted", new UserDeletedEvent(TEST_AUTHOR_ID));
 
         await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
             List<Comment> comments = commentRepository.findAll();
@@ -89,7 +97,7 @@ class CommentKafkaListenerTest {
     @Test
     @DisplayName("Удаление комментариев по adId при событии AdDeletedEvent")
     void testHandleAdDeletedEvent_shouldDeleteAllCommentsByAdId() {
-        kafkaTemplate.send("adv.deleted", new AdDeletedEvent(TEST_AD_ID));
+        adDeletedKafkaTemplate.send("adv.deleted", new AdDeletedEvent(TEST_AD_ID));
 
         await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
             List<Comment> comments = commentRepository.findAll();

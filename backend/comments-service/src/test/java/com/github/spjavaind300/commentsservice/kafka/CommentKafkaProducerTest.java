@@ -51,7 +51,7 @@ class CommentKafkaProducerTest {
             .withInitScript("init_schema.sql");
 
     @Autowired
-    private KafkaTemplate<String, Object> kafkaTemplate;
+    private KafkaTemplate<String, CommentCreatedEvent> kafkaTemplate;
 
     @Autowired
     private CommentRepository commentRepository;
@@ -107,22 +107,22 @@ class CommentKafkaProducerTest {
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "test-consumer-" + UUID.randomUUID());
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
-        props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
+        props.put(JsonDeserializer.VALUE_DEFAULT_TYPE, CommentCreatedEvent.class.getName());
+        props.put(JsonDeserializer.TRUSTED_PACKAGES, "*"); // или указать конкретный пакет
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
-        Consumer<String, CommentCreatedEvent> consumer = new KafkaConsumer<>(props);
-        consumer.subscribe(Collections.singletonList("comment.created"));
+        try (Consumer<String, CommentCreatedEvent> consumer = new KafkaConsumer<>(props)) {
+            consumer.subscribe(Collections.singletonList("comment.created"));
 
-        ConsumerRecord<String, CommentCreatedEvent> record = null;
-        long startTime = System.currentTimeMillis();
-        while (System.currentTimeMillis() - startTime < 5000) {
-            ConsumerRecords<String, CommentCreatedEvent> records = consumer.poll(Duration.ofMillis(100));
-            if (!records.isEmpty()) {
-                record = records.iterator().next();
-                break;
+            long startTime = System.currentTimeMillis();
+            while (System.currentTimeMillis() - startTime < 5000) {
+                ConsumerRecords<String, CommentCreatedEvent> records = consumer.poll(Duration.ofMillis(100));
+                if (!records.isEmpty()) {
+                    return records.iterator().next().value();
+                }
             }
         }
-        consumer.close();
-        return record != null ? record.value() : null;
+
+        return null;
     }
 }

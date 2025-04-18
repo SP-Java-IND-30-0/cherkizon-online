@@ -2,7 +2,6 @@ package com.github.spjavaind300.commentsservice.kafka;
 
 import com.github.spjavaind300.commentsservice.kafka.dto.AdDeletedEvent;
 import com.github.spjavaind300.commentsservice.kafka.dto.UserDeletedEvent;
-import com.github.spjavaind300.commentsservice.kafka.dto.CommentCreatedEvent;
 import com.github.spjavaind300.commentsservice.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +18,7 @@ public class CommentKafkaListener {
     @KafkaListener(
             topics = "profile.user.deleted",
             groupId = "${spring.kafka.consumer.group-id}",
-            containerFactory = "kafkaListenerContainerFactory"
+            containerFactory = "userDeletedKafkaListenerContainerFactory"
     )
     public void handleUserDeleted(UserDeletedEvent event) {
         log.info("Received user deleted event: {}", event);
@@ -29,19 +28,10 @@ public class CommentKafkaListener {
     @KafkaListener(
             topics = "adv.deleted",
             groupId = "${spring.kafka.consumer.group-id}",
-            containerFactory = "kafkaListenerContainerFactory"
+            containerFactory = "adDeletedKafkaListenerContainerFactory"
     )
     public void handleAdDeleted(AdDeletedEvent event) {
         log.info("Received ad deleted event: {}", event);
         commentService.deleteCommentsByAdId(event.getId());
-    }
-
-    @KafkaListener(
-            topics = "comment.created",
-            groupId = "comments-service-group",
-            containerFactory = "kafkaListenerContainerFactory"
-    )
-    public void listenCommentCreatedEvent(CommentCreatedEvent event) {
-        log.info("Received comment created event: {}", event);
     }
 }
