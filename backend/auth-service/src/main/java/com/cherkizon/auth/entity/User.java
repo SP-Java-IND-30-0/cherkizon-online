@@ -17,7 +17,7 @@ import java.util.List;
 @Data
 @Builder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@ToString(exclude = "password")
+@ToString
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,6 +28,7 @@ public class User implements UserDetails {
     @Email
     private String username;
 
+    @ToString.Exclude
     @Column(nullable = false, length = 64)
     private String password;
 
