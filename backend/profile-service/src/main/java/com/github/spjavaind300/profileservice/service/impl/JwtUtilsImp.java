@@ -10,6 +10,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -18,10 +19,15 @@ import java.time.Instant;
 import java.util.function.Function;
 
 @Service
-@RequiredArgsConstructor
 public class JwtUtilsImp implements JwtUtils {
 
     private final String JwtSecret;
+
+    public JwtUtilsImpl(
+            @Qualifier("jwtSecret") String jwtSecret
+    ) {
+        this.JwtSecret = jwtSecret;
+    }
 
     //TODO temporary method
     @Override
