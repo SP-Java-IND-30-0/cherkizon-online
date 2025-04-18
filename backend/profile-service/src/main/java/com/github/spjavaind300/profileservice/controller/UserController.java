@@ -1,10 +1,12 @@
 package com.github.spjavaind300.profileservice.controller;
 
 import com.github.spjavaind300.profileservice.dto.JwtUserInfo;
+import com.github.spjavaind300.profileservice.dto.UpdatePasswordDTO;
 import com.github.spjavaind300.profileservice.dto.UpdateUserDTO;
 import com.github.spjavaind300.profileservice.dto.UserDTO;
 import com.github.spjavaind300.profileservice.exception.InvalidImageException;
 import com.github.spjavaind300.profileservice.service.impl.JwtServiceImpl;
+import com.github.spjavaind300.profileservice.service.impl.PasswordServiceImpl;
 import com.github.spjavaind300.profileservice.service.impl.ProfileServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,7 @@ public class UserController {
 
     private final ProfileServiceImpl profileService;
     private final JwtServiceImpl jwtService;
+    private final PasswordServiceImpl passwordService;
 
     @GetMapping("/me")
     public ResponseEntity<UserDTO> getProfile() {
@@ -57,6 +60,22 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    //TODO добавить эндпоинт на смену пароля и на удаление пользователя
+    @PatchMapping("/set_password")
+    public ResponseEntity<Void> changePassword(
+            @RequestHeader("Authorization") String token,
+            @RequestBody @Valid UpdatePasswordDTO passwordDTO) {
+        passwordService.changePassword(token, passwordDTO);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(
+            @PathVariable("id") long id,
+            @RequestHeader("Authorization") String token) {
+        profileService.deleteProfile(id, token);
+        return ResponseEntity.noContent().build();
+    }
+
+    //TODO создать эндпоинт на получение картинки пользователя для фронта
 
 }
