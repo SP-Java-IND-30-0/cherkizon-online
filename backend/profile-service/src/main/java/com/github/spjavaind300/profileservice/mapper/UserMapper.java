@@ -38,6 +38,7 @@ public class UserMapper {
                     .toUriString();
             userDTO.setImage(url);
         }
+        //TODO передавать значение из токена
         userDTO.setRole("ADMIN");
         return userDTO;
     }

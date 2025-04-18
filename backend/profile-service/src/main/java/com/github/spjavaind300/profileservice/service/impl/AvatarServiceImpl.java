@@ -1,5 +1,6 @@
 package com.github.spjavaind300.profileservice.service.impl;
 
+import com.github.spjavaind300.profileservice.exception.AvatarNotFoundException;
 import com.github.spjavaind300.profileservice.exception.AvatarStorageException;
 import com.github.spjavaind300.profileservice.exception.AvatarReadException;
 import com.github.spjavaind300.profileservice.service.AvatarService;
@@ -7,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
@@ -75,12 +75,16 @@ public class AvatarServiceImpl implements AvatarService {
             return s3Client.getObjectAsBytes(getObjectRequest).asByteArray();
 
         } catch (S3Exception e) {
-            log.error("getFile: ошибка при получении объекта из S3. key='{}'", avatarKey, e);
-            // можно обернуть в своё бизнес‑исключение
-            throw e;
-        } catch (Exception e) {
-            log.error("getFile: непредвиденная ошибка при обработке key='{}'", avatarKey, e);
-            throw e;
+            int status = e.statusCode();
+            String message = e.awsErrorDetails().errorMessage();
+            if (status == 404) {
+                log.warn("getFile: аватар '{}' не найден (S3 404): {}", avatarKey, message);
+                throw new AvatarNotFoundException(avatarKey, e);
+            } else {
+                log.error("getFile: ошибка S3 для '{}', status={} message={}",
+                        avatarKey, status, message);
+                throw new AvatarStorageException(avatarKey, e);
+            }
         }
     }
 

@@ -6,7 +6,6 @@ import com.github.spjavaind300.profileservice.dto.InternalUserResponse;
 import com.github.spjavaind300.profileservice.dto.InternalUserSummary;
 import com.github.spjavaind300.profileservice.dto.UserDTO;
 import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @Component
 public class InternalUserMapper {
@@ -29,15 +28,10 @@ public class InternalUserMapper {
     }
 
     public InternalProfileResponse toProfile(UserDTO userDTO) {
-        String url = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/api/users/{id}/avatar/")
-                .path(userDTO.getImage())
-                .buildAndExpand(userDTO.getId())
-                .toUriString();
         return new InternalProfileResponse(
                 userDTO.getId(),
                 userDTO.getFirstName(),
-                url
+                userDTO.getImage()
         );
     }
 }

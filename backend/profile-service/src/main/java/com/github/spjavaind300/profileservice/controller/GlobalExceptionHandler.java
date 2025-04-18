@@ -1,9 +1,11 @@
 package com.github.spjavaind300.profileservice.controller;
 
 import com.github.spjavaind300.profileservice.exception.AccessDeniedProfileException;
+import com.github.spjavaind300.profileservice.exception.AvatarNotFoundException;
 import com.github.spjavaind300.profileservice.exception.InvalidImageException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.common.protocol.types.Field;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -17,29 +19,26 @@ public class GlobalExceptionHandler {
 
 
     @ExceptionHandler(InvalidImageException.class)
-    public ResponseEntity<Void> handleInvalidImage() {
-        return ResponseEntity.badRequest().build();
+    public ResponseEntity<String> handleInvalidImage(Exception e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
     }
 
     @ExceptionHandler(AccessDeniedProfileException.class)
-    public ResponseEntity<Void> handleAccessDenied() {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    public ResponseEntity<String> handleAccessDenied(Exception e) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
     }
 
-
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleAll(Exception ex, HttpServletRequest req) {
-        // тут вы гарантированно получите запись в логе со стеком
-        log.error("Unhandled exception for {} {}: {}", req.getMethod(), req.getRequestURI(), ex.getMessage(), ex);
+    public ResponseEntity<String> handleException(Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+    }
 
-        // возвращаете клиенту любое тело (можно ваше DTO)
+    @ExceptionHandler(AvatarNotFoundException.class)
+    public ResponseEntity<Void> handleAvatarNotFound(AvatarNotFoundException e) {
+        log.warn("Avatar not found: {}", e.getMessage());
         return ResponseEntity
-                .status(500)
-                .body(Map.of(
-                        "status", 500,
-                        "error", "Internal Server Error",
-                        "message", ex.getMessage()
-                ));
+                .status(HttpStatus.NOT_FOUND)
+                .build();
     }
 
 }
