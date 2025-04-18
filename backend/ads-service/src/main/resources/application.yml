@@ -53,7 +53,15 @@ spring:
       properties:
         spring.json.trusted.packages: "*"
 
-
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+    fetch-registry: true
+    register-with-eureka: true
+  instance:
+    hostname: localhost
+    prefer-ip-address: true
 
 springdoc:
   swagger-ui:
