@@ -41,6 +41,7 @@ import java.util.UUID;
 @TestPropertySource(properties = {
         "spring.kafka.consumer.auto-offset-reset=earliest"
 })
+@TestPropertySource(properties = {"JWT_SECRET_KEY=test-secret-key"})
 class CommentKafkaProducerTest {
 
     @Container

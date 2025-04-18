@@ -15,12 +15,14 @@ import com.github.spjavaind300.commentsservice.kafka.CommentKafkaProducer;
 import com.github.spjavaind300.commentsservice.mapper.CommentMapper;
 import com.github.spjavaind300.commentsservice.model.Comment;
 import com.github.spjavaind300.commentsservice.repository.CommentRepository;
+import com.github.spjavaind300.commentsservice.security.JwtUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -39,6 +41,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.times;
 
+@TestPropertySource(properties = {"JWT_SECRET_KEY=test-secret-key"})
 @SpringBootTest
 @Testcontainers
 public class CommentServiceTest {

@@ -15,6 +15,7 @@ import com.github.spjavaind300.commentsservice.kafka.CommentKafkaProducer;
 import com.github.spjavaind300.commentsservice.mapper.CommentMapper;
 import com.github.spjavaind300.commentsservice.model.Comment;
 import com.github.spjavaind300.commentsservice.repository.CommentRepository;
+import com.github.spjavaind300.commentsservice.security.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

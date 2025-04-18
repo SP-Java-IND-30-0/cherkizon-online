@@ -16,7 +16,6 @@ import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -37,6 +36,7 @@ import java.util.concurrent.TimeUnit;
 @TestPropertySource(properties = {
         "spring.kafka.consumer.group-id=comment-test-listener-${random.uuid}"
 })
+@TestPropertySource(properties = {"JWT_SECRET_KEY=test-secret-key"})
 class CommentKafkaListenerTest {
 
     @Container

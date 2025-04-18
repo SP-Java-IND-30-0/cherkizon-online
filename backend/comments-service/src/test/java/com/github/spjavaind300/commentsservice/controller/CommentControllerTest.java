@@ -7,7 +7,7 @@ import com.github.spjavaind300.commentsservice.dto.UserContext;
 import com.github.spjavaind300.commentsservice.feing.AdsFeignClientInternal;
 import com.github.spjavaind300.commentsservice.model.Comment;
 import com.github.spjavaind300.commentsservice.repository.CommentRepository;
-import com.github.spjavaind300.commentsservice.service.JwtUtils;
+import com.github.spjavaind300.commentsservice.security.JwtUtils;
 import org.springframework.http.MediaType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -38,6 +39,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @SpringBootTest
 @AutoConfigureMockMvc
 @Testcontainers
+@TestPropertySource(properties = {"JWT_SECRET_KEY=test-secret-key"})
 class CommentControllerTest {
 
     @Container
