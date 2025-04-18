@@ -4,6 +4,7 @@ import com.github.spjavaind300.profileservice.dto.UpdateUserDTO;
 import com.github.spjavaind300.profileservice.dto.UserDTO;
 import com.github.spjavaind300.profileservice.model.entity.User;
 import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @Component
 public class UserMapper {
@@ -29,13 +30,20 @@ public class UserMapper {
         userDTO.setFirstName(user.getFirstName());
         userDTO.setLastName(user.getLastName());
         userDTO.setPhone(user.getPhone());
-        userDTO.setImage(user.getImage());
-        //TODO поменять на значение из JWT
-        userDTO.setRole("User");
+        if (user.getImage() != null) {
+            String url = ServletUriComponentsBuilder
+                    .fromCurrentContextPath()
+                    .path("api/users/avatar/")
+                    .path(user.getImage())
+                    .toUriString();
+            userDTO.setImage(url);
+        }
+        //TODO передавать значение из токена
+        userDTO.setRole("ADMIN");
         return userDTO;
     }
 
-    public void toUpdatedUserEntity (UpdateUserDTO dto, User user) {
+    public void toUpdatedUserEntity(UpdateUserDTO dto, User user) {
         if (dto.getFirstName() != null) {
             user.setFirstName(dto.getFirstName());
         }
@@ -47,6 +55,5 @@ public class UserMapper {
         }
     }
 
-    //TODO добавить мапинг картинки из гетзапроса для фронта+добавить контроллер с таким гетзапросов
 
 }

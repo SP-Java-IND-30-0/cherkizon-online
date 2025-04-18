@@ -13,5 +13,5 @@ public interface ProfileService {
 
     void deleteProfile (long targetUserId, String token);
 
-    String updateAvatar(long userId, MultipartFile file) throws IOException;
+    String updateAvatar(long userId, MultipartFile file);
 }
