@@ -1,11 +1,14 @@
 package com.github.spjavaind300.controller;
 
+import com.github.spjavaind300.model.dto.Role;
 import com.github.spjavaind300.service.JwtUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.time.Instant;
 
 
 //TODO temporary class
@@ -16,9 +19,30 @@ public class SecurityController {
 
     private final JwtUtils jwtUtils;
 
-    @GetMapping
-    public String login(@RequestParam long userId, @RequestParam String role) {
-        return jwtUtils.generateToken(userId, role);
+    @PostMapping
+    public TokenResponse login(@RequestBody TokenRequest request) {
+        String accessToken = jwtUtils.generateToken(1L, Role.USER.name());
+        return new TokenResponse(
+                accessToken,
+                accessToken,
+                1L,
+                Instant.now().plusSeconds(60 * 60));
     }
 
+    public record TokenRequest(
+            String username,
+            String password
+    ) {
+
+    }
+
+    public record TokenResponse(
+            String accessToken,
+            String refreshToken,
+            Long userId,
+            Instant expiresAt
+
+    ) {
+
+    }
 }

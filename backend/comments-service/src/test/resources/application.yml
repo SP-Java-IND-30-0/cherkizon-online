@@ -1,12 +1,30 @@
 spring:
   application:
     name: comments-service
+  liquibase:
+    enabled: false
 
   datasource:
     driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
     url: jdbc:tc:postgresql:17-alpine:///db_test
     username: test
     password: test
+
+  kafka:
+    bootstrap-servers: localhost:29092
+    admin:
+      auto-create: true
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      retries: 3
+      acks: all
+    consumer:
+      group-id: comments-service-group
+      auto-offset-reset: earliest
+      properties:
+        spring.json.trusted.packages: "*"
+
   jpa:
     hibernate:
       ddl-auto: create-drop
@@ -20,5 +38,5 @@ spring:
      encoding: UTF-8
      schema-locations: classpath:init_schema.sql
 
-  liquibase:
-    enabled: false
+jwt:
+  secret-key: ${JWT_SECRET_KEY}

@@ -11,15 +11,18 @@ import com.github.spjavaind300.commentsservice.exception.NotFoundException;
 import com.github.spjavaind300.commentsservice.exception.UnauthorizedException;
 import com.github.spjavaind300.commentsservice.feing.AdsFeignClientInternal;
 import com.github.spjavaind300.commentsservice.feing.ProfileFeignClientInternal;
+import com.github.spjavaind300.commentsservice.kafka.CommentKafkaProducer;
 import com.github.spjavaind300.commentsservice.mapper.CommentMapper;
 import com.github.spjavaind300.commentsservice.model.Comment;
 import com.github.spjavaind300.commentsservice.repository.CommentRepository;
+import com.github.spjavaind300.commentsservice.security.JwtUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -27,6 +30,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 import java.time.Instant;
+import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -36,6 +41,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.times;
 
+@TestPropertySource(properties = {"JWT_SECRET_KEY=test-secret-key"})
 @SpringBootTest
 @Testcontainers
 public class CommentServiceTest {
@@ -68,6 +74,8 @@ public class CommentServiceTest {
     @MockitoBean
     private AuthorProfileCache authorProfileCache;
 
+    private CommentKafkaProducer commentKafkaProducer;
+
     private CommentServiceImpl commentService;
 
     private ProfileDto testProfile;
@@ -79,7 +87,8 @@ public class CommentServiceTest {
                 commentMapper,
                 adsFeignClientInternal,
                 jwtUtils,
-                profileCacheService
+                profileCacheService,
+                commentKafkaProducer
         );
 
         testProfile = new ProfileDto();
@@ -269,14 +278,17 @@ public class CommentServiceTest {
     }
 
     @Test
-    @DisplayName("Удаление комментария — комментарий не найден, ничего не делаем")
+    @DisplayName("Удаление комментария — комментарий не найден, выбрасываем исключение")
     void test_deleteComment_commentNotFound() {
         when(jwtUtils.getUserContext()).thenReturn(new UserContext(testProfile.getAuthorId(), Role.USER));
         when(profileCacheService.getProfile(testProfile.getAuthorId())).thenReturn(testProfile);
 
-        commentService.deleteComment(1, 999);
+        NotFoundException exception = assertThrows(
+                NotFoundException.class,
+                () -> commentService.deleteComment(1, 999)
+        );
 
-        assertTrue(commentRepository.findAll().isEmpty());
+        assertEquals("Комментарий с id=999 не найден", exception.getMessage());
     }
 
     @Test
@@ -309,5 +321,44 @@ public class CommentServiceTest {
         commentService.addComment(1, commentTextDto);
 
         verify(authorProfileCache, times(1)).put(testProfile.getAuthorId(), testProfile);
+    }
+
+    @Test
+    @DisplayName("Получение авторов комментариев для объявления — комментарии найдены")
+    void test_getAuthorIdsByAdId_returnsAuthorsSet() {
+        commentRepository.saveAll(List.of(
+                Comment.builder()
+                        .adId(1)
+                        .authorId(100L)
+                        .text("Комментарий 1")
+                        .createdAt(Instant.now())
+                        .build(),
+                Comment.builder()
+                        .adId(1)
+                        .authorId(101L)
+                        .text("Комментарий 2")
+                        .createdAt(Instant.now())
+                        .build(),
+                Comment.builder()
+                        .adId(1)
+                        .authorId(100L)
+                        .text("Комментарий 3")
+                        .createdAt(Instant.now())
+                        .build()
+        ));
+
+        Set<Long> result = commentService.getAuthorIdsByAdId(1);
+
+        assertNotNull(result);
+        assertEquals(Set.of(100L, 101L), result);
+    }
+
+    @Test
+    @DisplayName("Получение авторов комментариев для объявления — комментарии отсутствуют")
+    void test_getAuthorIdsByAdId_returnsEmptySet() {
+        Set<Long> result = commentService.getAuthorIdsByAdId(999);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 }
