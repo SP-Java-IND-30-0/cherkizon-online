@@ -12,6 +12,7 @@ import com.github.spjavaind300.model.dto.Role;
 import com.github.spjavaind300.model.dto.UserDto;
 import com.github.spjavaind300.model.entity.Ad;
 import com.github.spjavaind300.model.event.AdDeletedEvent;
+import com.github.spjavaind300.model.event.AdUpdatedEvent;
 import com.github.spjavaind300.model.mapper.AdMapper;
 import com.github.spjavaind300.repository.AdRepository;
 import com.github.spjavaind300.security.CustomUserDetails;
@@ -33,6 +34,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class AdServiceImp implements AdService {
+
+    private static final String ADV_URI = "http://localhost:8080/ads/";
 
     private final AdRepository adRepository;
     private final AdMapper adMapper;
@@ -101,6 +104,9 @@ public class AdServiceImp implements AdService {
     public AdResponseDto updateAd(int id, AdRequestDto adRequestDto) {
         Ad ad = adRepository.findById(id).orElseThrow(() -> new NotFoundException(id));
         checkUserAccess(ad.getUserId());
+        UserDto userDto = profileService.getUser(ad.getUserId());
+        AdUpdatedEvent updatedEvent = adMapper.toAdUpdatedEvent(ad, userDto, ADV_URI+ad.getId());
+        outboxEventService.saveOutboxEvent(updatedEvent);
         adMapper.updateAd(ad, adRequestDto);
         return saveAd(ad);
     }

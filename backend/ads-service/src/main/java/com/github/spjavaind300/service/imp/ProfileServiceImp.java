@@ -5,7 +5,6 @@ import com.github.spjavaind300.exception.ProfileRequestFailedException;
 import com.github.spjavaind300.model.dto.UserDto;
 import com.github.spjavaind300.service.ProfileService;
 import feign.FeignException;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
@@ -13,11 +12,14 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class ProfileServiceImp implements ProfileService {
 
     private final ProfileServiceClient client;
+
+    public ProfileServiceImp(ProfileServiceClient client) {
+        this.client = client;
+    }
 
 
     @Retryable(
@@ -30,12 +32,24 @@ public class ProfileServiceImp implements ProfileService {
     )
     @Override
     public UserDto getUser(long userId) {
-        return client.getProfiles(userId);
+        try {
+            return client.getProfiles(userId);
+        } catch (FeignException e) {
+            log.error("Feign error while getting user {}: status {}, headers {}, body {}",
+                    userId,
+                    e.status(),
+                    e.responseHeaders(),
+                    e.contentUTF8());
+            throw e;
+        }
     }
 
     @Recover
-    public void getUserFallback(long userId, Throwable t) {
-        log.warn("getUserFallback for userId={}, error={}", userId, t.getMessage());
+    public UserDto getUserFallback(long userId, Throwable t) {
+        log.warn("getUserFallback for userId={}, error={}",
+                userId,
+                t == null ? "" : t.getMessage()
+        );
         throw new ProfileRequestFailedException(userId, t);
     }
 

@@ -1,6 +1,6 @@
 package com.github.spjavaind300.service;
 
-import com.github.spjavaind300.model.UserDeletedEvent;
+import com.github.spjavaind300.model.event.UserDeletedEvent;
 import com.github.spjavaind300.security.SecurityService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
