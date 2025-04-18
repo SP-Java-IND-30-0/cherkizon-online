@@ -10,7 +10,9 @@ spring:
             - Path=/login
             - Method=POST
           filters:
-            - RewritePath=/login, /api/auth/login
+            - name: LoginRouteFilterFactory
+              args:
+                loginUrl: "/internal/security"
         - id: register-route
           uri: http://localhost:8081
           predicates:
@@ -41,5 +43,11 @@ spring:
             - RewritePath=/ads(?<segment>/?.*), /api/ads$\{segment}
 
 
+webclient:
+  auth:
+    server:
+      url: http://localhost:8083
+
 server:
-  port:
+  port: 8080
+
