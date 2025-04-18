@@ -5,7 +5,7 @@ spring:
     gateway:
       routes:
         - id: login-route
-          uri: http://localhost:8081
+          uri: lb://auth-service
           predicates:
             - Path=/login
             - Method=POST
@@ -14,7 +14,7 @@ spring:
               args:
                 loginUrl: "/internal/security"
         - id: register-route
-          uri: http://localhost:8081
+          uri: lb://auth-service
           predicates:
             - Path=/register
             - Method=POST
@@ -22,21 +22,21 @@ spring:
             - RewritePath=/register, /api/auth/register
 
         - id: profile-service-route
-          uri: http://localhost:8082
+          uri: lb://profile-service
           predicates:
             - Path=/users/**,/users
           filters:
             - RewritePath=/users/(?<id>/?.*), /api/profile/$\{id}
 
         - id: comments-service-route
-          uri: http://localhost:8084
+          uri: lb://comment-service
           predicates:
             - Path=/ads/{id}/comments,/ads/{adId}/comments/{commentId}
           filters:
             - RewritePath=/ads/(?<id>\d+)/comments(?<segment>/?.*), /api/comments/$\{id}$\{segment}
 
         - id: ads-service-route
-          uri: http://localhost:8083
+          uri: lb://ads-service
           predicates:
             - Path=/ads,/ads/me,/ads/{id}/image,/ads/{id}
           filters:
@@ -48,7 +48,7 @@ spring:
 webclient:
   auth:
     server:
-      url: http://localhost:8083
+      url: lb://ads-service
 
 server:
   port: 8080
