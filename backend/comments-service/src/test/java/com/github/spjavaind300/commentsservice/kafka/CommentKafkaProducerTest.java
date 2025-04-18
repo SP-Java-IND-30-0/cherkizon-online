@@ -51,7 +51,7 @@ class CommentKafkaProducerTest {
             .withInitScript("init_schema.sql");
 
     @Autowired
-    private KafkaTemplate<String, CommentCreatedEvent> kafkaTemplate;
+    private KafkaTemplate<String, Object> kafkaTemplate;
 
     @Autowired
     private CommentRepository commentRepository;

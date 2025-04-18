@@ -14,12 +14,12 @@ import java.util.concurrent.CompletableFuture;
 @RequiredArgsConstructor
 public class CommentKafkaProducer {
 
-    private final KafkaTemplate<String, CommentCreatedEvent> kafkaTemplate;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     public void sendCommentCreatedEvent(CommentCreatedEvent event) {
         String topic = "comment.created";
 
-        CompletableFuture<SendResult<String, CommentCreatedEvent>> future =
+        CompletableFuture<SendResult<String, Object>> future =
                 kafkaTemplate.send(topic, String.valueOf(event.getCommentId()), event);
 
         future.thenAccept(result -> {
