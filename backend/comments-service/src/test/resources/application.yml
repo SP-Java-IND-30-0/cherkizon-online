@@ -1,6 +1,8 @@
 spring:
   application:
     name: comments-service
+  liquibase:
+    enabled: false
 
   datasource:
     driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
@@ -23,7 +25,6 @@ spring:
       properties:
         spring.json.trusted.packages: "*"
 
-
   jpa:
     hibernate:
       ddl-auto: create-drop
@@ -37,5 +38,5 @@ spring:
      encoding: UTF-8
      schema-locations: classpath:init_schema.sql
 
-  liquibase:
-    enabled: false
+jwt:
+  secret-key: ${JWT_SECRET_KEY}

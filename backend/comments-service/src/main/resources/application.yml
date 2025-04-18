@@ -62,6 +62,9 @@ springdoc:
   api-docs:
     path: /v3/api-docs
 
+jwt:
+  secret-key: ${JWT_SECRET_KEY}
+
 server:
   port: 8084
 
