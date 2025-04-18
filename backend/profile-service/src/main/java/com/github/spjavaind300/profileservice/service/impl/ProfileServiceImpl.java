@@ -1,6 +1,5 @@
 package com.github.spjavaind300.profileservice.service.impl;
 
-import com.github.spjavaind300.profileservice.dto.JwtUserInfo;
 import com.github.spjavaind300.profileservice.dto.Role;
 import com.github.spjavaind300.profileservice.exception.AccessDeniedProfileException;
 import com.github.spjavaind300.profileservice.mapper.UserMapper;
@@ -9,11 +8,12 @@ import com.github.spjavaind300.profileservice.dto.UserDTO;
 import com.github.spjavaind300.profileservice.exception.UserNotFoundException;
 import com.github.spjavaind300.profileservice.model.entity.User;
 import com.github.spjavaind300.profileservice.repository.UserRepository;
+import com.github.spjavaind300.profileservice.security.CustomUserDetails;
 import com.github.spjavaind300.profileservice.service.AvatarService;
-import com.github.spjavaind300.profileservice.service.JwtService;
 import com.github.spjavaind300.profileservice.service.ProfileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,7 +28,6 @@ public class ProfileServiceImpl implements ProfileService {
 
     private final UserMapper userMapper;
 
-    private final JwtService jwtService;
 
     @Override
     public UserDTO getProfile(long userId) {
@@ -51,16 +50,10 @@ public class ProfileServiceImpl implements ProfileService {
     }
     @Transactional
     @Override
-    public void deleteProfile(long targetUserId, String token) {
-        JwtUserInfo jwtUser = jwtService.parseToken(token);
-        Long requesterId = jwtUser.getUserId();
-        Role role = jwtUser.getRole();
-
-        if (!role.equals(Role.ADMIN) && !requesterId.equals(targetUserId)) {
-            throw new AccessDeniedProfileException("У вас нет прав на удаление аккаунта");
-        }
-        User user = userRepository.findById(targetUserId)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден: " + targetUserId));
+    public void deleteProfile(long targetUserId) {
+        User user = userRepository.findById(targetUserId).orElseThrow(()
+                -> new UserNotFoundException("Пользователь не найден: " + targetUserId));
+        checkUserAccess(user.getId());
         if (user.getImage() != null) {
             avatarService.deleteAvatar(user.getImage());
         }
@@ -79,4 +72,16 @@ public class ProfileServiceImpl implements ProfileService {
         userRepository.save(user);
         return avatarUrl;
     }
+
+    private void checkUserAccess(long userId) {
+        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+        if (userDetails.role() == Role.USER && userDetails.userId() != userId) {
+            throw new AccessDeniedProfileException();
+        }
+    }
+
+
 }
