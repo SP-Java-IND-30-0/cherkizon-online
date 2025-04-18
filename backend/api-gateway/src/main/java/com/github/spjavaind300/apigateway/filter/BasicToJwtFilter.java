@@ -10,6 +10,7 @@ import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -56,10 +57,7 @@ public class BasicToJwtFilter implements GlobalFilter {
         return Mono.just(authHeader)
                 .map(this::extractCredentials)
                 .flatMap(creds -> getOrRefreshToken(creds[0], creds[1]))
-                .flatMap(jwt -> {
-                    updateRequestHeaders(exchange, jwt);
-                    return chain.filter(exchange);
-                });
+                .flatMap(jwt -> updateRequestHeaders(exchange, chain, jwt));
     }
 
     private String[] extractCredentials(String header) {
@@ -128,10 +126,21 @@ public class BasicToJwtFilter implements GlobalFilter {
         return Mono.just(token.accessToken());
     }
 
-    private void updateRequestHeaders(ServerWebExchange exchange, String jwt) {
-        exchange.getRequest().mutate()
-                .header(HttpHeaders.AUTHORIZATION, AUTH_BEARER_PREFIX + jwt)
+    private Mono<Void> updateRequestHeaders(ServerWebExchange exchange,
+                                            GatewayFilterChain chain,
+                                            String jwt) {
+        ServerHttpRequest mutatedRequest = exchange.getRequest()
+                .mutate()
+                .headers(headers -> {
+                    headers.remove(HttpHeaders.AUTHORIZATION);
+                    headers.set(HttpHeaders.AUTHORIZATION, AUTH_BEARER_PREFIX + jwt);
+                })
                 .build();
+        ServerWebExchange mutated = exchange.mutate()
+                .request(mutatedRequest)
+                .build();
+
+        return chain.filter(mutated);
     }
 
     private boolean isTokenExpired(Instant expiry) {

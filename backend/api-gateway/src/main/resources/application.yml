@@ -10,7 +10,9 @@ spring:
             - Path=/login
             - Method=POST
           filters:
-            - name: LoginRouteFilter
+            - name: LoginRouteFilterFactory
+              args:
+                loginUrl: "/internal/security"
         - id: register-route
           uri: http://localhost:8081
           predicates:
@@ -44,7 +46,7 @@ spring:
 webclient:
   auth:
     server:
-      url: http://localhost:8081
+      url: http://localhost:8083
 
 server:
   port: 8080

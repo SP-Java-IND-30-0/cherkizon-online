@@ -6,10 +6,10 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.spjavaind300.apigateway.dto.TokenDto;
 import com.github.spjavaind300.apigateway.utils.Hashing;
 import jakarta.validation.constraints.NotNull;
-import lombok.RequiredArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
-import org.springframework.cloud.gateway.filter.GatewayFilterChain;
+import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -23,14 +23,14 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 
 @Component
 @Slf4j
-@RequiredArgsConstructor
-public class LoginRouteFilter implements GatewayFilter {
+public class LoginRouteFilterFactory extends AbstractGatewayFilterFactory<LoginRouteFilterFactory.Config> {
 
-    private static final String LOGIN_URL = "/api/auth/login";
+
     private static final String USERNAME_KEY = "username";
     private static final String PASSWORD_KEY = "password";
 
@@ -39,36 +39,53 @@ public class LoginRouteFilter implements GatewayFilter {
     private final Cache<String, TokenDto> tokenCache;
 
 
+    public LoginRouteFilterFactory(WebClient authWebClient, ObjectMapper mapper, Cache<String, TokenDto> tokenCache) {
+        super(Config.class);
+        this.authWebClient = authWebClient;
+        this.mapper = mapper;
+        this.tokenCache = tokenCache;
+    }
+
     @Override
-    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+    public GatewayFilter apply(Config config) {
+        return (exchange, chain) -> {
+            if (!isLoginRequest(exchange.getRequest())) {
+                return chain.filter(exchange);
+            }
+            return exchange.getRequest()
+                    .getBody()
+                    .single()
+                    .flatMap(buffer -> {
+                        try {
+                            String body = buffer.toString(StandardCharsets.UTF_8);
+                            JsonNode json = mapper.readTree(body);
 
-        if (!isLoginRequest(exchange.getRequest())) {
-            return chain.filter(exchange);
-        }
+                            if (!json.has(USERNAME_KEY) || !json.has(PASSWORD_KEY)) {
+                                return Mono.error(new IllegalArgumentException("Missing 'username' or 'password'"));
+                            }
+                            String username = json.get(USERNAME_KEY).asText();
+                            String password = json.get(PASSWORD_KEY).asText();
 
-        return exchange.getRequest()
-                .getBody()
-                .single()
-                .flatMap(buffer -> {
-                    try {
-                        String body = buffer.toString(StandardCharsets.UTF_8);
-                        JsonNode json = mapper.readTree(body);
-
-                        if (!json.has(USERNAME_KEY) || !json.has(PASSWORD_KEY)) {
-                            return Mono.error(new IllegalArgumentException("Missing 'username' or 'password'"));
-                        }
-                        String username = json.get(USERNAME_KEY).asText();
-                        String password = json.get(PASSWORD_KEY).asText();
-
-                        return authenticateAndCache(username, password)
+                            return authenticateAndCache(username, password, config.getLoginUrl())
 //                                .then(chain.filter(exchange))
-                                .then(Mono.fromRunnable(() -> exchange.getResponse().setStatusCode(HttpStatus.OK)))
-                                .doOnSuccess(v -> log.info("Cached tokens for user: {}", username));
-                    } catch (Exception e) {
-                        return Mono.error(e);
-                    }
-                })
-                .onErrorResume(e -> handleError(exchange, e)).then();
+                                    .then(Mono.fromRunnable(() -> exchange.getResponse().setStatusCode(HttpStatus.OK)))
+                                    .doOnSuccess(v -> log.info("Cached tokens for user: {}", username));
+                        } catch (Exception e) {
+                            return Mono.error(e);
+                        }
+                    })
+                    .onErrorResume(e -> handleError(exchange, e)).then();
+        };
+    }
+
+    @Override
+    public List<String> shortcutFieldOrder() {
+        return List.of("loginUrl");
+    }
+
+    @Data
+    public static class Config {
+        String loginUrl = "/api/auth/login";
     }
 
 
@@ -77,9 +94,9 @@ public class LoginRouteFilter implements GatewayFilter {
                 && "/login".equals(request.getPath().toString());
     }
 
-    private Mono<Void> authenticateAndCache(String username, String password) {
+    private Mono<Void> authenticateAndCache(String username, String password, String loginUrl) {
         return authWebClient.post()
-                .uri(LOGIN_URL)
+                .uri(loginUrl)
                 .header(HttpHeaders.CONTENT_TYPE, "application/json")
                 .bodyValue(Map.of(USERNAME_KEY, username, PASSWORD_KEY, password))
                 .retrieve()
