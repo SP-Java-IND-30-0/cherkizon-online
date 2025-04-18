@@ -5,7 +5,7 @@ import com.github.spjavaind300.profileservice.dto.InternalUserResponse;
 import com.github.spjavaind300.profileservice.dto.InternalUserSummary;
 import com.github.spjavaind300.profileservice.dto.UserDTO;
 import com.github.spjavaind300.profileservice.mapper.InternalUserMapper;
-import com.github.spjavaind300.profileservice.service.impl.ProfileServiceImpl;
+import com.github.spjavaind300.profileservice.service.ProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/internal")
 @RequiredArgsConstructor
 public class InternalUserController {
-    private final ProfileServiceImpl profileService;
+    private final ProfileService profileService;
     private final InternalUserMapper mapper;
 
     @GetMapping("/user/{userId}")

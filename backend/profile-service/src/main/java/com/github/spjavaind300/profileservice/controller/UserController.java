@@ -5,11 +5,14 @@ import com.github.spjavaind300.profileservice.dto.UpdatePasswordDTO;
 import com.github.spjavaind300.profileservice.dto.UpdateUserDTO;
 import com.github.spjavaind300.profileservice.dto.UserDTO;
 import com.github.spjavaind300.profileservice.exception.InvalidImageException;
-import com.github.spjavaind300.profileservice.service.impl.JwtServiceImpl;
-import com.github.spjavaind300.profileservice.service.impl.PasswordServiceImpl;
-import com.github.spjavaind300.profileservice.service.impl.ProfileServiceImpl;
+import com.github.spjavaind300.profileservice.service.AvatarService;
+import com.github.spjavaind300.profileservice.service.JwtService;
+import com.github.spjavaind300.profileservice.service.PasswordService;
+import com.github.spjavaind300.profileservice.service.ProfileService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,9 +24,10 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 @RequiredArgsConstructor
 public class UserController {
 
-    private final ProfileServiceImpl profileService;
-    private final JwtServiceImpl jwtService;
-    private final PasswordServiceImpl passwordService;
+    private final ProfileService profileService;
+    private final JwtService jwtService;
+    private final PasswordService passwordService;
+    private final AvatarService avatarService;
 
     @GetMapping("/me")
     public ResponseEntity<UserDTO> getProfile() {
@@ -76,6 +80,21 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    //TODO создать эндпоинт на получение картинки пользователя для фронта
+    @GetMapping(
+            value    = "/avatar/{userId}/{filename:.+}",
+            produces = MediaType.IMAGE_JPEG_VALUE
+    )
+    public ResponseEntity<byte[]> getAvatar(
+            @PathVariable long userId,
+            @PathVariable String filename
+    ) {
+        String avatarKey = userId + "/" + filename;
+        byte[] imageData = avatarService.getFile(avatarKey);
 
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.IMAGE_JPEG);
+        headers.setContentLength(imageData.length);
+
+        return ResponseEntity.ok().headers(headers).body(imageData);
+    }
 }

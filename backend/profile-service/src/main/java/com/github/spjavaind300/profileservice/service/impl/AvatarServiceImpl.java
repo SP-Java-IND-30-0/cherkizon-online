@@ -3,10 +3,13 @@ package com.github.spjavaind300.profileservice.service.impl;
 import com.github.spjavaind300.profileservice.exception.AvatarStorageException;
 import com.github.spjavaind300.profileservice.exception.AvatarReadException;
 import com.github.spjavaind300.profileservice.service.AvatarService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -15,6 +18,7 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import java.io.IOException;
 
 @Service
+@Slf4j
 public class AvatarServiceImpl implements AvatarService {
 
     private final S3Client s3Client;
@@ -58,5 +62,27 @@ public class AvatarServiceImpl implements AvatarService {
                     e.awsErrorDetails().errorMessage(), e);
         }
     }
+
+    @Override
+    public byte[] getFile(String avatarKey) {
+        log.debug("getFile: пытаемся скачать объект из S3. bucket='{}', key='{}'", bucketName, avatarKey);
+        try {
+            GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(avatarKey)
+                    .build();
+
+            return s3Client.getObjectAsBytes(getObjectRequest).asByteArray();
+
+        } catch (S3Exception e) {
+            log.error("getFile: ошибка при получении объекта из S3. key='{}'", avatarKey, e);
+            // можно обернуть в своё бизнес‑исключение
+            throw e;
+        } catch (Exception e) {
+            log.error("getFile: непредвиденная ошибка при обработке key='{}'", avatarKey, e);
+            throw e;
+        }
+    }
+
 
 }

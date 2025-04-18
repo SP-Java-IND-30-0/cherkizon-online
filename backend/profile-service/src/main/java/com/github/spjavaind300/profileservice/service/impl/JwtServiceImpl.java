@@ -10,6 +10,6 @@ public class JwtServiceImpl implements JwtService {
 
     @Override
     public JwtUserInfo parseToken(String token) {
-        return new JwtUserInfo(1L, Role.USER);
+        return new JwtUserInfo(1L, Role.ADMIN);
     }
 }
