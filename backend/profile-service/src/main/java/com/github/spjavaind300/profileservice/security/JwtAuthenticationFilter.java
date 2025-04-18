@@ -2,7 +2,7 @@ package com.github.spjavaind300.profileservice.security;
 
 
 import com.github.spjavaind300.profileservice.dto.Role;
-import com.github.spjavaind300.service.JwtUtils;
+import com.github.spjavaind300.profileservice.service.JwtUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
