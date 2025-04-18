@@ -2,6 +2,7 @@ package com.github.spjavaind300.profileservice.controller;
 
 
 import com.github.spjavaind300.profileservice.dto.Role;
+import com.github.spjavaind300.profileservice.service.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
