@@ -2,12 +2,10 @@ package com.github.spjavaind300.controller;
 
 import com.github.spjavaind300.model.dto.Role;
 import com.github.spjavaind300.service.JwtUtils;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
@@ -28,17 +26,17 @@ public class SecurityController {
                 accessToken,
                 accessToken,
                 1L,
-                Instant.now().plusSeconds(60*60));
+                Instant.now().plusSeconds(60 * 60));
     }
 
-    public static record TokenRequest(
+    public record TokenRequest(
             String username,
             String password
     ) {
 
     }
 
-    public static record TokenResponse(
+    public record TokenResponse(
             String accessToken,
             String refreshToken,
             Long userId,
