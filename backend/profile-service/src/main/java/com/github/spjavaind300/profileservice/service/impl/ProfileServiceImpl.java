@@ -1,12 +1,11 @@
 package com.github.spjavaind300.profileservice.service.impl;
 
-import com.github.spjavaind300.profileservice.dto.Role;
+import com.github.spjavaind300.profileservice.dto.*;
 import com.github.spjavaind300.profileservice.dto.event.UserCreatedEvent;
 import com.github.spjavaind300.profileservice.dto.event.UserDeletedEvent;
 import com.github.spjavaind300.profileservice.exception.AccessDeniedProfileException;
+import com.github.spjavaind300.profileservice.mapper.InternalUserMapper;
 import com.github.spjavaind300.profileservice.mapper.UserMapper;
-import com.github.spjavaind300.profileservice.dto.UpdateUserDTO;
-import com.github.spjavaind300.profileservice.dto.UserDTO;
 import com.github.spjavaind300.profileservice.exception.UserNotFoundException;
 import com.github.spjavaind300.profileservice.model.entity.User;
 import com.github.spjavaind300.profileservice.repository.UserRepository;
@@ -21,6 +20,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -29,6 +32,7 @@ public class ProfileServiceImpl implements ProfileService {
     private final AvatarService avatarService;
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final InternalUserMapper internalUserMapper;
     private final ProfileKafkaProducerService kafkaProducer;
 
 
@@ -38,6 +42,39 @@ public class ProfileServiceImpl implements ProfileService {
                 .orElseThrow(() -> new UserNotFoundException("Пользователь не найден: " + userId));
         return userMapper.toUserDTO(user);
     }
+
+    @Override
+    public InternalUserResponse getUserForAdsRequest(long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден: " + userId));
+        return internalUserMapper.toResponse(user);
+    }
+
+    @Override
+    public InternalProfileResponse getProfileForAdsRequest(long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден: " + userId));
+        return internalUserMapper.toProfile(user);
+    }
+
+    @Override
+    public List<InternalUserSummary> getUserSummariesForAdsRequest(List<Long> userIds) {
+        List<User> users = userRepository.findAllById(userIds);
+
+        if (users.size() != userIds.size()) {
+            Set<Long> foundIds = users.stream()
+                    .map(User::getId)
+                    .collect(Collectors.toSet());
+            List<Long> missing = userIds.stream()
+                    .filter(id -> !foundIds.contains(id))
+                    .toList();
+            throw new UserNotFoundException("Пользователи не найдены: " + missing);
+        }
+        return users.stream()
+                .map(internalUserMapper::toSummary)
+                .collect(Collectors.toList());
+    }
+
 
     @Transactional
     @Override
