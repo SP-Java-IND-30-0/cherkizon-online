@@ -55,7 +55,6 @@ public class AuthController {
     public JwtResponse refreshToken(
             @RequestHeader("Authorization") String authorizationHeader,
             HttpServletResponse response) {
-        // Извлекаем токен без префикса "Bearer "
         String refreshToken = authorizationHeader.startsWith("Bearer ") ?
                 authorizationHeader.substring(7) : authorizationHeader;
 
