@@ -27,9 +27,9 @@ public class InternalController {
 
     }
 
-    @GetMapping("/check/{id}")
-    public ResponseEntity<Void> checkAd(@PathVariable("id") int id) {
-        service.getAdForNotifications(id);
+    @GetMapping("/check/{adId}")
+    public ResponseEntity<Void> checkAd(@PathVariable("adId") int adId) {
+        service.getAdForNotifications(adId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
