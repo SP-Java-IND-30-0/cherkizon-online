@@ -3,6 +3,9 @@ package com.github.spjavaind300.profileservice.mapper;
 import com.github.spjavaind300.profileservice.dto.UpdateUserDTO;
 import com.github.spjavaind300.profileservice.dto.UserDTO;
 import com.github.spjavaind300.profileservice.model.entity.User;
+import com.github.spjavaind300.profileservice.security.CustomUserDetails;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -38,8 +41,9 @@ public class UserMapper {
                     .toUriString();
             userDTO.setImage(url);
         }
-        //TODO передавать значение из токена
-        userDTO.setRole("ADMIN");
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        userDTO.setRole(String.valueOf(userDetails.role()));
         return userDTO;
     }
 
