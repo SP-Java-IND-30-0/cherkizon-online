@@ -65,7 +65,7 @@ private final CustomUserDetailsService customUserDetailsService;
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .authorizeRequests(auth -> auth
+                .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/register", "/login", "/activate/**").permitAll()
                         .anyRequest().authenticated()
                 )
