@@ -27,7 +27,7 @@ public class ProfileKafkaProducerService {
     public void publishUserDeleted(UserDeletedEvent event) {
         kafkaTemplate.send(
                         "profile.user.deleted",
-                        event.userId().toString(),
+                        String.valueOf(event.userId()),
                         event
                 )
                 .thenApply(r -> {
