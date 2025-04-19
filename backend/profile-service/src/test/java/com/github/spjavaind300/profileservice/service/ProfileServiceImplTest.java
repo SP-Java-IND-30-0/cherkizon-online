@@ -1,6 +1,6 @@
 package com.github.spjavaind300.profileservice.service;
 
-import com.github.spjavaind300.profileservice.dto.JwtUserInfo;
+
 import com.github.spjavaind300.profileservice.dto.Role;
 import com.github.spjavaind300.profileservice.dto.UpdateUserDTO;
 import com.github.spjavaind300.profileservice.dto.UserDTO;
@@ -26,7 +26,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.time.Instant;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -46,6 +45,9 @@ class ProfileServiceImplTest {
 
     @Mock
     private JwtUtilsImp jwtService;
+
+    @Mock
+    private ProfileKafkaProducerService kafkaProducer;
 
     @InjectMocks
     private ProfileServiceImpl profileService;
