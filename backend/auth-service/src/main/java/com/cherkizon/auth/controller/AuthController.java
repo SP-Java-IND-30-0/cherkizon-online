@@ -2,13 +2,16 @@ package com.cherkizon.auth.controller;
 
 import com.cherkizon.auth.dto.request.LoginRequest;
 import com.cherkizon.auth.dto.request.RegisterRequest;
+import com.cherkizon.auth.dto.request.response.JwtResponse;
 import com.cherkizon.auth.service.AuthService;
+import com.cherkizon.auth.service.JwtService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,6 +22,8 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final JwtService jwtService;
+
 
     @Operation(summary = "Регистрация пользователя",
             description = "Регистрирует нового пользователя и возвращает его данные")
@@ -26,10 +31,9 @@ public class AuthController {
     @ApiResponse(responseCode = "400", description = "Некорректные входные данные")
     @ApiResponse(responseCode = "409", description = "Пользователь с таким username уже существует")
     @PostMapping("/register")
-    public void register(
-            @Valid @RequestBody RegisterRequest request) {
-        // TODO: Реализовать регистрацию
-        throw new UnsupportedOperationException("Not implemented yet");
+    @ResponseStatus(HttpStatus.CREATED)
+    public void register(@Valid @RequestBody RegisterRequest request) {
+        authService.register(request);
     }
 
     @Operation(summary = "Аутентификация пользователя",
@@ -37,12 +41,10 @@ public class AuthController {
     @ApiResponse(responseCode = "200", description = "Успешная аутентификация")
     @ApiResponse(responseCode = "401", description = "Неверные учетные данные")
     @PostMapping("/login")
-    public void login(
-            @Valid @RequestBody LoginRequest request,
-            HttpServletResponse response) {
-        // TODO: Реализовать аутентификацию
-        // response.setHeader("Authorization", "Bearer " + token);
-        throw new UnsupportedOperationException("Not implemented yet");
+    public JwtResponse login(@Valid @RequestBody LoginRequest request, HttpServletResponse response) {
+        JwtResponse jwtResponse = authService.login(request);
+        response.setHeader("Authorization", "Bearer " + jwtResponse.accessToken());
+        return jwtResponse;
     }
 
     @Operation(summary = "Обновление токена",
@@ -50,11 +52,14 @@ public class AuthController {
     @ApiResponse(responseCode = "200", description = "Токен обновлен")
     @ApiResponse(responseCode = "401", description = "Невалидный refresh-токен")
     @PostMapping("/refresh")
-    public void refreshToken(
-            @RequestHeader("Authorization") String refreshToken,
+    public JwtResponse refreshToken(
+            @RequestHeader("Authorization") String authorizationHeader,
             HttpServletResponse response) {
-        // TODO: Реализовать обновление токена
-        // response.setHeader("Authorization", "Bearer " + newToken);
-        throw new UnsupportedOperationException("Not implemented yet");
+        String refreshToken = authorizationHeader.startsWith("Bearer ") ?
+                authorizationHeader.substring(7) : authorizationHeader;
+
+        JwtResponse jwtResponse = jwtService.refreshToken(refreshToken);
+        response.setHeader("Authorization", "Bearer " + jwtResponse.accessToken());
+        return jwtResponse;
     }
 }

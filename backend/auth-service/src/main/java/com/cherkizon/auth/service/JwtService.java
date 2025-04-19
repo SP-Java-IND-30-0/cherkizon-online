@@ -6,5 +6,5 @@ import com.cherkizon.auth.entity.User;
 public interface JwtService {
     JwtResponse generateTokens(User user);
 
-    JwtResponse refreshToken(String refreshToken);
+    JwtResponse refreshToken(String rawRefreshToken);
 }
