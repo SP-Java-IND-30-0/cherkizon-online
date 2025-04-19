@@ -3,8 +3,8 @@ package com.github.spjavaind300.model.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record UserDto(
-        @JsonProperty("first_name") String authorFirstName,
-        @JsonProperty("last_name") String authorLastName,
+        @JsonProperty("firstName") String authorFirstName,
+        @JsonProperty("lastName") String authorLastName,
         String email,
         String phone
 ) {
