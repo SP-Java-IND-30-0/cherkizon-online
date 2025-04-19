@@ -1,3 +1,6 @@
+server:
+  port: 8081
+
 spring:
   application:
     name: auth-service
@@ -7,11 +10,19 @@ spring:
     username: dev
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
+
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: none
+
   liquibase:
     change-log: classpath:/db/changelog-master.xml
+
+
+jwt:
+  secret: ${JWT_SECRET_KEY}
+  access-expiration: 900000        # 15 минут (в миллисекундах)
+  refresh-expiration: 1209600000   # 14 дней
 
   kafka:
     bootstrap-servers: localhost:29092
@@ -22,6 +33,7 @@ spring:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       retries: 3
       acks: all
+
 
 logging:
   level:
