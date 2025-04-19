@@ -2,6 +2,7 @@ package com.cherkizon.auth.service;
 
 import com.cherkizon.auth.dto.request.LoginRequest;
 import com.cherkizon.auth.dto.request.RegisterRequest;
+import com.cherkizon.auth.dto.request.RequestChangePasswordDto;
 import com.cherkizon.auth.dto.response.JwtResponse;
 
 public interface AuthService {
@@ -11,6 +12,9 @@ public interface AuthService {
 
     JwtResponse refreshToken(String refreshToken);
 
+    void changePassword(Long userId, RequestChangePasswordDto passwords);
+
+    void deleteUser(Long userId);
 }
 
 

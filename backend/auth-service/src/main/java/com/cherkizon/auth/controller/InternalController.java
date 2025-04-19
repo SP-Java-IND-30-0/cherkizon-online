@@ -1,5 +1,6 @@
 package com.cherkizon.auth.controller;
 
+import com.cherkizon.auth.dto.request.RequestChangePasswordDto;
 import com.cherkizon.auth.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
