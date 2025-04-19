@@ -6,7 +6,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 @Repository
-
 public interface TokenRepository extends JpaRepository<Token, Long> {
     List<Token> findAllByUserId(Long userId);
 
