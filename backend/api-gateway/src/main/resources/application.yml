@@ -1,11 +1,12 @@
 spring:
   application:
     name: api-gateway
+
   cloud:
     gateway:
       routes:
         - id: login-route
-          uri: lb://auth-service
+          uri: http://localhost:8081
           predicates:
             - Path=/login
             - Method=POST
@@ -14,7 +15,7 @@ spring:
               args:
                 loginUrl: "/internal/security"
         - id: register-route
-          uri: lb://auth-service
+          uri: http://localhost:8081
           predicates:
             - Path=/register
             - Method=POST
@@ -22,21 +23,21 @@ spring:
             - RewritePath=/register, /api/auth/register
 
         - id: profile-service-route
-          uri: lb://profile-service
+          uri: http://localhost:8082
           predicates:
             - Path=/users/**,/users
           filters:
             - RewritePath=/users/(?<id>/?.*), /api/profile/$\{id}
 
         - id: comments-service-route
-          uri: lb://comment-service
+          uri: http://localhost:8084
           predicates:
             - Path=/ads/{id}/comments,/ads/{adId}/comments/{commentId}
           filters:
             - RewritePath=/ads/(?<id>\d+)/comments(?<segment>/?.*), /api/comments/$\{id}$\{segment}
 
         - id: ads-service-route
-          uri: lb://ads-service
+          uri: http://localhost:8083
           predicates:
             - Path=/ads,/ads/me,/ads/{id}/image,/ads/{id}
           filters:
@@ -44,12 +45,17 @@ spring:
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Origin, RETAIN_UNIQUE
         - AddResponseHeader=Access-Control-Expose-Headers, Authorization
+        - name: CacheRequestBody
+          args:
+            cache: caffeine
 
 webclient:
   auth:
     server:
-      url: lb://ads-service
+      url: http://localhost:8083
+
 
 server:
   port: 8080
+
 
