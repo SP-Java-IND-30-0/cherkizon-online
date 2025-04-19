@@ -23,6 +23,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -42,11 +44,12 @@ public class AuthServiceImpl implements AuthService {
             throw new UserAlreadyExistsException("User with email " + request.getUsername() + " already exists");
         }
 
-        User user = User.builder()
-                .username(request.getUsername())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .role(User.Role.USER)
-                .build();
+        User user = new User(
+                0L,
+                request.getUsername(),
+                passwordEncoder.encode(request.getPassword()),
+                User.Role.USER,
+                List.of());
 
         userRepository.save(user);
         eventPublisher.publish(new UserCreatedDto(

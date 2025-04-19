@@ -22,13 +22,6 @@ spring:
   liquibase:
     change-log: classpath:db/changelog-master.yml
     enabled: true
-
-
-jwt:
-  secret: ${JWT_SECRET_KEY}
-  access-expiration: 900000        # 15 минут (в миллисекундах)
-  refresh-expiration: 1209600000   # 14 дней
-
   kafka:
     bootstrap-servers: localhost:29092
     admin:
@@ -38,6 +31,12 @@ jwt:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       retries: 3
       acks: all
+
+jwt:
+  secret: ${JWT_SECRET_KEY}
+  access-expiration: 900000        # 15 минут (в миллисекундах)
+  refresh-expiration: 1209600000   # 14 дней
+
 
 
 logging:
