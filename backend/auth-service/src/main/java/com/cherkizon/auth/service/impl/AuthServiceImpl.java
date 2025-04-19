@@ -1,4 +1,4 @@
-package com.cherkizon.auth.service;
+package com.cherkizon.auth.service.impl;
 
 import com.cherkizon.auth.dto.request.LoginRequest;
 import com.cherkizon.auth.dto.request.RegisterRequest;
@@ -6,6 +6,8 @@ import com.cherkizon.auth.dto.request.response.JwtResponse;
 import com.cherkizon.auth.entity.User;
 import com.cherkizon.auth.exception.UserAlreadyExistsException;
 import com.cherkizon.auth.repository.UserRepository;
+import com.cherkizon.auth.service.AuthService;
+import com.cherkizon.auth.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;

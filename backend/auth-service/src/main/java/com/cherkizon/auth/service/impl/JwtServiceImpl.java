@@ -1,4 +1,4 @@
-package com.cherkizon.auth.service;
+package com.cherkizon.auth.service.impl;
 
 import com.cherkizon.auth.dto.request.response.JwtResponse;
 import com.cherkizon.auth.entity.Token;
@@ -7,6 +7,7 @@ import com.cherkizon.auth.exception.InvalidTokenException;
 import com.cherkizon.auth.repository.TokenRepository;
 import com.cherkizon.auth.repository.UserRepository;
 
+import com.cherkizon.auth.service.JwtService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.crypto.SecretKey;
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -53,12 +55,22 @@ public class JwtServiceImpl implements JwtService {
     @Override
     @Transactional
     public JwtResponse refreshToken(String rawRefreshToken) {
-        if (!isTokenValid(rawRefreshToken)) {
-            log.error("Invalid refresh token attempt");
+        Claims claims;
+        try {
+            claims = extractAllClaims(rawRefreshToken);
+        } catch (ExpiredJwtException ex) {
+            log.warn("Refresh token expired: {}", ex.getMessage());
+            throw new InvalidTokenException("Refresh token expired");
+        } catch (Exception ex) {
+            log.error("Invalid refresh token: {}", ex.getMessage());
             throw new InvalidTokenException("Invalid refresh token");
         }
 
-        Token savedToken = tokenRepository.findAll().stream()
+        Long userId = Long.parseLong(claims.getSubject());
+
+        List<Token> userTokens = tokenRepository.findAllByUserId(userId);
+
+        Token savedToken = userTokens.stream()
                 .filter(token -> passwordEncoder.matches(rawRefreshToken, token.getRefreshToken()))
                 .findFirst()
                 .orElseThrow(() -> {
@@ -66,13 +78,6 @@ public class JwtServiceImpl implements JwtService {
                     return new InvalidTokenException("Refresh token not found or invalid");
                 });
 
-        if (savedToken.getExpiresAt().isBefore(Instant.now())) {
-            tokenRepository.delete(savedToken);
-            log.warn("Refresh token expired");
-            throw new InvalidTokenException("Refresh token expired");
-        }
-
-        Long userId = extractUserId(rawRefreshToken);
         User tokenUser = savedToken.getUser();
 
         if (!tokenUser.getId().equals(userId)) {
@@ -81,20 +86,28 @@ public class JwtServiceImpl implements JwtService {
             throw new InvalidTokenException("Token-user mismatch");
         }
 
-        JwtResponse newTokens = generateTokens(tokenUser);
+        if (savedToken.getExpiresAt().isBefore(Instant.now())) {
+            log.warn("Token in DB expired");
+            tokenRepository.delete(savedToken);
+            throw new InvalidTokenException("Refresh token expired");
+        }
 
         tokenRepository.delete(savedToken);
+
+        JwtResponse newTokens = generateTokens(tokenUser);
 
         Token newToken = Token.builder()
                 .refreshToken(passwordEncoder.encode(newTokens.refreshToken()))
                 .user(tokenUser)
                 .expiresAt(Instant.now().plusMillis(refreshExpiration))
                 .build();
+
         tokenRepository.save(newToken);
 
         log.info("Tokens refreshed for user: {}", userId);
         return newTokens;
     }
+
 
     private String generateToken(Map<String, Object> claims, User user, long expiration) {
         Instant now = Instant.now();
