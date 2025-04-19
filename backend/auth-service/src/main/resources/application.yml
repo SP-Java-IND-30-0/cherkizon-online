@@ -12,11 +12,16 @@ spring:
     driver-class-name: org.postgresql.Driver
 
   jpa:
+    show-sql: true
     hibernate:
-      ddl-auto: none
-
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
   liquibase:
-    change-log: classpath:/db/changelog-master.xml
+    change-log: classpath:db/changelog-master.yml
+    enabled: true
 
 
 jwt:

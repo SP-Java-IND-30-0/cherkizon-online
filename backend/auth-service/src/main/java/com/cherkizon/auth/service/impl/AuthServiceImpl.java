@@ -2,7 +2,7 @@ package com.cherkizon.auth.service.impl;
 
 import com.cherkizon.auth.dto.request.LoginRequest;
 import com.cherkizon.auth.dto.request.RegisterRequest;
-import com.cherkizon.auth.dto.request.response.JwtResponse;
+import com.cherkizon.auth.dto.response.JwtResponse;
 import com.cherkizon.auth.entity.User;
 import com.cherkizon.auth.exception.UserAlreadyExistsException;
 import com.cherkizon.auth.repository.UserRepository;
@@ -60,5 +60,10 @@ public class AuthServiceImpl implements AuthService {
 
         log.info("User logged in: {}", user.getUsername());
         return jwtService.generateTokens(user);
+    }
+
+    @Override
+    public JwtResponse refreshToken(String refreshToken) {
+        return jwtService.refreshToken(refreshToken.substring(7));
     }
 }

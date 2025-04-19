@@ -2,7 +2,7 @@ package com.cherkizon.auth.security;
 
 import com.cherkizon.auth.service.JwtService;
 import com.cherkizon.auth.service.CustomUserDetailsService;
-import com.cherkizon.auth.dto.request.response.JwtResponse;
+import com.cherkizon.auth.dto.response.JwtResponse;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebFilter;

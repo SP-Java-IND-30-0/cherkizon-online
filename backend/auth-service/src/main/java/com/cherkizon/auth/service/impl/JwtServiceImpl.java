@@ -1,6 +1,6 @@
 package com.cherkizon.auth.service.impl;
 
-import com.cherkizon.auth.dto.request.response.JwtResponse;
+import com.cherkizon.auth.dto.response.JwtResponse;
 import com.cherkizon.auth.entity.Token;
 import com.cherkizon.auth.entity.User;
 import com.cherkizon.auth.exception.InvalidTokenException;
@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.crypto.SecretKey;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
@@ -116,13 +117,14 @@ public class JwtServiceImpl implements JwtService {
 
 
     private String generateToken(Map<String, Object> claims, User user, long expiration) {
+       long jwtExpiration = expiration /1000;
         Instant now = Instant.now();
         return Jwts.builder()
                 .claims(claims)
                 .subject(String.valueOf(user.getId()))
                 .issuedAt(Date.from(now))
-                .expiration(Date.from(now.plusMillis(expiration)))
-                .signWith(getSignInKey(), Jwts.SIG.HS256)
+                .expiration(Timestamp.from(Instant.now().plusSeconds(jwtExpiration)))
+                .signWith(getSignInKey())
                 .compact();
     }
 
