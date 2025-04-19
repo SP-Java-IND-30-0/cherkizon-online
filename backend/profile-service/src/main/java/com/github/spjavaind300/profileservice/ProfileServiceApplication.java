@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication
-@EnableFeignClients(basePackages = "com.github.spjavaind300.profileservice.client")
+@EnableFeignClients()
 public class ProfileServiceApplication {
 
     public static void main(String[] args) {
