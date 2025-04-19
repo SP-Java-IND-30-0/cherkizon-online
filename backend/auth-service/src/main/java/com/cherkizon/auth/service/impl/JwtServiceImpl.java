@@ -46,11 +46,17 @@ public class JwtServiceImpl implements JwtService {
 
     @Override
     public JwtResponse generateTokens(User user) {
+        String accessToken = generateToken(Map.of("role", user.getRole().name()), user, accessExpiration);
+        String refreshToken = generateToken(Map.of("role", user.getRole().name()), user, refreshExpiration);
+
         return new JwtResponse(
-                generateToken(Map.of("role", user.getRole().name()), user, accessExpiration),
-                generateToken(Map.of("role", user.getRole().name()), user, refreshExpiration)
+                accessToken,
+                refreshToken,
+                user.getId(),
+                Instant.now().plusMillis(accessExpiration)
         );
     }
+
 
     @Override
     @Transactional
@@ -120,21 +126,6 @@ public class JwtServiceImpl implements JwtService {
                 .compact();
     }
 
-
-    public boolean isTokenValid(String token) {
-        try {
-            Jwts.parser()
-                    .verifyWith(getSignInKey())
-                    .build()
-                    .parseSignedClaims(token);
-            return true;
-        } catch (ExpiredJwtException ex) {
-            log.warn("Token expired: {}", ex.getMessage());
-        } catch (Exception ex) {
-            log.warn("Invalid token: {}", ex.getMessage());
-        }
-        return false;
-    }
 
     public Long extractUserId(String token) {
         return Long.parseLong(extractClaim(token, Claims::getSubject));

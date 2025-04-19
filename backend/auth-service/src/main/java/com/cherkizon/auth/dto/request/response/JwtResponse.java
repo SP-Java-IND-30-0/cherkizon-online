@@ -1,5 +1,7 @@
 package com.cherkizon.auth.dto.request.response;
 
 
-public record JwtResponse(String accessToken, String refreshToken) {
+import java.time.Instant;
+
+public record JwtResponse(String accessToken, String refreshToken, Long userId, Instant expiresAt) {
 }
