@@ -3,7 +3,7 @@ package com.cherkizon.auth.dto.event;
 public record UserCreatedDto(
         long id,
         String username,
-        String firtsname,
+        String firstname,
         String lastname,
         String phone
 ) implements UserEvent {

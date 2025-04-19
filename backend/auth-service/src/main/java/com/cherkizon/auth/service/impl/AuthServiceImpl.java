@@ -23,8 +23,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -39,17 +37,15 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public void register(RegisterRequest request) {
-        if (userRepository.existsByUsername(request.getUsername())) {
+        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
             log.warn("Registration failed - user exists: {}", request.getUsername());
             throw new UserAlreadyExistsException("User with email " + request.getUsername() + " already exists");
         }
 
-        User user = new User(
-                0L,
-                request.getUsername(),
-                passwordEncoder.encode(request.getPassword()),
-                User.Role.USER,
-                List.of());
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRole(User.Role.USER);
 
         userRepository.save(user);
         eventPublisher.publish(new UserCreatedDto(

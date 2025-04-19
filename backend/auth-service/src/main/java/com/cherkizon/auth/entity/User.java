@@ -10,7 +10,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -36,7 +35,6 @@ public class User implements UserDetails {
     private Long id;
 
     @Column(unique = true, nullable = false, length = 254)
-    @Email
     private String username;
 
     @ToString.Exclude
@@ -49,7 +47,7 @@ public class User implements UserDetails {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
-    private List<Token> tokens;
+    private transient List<Token> tokens;
 
     public enum Role implements GrantedAuthority {
         ADMIN, USER, SERVICE;
