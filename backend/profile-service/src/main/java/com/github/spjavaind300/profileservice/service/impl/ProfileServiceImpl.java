@@ -1,6 +1,8 @@
 package com.github.spjavaind300.profileservice.service.impl;
 
 import com.github.spjavaind300.profileservice.dto.Role;
+import com.github.spjavaind300.profileservice.dto.event.UserCreatedEvent;
+import com.github.spjavaind300.profileservice.dto.event.UserDeletedEvent;
 import com.github.spjavaind300.profileservice.exception.AccessDeniedProfileException;
 import com.github.spjavaind300.profileservice.mapper.UserMapper;
 import com.github.spjavaind300.profileservice.dto.UpdateUserDTO;
@@ -10,6 +12,7 @@ import com.github.spjavaind300.profileservice.model.entity.User;
 import com.github.spjavaind300.profileservice.repository.UserRepository;
 import com.github.spjavaind300.profileservice.security.CustomUserDetails;
 import com.github.spjavaind300.profileservice.service.AvatarService;
+import com.github.spjavaind300.profileservice.service.ProfileKafkaProducerService;
 import com.github.spjavaind300.profileservice.service.ProfileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,8 +28,8 @@ public class ProfileServiceImpl implements ProfileService {
 
     private final AvatarService avatarService;
     private final UserRepository userRepository;
-
     private final UserMapper userMapper;
+    private final ProfileKafkaProducerService kafkaProducer;
 
 
     @Override
@@ -35,6 +38,7 @@ public class ProfileServiceImpl implements ProfileService {
                 .orElseThrow(() -> new UserNotFoundException("Пользователь не найден: " + userId));
         return userMapper.toUserDTO(user);
     }
+
     @Transactional
     @Override
     public UpdateUserDTO updateProfile(long userId, UpdateUserDTO updatedData) {
@@ -48,6 +52,7 @@ public class ProfileServiceImpl implements ProfileService {
 
         return userMapper.toUpdateUserDTO(updatedUser);
     }
+
     @Transactional
     @Override
     public void deleteProfile(long targetUserId) {
@@ -58,11 +63,13 @@ public class ProfileServiceImpl implements ProfileService {
             avatarService.deleteAvatar(user.getImage());
         }
         userRepository.delete(user);
+        kafkaProducer.publishUserDeleted(new UserDeletedEvent(user.getId()));
     }
+
     @Transactional
-    public String updateAvatar(long userId, MultipartFile file){
+    public String updateAvatar(long userId, MultipartFile file) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден: "+ userId));
+                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден: " + userId));
 
         if (user.getImage() != null) {
             avatarService.deleteAvatar(user.getImage());
@@ -83,5 +90,15 @@ public class ProfileServiceImpl implements ProfileService {
         }
     }
 
-
+    @Override
+    @Transactional
+    public void createProfile(UserCreatedEvent event) {
+        User user = new User();
+        user.setId(event.id());
+        user.setEmail(event.email());
+        user.setFirstName(event.firstName());
+        user.setLastName(event.lastName());
+        user.setPhone(event.phone());
+        userRepository.save(user);
+    }
 }

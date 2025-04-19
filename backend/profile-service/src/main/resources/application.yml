@@ -29,6 +29,16 @@ spring:
     default-schema: app
     liquibase-schema: service
 
+  kafka:
+    bootstrap-servers: localhost:29092
+    admin:
+      auto-create: true
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      retries: 3
+      acks: all
+
 validation:
   patterns:
     password: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[A-Za-z\\d]{8,16}$"
@@ -41,8 +51,10 @@ aws:
     region: ru-central1
     endpoint: https://storage.yandexcloud.net
 
+
 server:
   port: 8082
 
 jwt:
   secret-key: ${JWT_SECRET_KEY}
+
