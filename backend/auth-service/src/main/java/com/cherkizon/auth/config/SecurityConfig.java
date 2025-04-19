@@ -26,7 +26,7 @@ public class SecurityConfig {
 
     private final UserRepository userRepository;
     private final JwtService jwtService;
-
+private final CustomUserDetailsService customUserDetailsService;
 
     @Bean
     public UserDetailsService userDetailsService() {
@@ -35,7 +35,7 @@ public class SecurityConfig {
 
     @Bean
     public JwtAuthFilter jwtAuthFilter() {
-        return new JwtAuthFilter(jwtService, userDetailsService());
+        return new JwtAuthFilter(jwtService, customUserDetailsService);
     }
 
 
