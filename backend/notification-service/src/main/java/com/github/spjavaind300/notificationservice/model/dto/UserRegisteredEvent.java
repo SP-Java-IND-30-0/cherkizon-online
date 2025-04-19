@@ -6,8 +6,8 @@ import com.github.spjavaind300.notificationservice.model.NotificationType;
 public record UserRegisteredEvent
         (@JsonProperty("id") long id,
          @JsonProperty("username") String email,
-         @JsonProperty("first_name") String firstName,
-         @JsonProperty("last_name") String lastName,
+         @JsonProperty("firstname") String firstName,
+         @JsonProperty("lastname") String lastName,
          @JsonProperty("phone") String phone)
 implements Event{
 
