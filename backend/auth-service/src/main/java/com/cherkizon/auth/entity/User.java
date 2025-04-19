@@ -2,6 +2,7 @@ package com.cherkizon.auth.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -14,8 +15,9 @@ import java.util.List;
 @Entity
 @Table(name = "users")
 @Data
+@Builder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@ToString(exclude = "password")
+@ToString
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,6 +28,7 @@ public class User implements UserDetails {
     @Email
     private String username;
 
+    @ToString.Exclude
     @Column(nullable = false, length = 64)
     private String password;
 
@@ -33,11 +36,12 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @Column(name = "is_active", nullable = false)
-    private boolean isActive = false;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    private List<Token> tokens;
 
     public enum Role implements GrantedAuthority {
-        ADMIN, USER;
+        ADMIN, USER, SERVICE;
 
         @Override
         public String getAuthority() {
@@ -66,17 +70,12 @@ public class User implements UserDetails {
     }
 
     @Override
-    public boolean isEnabled() {
-        return isActive;
-    }
-
-    @Override
     public boolean isAccountNonExpired() {
-        return true; // Не используется
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true; // Не используется
+        return true;
     }
 }
