@@ -1,18 +1,13 @@
 package com.github.spjavaind300.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.spjavaind300.model.dto.AdExtraInfoDto;
 import com.github.spjavaind300.model.dto.AdRequestDto;
 import com.github.spjavaind300.model.dto.AdResponseDto;
 import com.github.spjavaind300.security.CustomUserDetails;
 import com.github.spjavaind300.service.AdService;
 import com.github.spjavaind300.service.ImageStorageService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -28,6 +23,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -69,27 +65,16 @@ public class AdController {
         return adService.getAdInfo(id);
     }
 
-    @Operation(summary = "Create new advertisement",
-            description = "Create new ad with image upload")
-    @ApiResponse(responseCode = "201", description = "Ad created successfully",
-            content = @Content(schema = @Schema(implementation = AdResponseDto.class)))
-    @ApiResponse(responseCode = "400", description = "Invalid input data")
-    @ApiResponse(responseCode = "401", description = "Unauthorized")
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping
     public ResponseEntity<AdResponseDto> createAd(
-            @Parameter(description = "Ad properties",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = AdRequestDto.class)))
             @RequestPart(value = "properties")
-            @Valid
-            AdRequestDto adRequestDto,
+            String properties,
 
-            @Parameter(description = "Image file",
-                    content = @Content(mediaType = "image/*",
-                            schema = @Schema(type = "string", format = "binary")))
             @RequestPart("image")
-            @NotNull
             MultipartFile image) {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        AdRequestDto adRequestDto = objectMapper.convertValue(properties, AdRequestDto.class);
 
         if (image.getContentType() == null || !image.getContentType().startsWith("image/")) {
             throw new IllegalArgumentException("Invalid image file type");
@@ -111,7 +96,7 @@ public class AdController {
 
     @PatchMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<byte[]> updateAdImage(@PathVariable int id,
-                                                @RequestPart("image") @NotNull MultipartFile image) {
+                                                @RequestParam("image") MultipartFile image) {
 
         if (image.getContentType() == null || !image.getContentType().startsWith("image/")) {
             throw new IllegalArgumentException("Invalid image file type");
@@ -130,11 +115,10 @@ public class AdController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/images/{imageKey}")
+    @GetMapping(value = "/images/{imageKey}", produces = {MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_GIF_VALUE, "image/*"})
     public ResponseEntity<byte[]> getAdImage(@PathVariable String imageKey) {
         byte[] imageData = imageStorageService.getFile("images/" + imageKey);
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.IMAGE_JPEG);
         headers.setContentLength(imageData.length);
         return ResponseEntity.ok().headers(headers).body(imageData);
 

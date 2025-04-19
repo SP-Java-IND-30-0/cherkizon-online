@@ -7,6 +7,7 @@ import com.github.spjavaind300.model.dto.ImageDto;
 import com.github.spjavaind300.model.dto.UserDto;
 import com.github.spjavaind300.model.entity.Ad;
 import com.github.spjavaind300.model.event.AdUpdatedEvent;
+import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -18,7 +19,7 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 )
 public interface AdMapper {
 
-    @Mapping(target = "image", source = "imageKey")
+    @Mapping(target = "image", ignore = true)
     AdResponseDto toAdResponseDto(Ad ad);
 
     @Mapping(target = "image", source = "ad.imageKey")
@@ -34,4 +35,8 @@ public interface AdMapper {
     AdUpdatedEvent toAdUpdatedEvent(Ad ad, UserDto userDto, String uri);
 
 
+    @AfterMapping
+    default void setImage(@MappingTarget AdResponseDto adResponseDto, Ad ad) {
+        adResponseDto.setImage("/ads/"+ad.getImageKey());
+    }
 }
