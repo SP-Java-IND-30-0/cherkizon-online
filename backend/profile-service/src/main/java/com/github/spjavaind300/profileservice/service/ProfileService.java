@@ -2,6 +2,7 @@ package com.github.spjavaind300.profileservice.service;
 
 import com.github.spjavaind300.profileservice.dto.UpdateUserDTO;
 import com.github.spjavaind300.profileservice.dto.UserDTO;
+import com.github.spjavaind300.profileservice.dto.event.UserCreatedEvent;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -14,4 +15,6 @@ public interface ProfileService {
     void deleteProfile (long targetUserId);
 
     String updateAvatar(long userId, MultipartFile file);
+
+    void createProfile (UserCreatedEvent event);
 }

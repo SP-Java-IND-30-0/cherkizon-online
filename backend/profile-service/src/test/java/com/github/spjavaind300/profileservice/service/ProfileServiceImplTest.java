@@ -4,6 +4,7 @@ import com.github.spjavaind300.profileservice.dto.JwtUserInfo;
 import com.github.spjavaind300.profileservice.dto.Role;
 import com.github.spjavaind300.profileservice.dto.UpdateUserDTO;
 import com.github.spjavaind300.profileservice.dto.UserDTO;
+import com.github.spjavaind300.profileservice.dto.event.UserCreatedEvent;
 import com.github.spjavaind300.profileservice.exception.AccessDeniedProfileException;
 import com.github.spjavaind300.profileservice.exception.UserNotFoundException;
 import com.github.spjavaind300.profileservice.mapper.UserMapper;
@@ -16,6 +17,7 @@ import com.github.spjavaind300.profileservice.service.impl.ProfileServiceImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -24,6 +26,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -277,6 +280,52 @@ class ProfileServiceImplTest {
         assertThatThrownBy(() -> profileService.updateAvatar(userId, file))
                 .isInstanceOf(UserNotFoundException.class)
                 .hasMessageContaining("Пользователь не найден: " + userId);
+    }
+
+    @Test
+    void createProfile_savesUserWithAllFieldsFromEvent() {
+        UserCreatedEvent event = new UserCreatedEvent(
+                42L,
+                "alice@example.com",
+                "Alice",
+                "Smith",
+                "+71234567890"
+        );
+
+        when(userRepository.save(any(User.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        profileService.createProfile(event);
+
+        ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(captor.capture());
+        User saved = captor.getValue();
+
+        assertThat(saved.getId()).isEqualTo(42L);
+        assertThat(saved.getEmail()).isEqualTo("alice@example.com");
+        assertThat(saved.getFirstName()).isEqualTo("Alice");
+        assertThat(saved.getLastName()).isEqualTo("Smith");
+        assertThat(saved.getPhone()).isEqualTo("+71234567890");
+    }
+
+    @Test
+    void createProfile_whenSaveFails_throwsException() {
+        UserCreatedEvent event = new UserCreatedEvent(
+                100L,
+                "bob@example.com",
+                "Bob",
+                "Johnson",
+                "+79876543210"
+        );
+
+        when(userRepository.save(any(User.class)))
+                .thenThrow(new RuntimeException("db down"));
+
+        assertThatThrownBy(() -> profileService.createProfile(event))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("db down");
+
+        verify(userRepository).save(any(User.class));
     }
 }
 
