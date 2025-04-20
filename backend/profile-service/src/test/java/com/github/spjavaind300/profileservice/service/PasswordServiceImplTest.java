@@ -2,21 +2,20 @@ package com.github.spjavaind300.profileservice.service;
 
 import com.github.spjavaind300.profileservice.client.AuthClient;
 import com.github.spjavaind300.profileservice.dto.UpdatePasswordDTO;
-import com.github.spjavaind300.profileservice.service.impl.JwtUtilsImp;
 import com.github.spjavaind300.profileservice.service.impl.PasswordServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class PasswordServiceImplTest {
 
-    @Mock
-    private JwtUtilsImp jwtService;
 
     @Mock
     private AuthClient authClient;
@@ -30,6 +29,8 @@ class PasswordServiceImplTest {
         UpdatePasswordDTO dto = new UpdatePasswordDTO();
         dto.setCurrentPassword("oldPass");
         dto.setNewPassword("newPass");
+
+        when(authClient.changePassword(userId, dto)).thenReturn(ResponseEntity.ok().build());
 
         passwordService.changePassword(userId, dto);
 

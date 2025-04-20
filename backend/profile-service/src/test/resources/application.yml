@@ -16,6 +16,32 @@ spring:
 
   liquibase:
     enabled: false
+  kafka:
+    bootstrap-servers: localhost:29092
+    admin:
+      auto-create: true
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      retries: 3
+      acks: all
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connect-timeout: 5000
+            read-timeout: 5000
+            logger-level: basic
+          auth-service:
+            url: http://localhost:8081
+
+
+
+validation:
+  patterns:
+    password: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[A-Za-z\\d]{8,16}$"
+
 
 aws:
   s3:
@@ -24,3 +50,9 @@ aws:
     secret-key: dummy
     region: ru-central1
     endpoint: http://localhost
+
+jwt:
+  secret-key: ${JWT_SECRET_KEY}
+
+
+
