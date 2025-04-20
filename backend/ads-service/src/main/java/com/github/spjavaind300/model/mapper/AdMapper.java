@@ -22,7 +22,7 @@ public interface AdMapper {
     @Mapping(target = "image", ignore = true)
     AdResponseDto toAdResponseDto(Ad ad);
 
-    @Mapping(target = "image", source = "ad.imageKey")
+    @Mapping(target = "image", ignore = true)
     AdExtraInfoDto toAdExtraInfoDto(Ad ad, UserDto userDto);
 
     @Mapping(target = "imageKey", source = "imageDto.url")
@@ -38,5 +38,10 @@ public interface AdMapper {
     @AfterMapping
     default void setImage(@MappingTarget AdResponseDto adResponseDto, Ad ad) {
         adResponseDto.setImage("/ads/"+ad.getImageKey());
+    }
+
+    @AfterMapping
+    default void setImage(@MappingTarget AdExtraInfoDto adExtraInfoDto, Ad ad) {
+        adExtraInfoDto.setImage("/ads/"+ad.getImageKey());
     }
 }

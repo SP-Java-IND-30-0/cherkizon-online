@@ -1,5 +1,6 @@
 package com.github.spjavaind300.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.spjavaind300.model.dto.AdExtraInfoDto;
 import com.github.spjavaind300.model.dto.AdRequestDto;
@@ -65,7 +66,7 @@ public class AdController {
         return adService.getAdInfo(id);
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<AdResponseDto> createAd(
             @RequestPart(value = "properties")
             String properties,
@@ -74,7 +75,16 @@ public class AdController {
             MultipartFile image) {
 
         ObjectMapper objectMapper = new ObjectMapper();
-        AdRequestDto adRequestDto = objectMapper.convertValue(properties, AdRequestDto.class);
+        AdRequestDto adRequestDto;
+        try {
+            adRequestDto=objectMapper.readValue(properties, AdRequestDto.class);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Invalid parameter 'properties'="+properties);
+        }
+
+        if (image.isEmpty()) {
+            throw new IllegalArgumentException("Image file is required");
+        }
 
         if (image.getContentType() == null || !image.getContentType().startsWith("image/")) {
             throw new IllegalArgumentException("Invalid image file type");

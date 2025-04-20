@@ -1,7 +1,10 @@
 spring:
   application:
     name: ads-service
-
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/ads_service_db
@@ -78,3 +81,7 @@ server:
 
 jwt:
   secret-key: ${JWT_SECRET_KEY}
+
+logging:
+  level:
+    ads-service: TRACE
