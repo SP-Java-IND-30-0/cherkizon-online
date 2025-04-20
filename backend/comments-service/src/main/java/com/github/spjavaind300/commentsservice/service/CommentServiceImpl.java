@@ -26,6 +26,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Implementation of the {@link CommentService} that handles operations related to comments on ads.
+ * This service is responsible for creating, retrieving, updating, and deleting comments, as well as publishing
+ * comment-related events to Kafka.
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -38,6 +43,12 @@ public class CommentServiceImpl implements CommentService {
     private final ProfileCacheService profileCacheService;
     private final CommentKafkaProducer commentKafkaProducer;
 
+    /**
+     * Retrieves all comments associated with a specific advertisement.
+     *
+     * @param adId the ID of the advertisement
+     * @return a list of {@link CommentDto} containing comments for the specified ad
+     */
     @Override
     public List<CommentDto> getCommentsForAd(int adId) {
         List<Comment> comments = commentRepository.findByAdId(adId);
@@ -51,6 +62,15 @@ public class CommentServiceImpl implements CommentService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Adds a new comment to the specified advertisement.
+     * Sends a Kafka event upon successful creation.
+     *
+     * @param adId           the ID of the advertisement
+     * @param commentTextDto the DTO containing the text of the comment
+     * @return the created {@link CommentDto}
+     * @throws NotFoundException if the advertisement does not exist
+     */
     @Transactional
     @Override
     public CommentDto addComment(int adId, CommentTextDto commentTextDto) {
@@ -88,6 +108,16 @@ public class CommentServiceImpl implements CommentService {
         return commentMapper.toDto(savedComment, currentProfile);
     }
 
+    /**
+     * Updates an existing comment for a given advertisement.
+     *
+     * @param adId           the ID of the advertisement
+     * @param commentId      the ID of the comment to update
+     * @param commentTextDto the DTO containing updated comment text
+     * @return the updated {@link CommentDto}
+     * @throws NotFoundException if the comment is not found
+     * @throws ForbiddenException if the current user is not the comment's author or lacks sufficient rights
+     */
     @Override
     public CommentDto updateComment(int adId, int commentId, CommentTextDto commentTextDto) {
         Comment comment = commentRepository.findByIdAndAdId(commentId, adId)
@@ -104,6 +134,14 @@ public class CommentServiceImpl implements CommentService {
         return commentMapper.toDto(updatedComment, currentProfile);
     }
 
+    /**
+     * Deletes a comment by its ID and associated advertisement ID.
+     *
+     * @param adId      the ID of the advertisement
+     * @param commentId the ID of the comment to delete
+     * @throws NotFoundException if the comment is not found
+     * @throws ForbiddenException if the current user is not the comment's author or lacks sufficient rights
+     */
     @Override
     public void deleteComment(int adId, int commentId) {
         Comment comment = commentRepository.findByIdAndAdId(commentId, adId)
@@ -114,11 +152,22 @@ public class CommentServiceImpl implements CommentService {
         log.info("Комментарий с id: {} был удален для объявления с id: {}", commentId, adId);
     }
 
+    /**
+     * Retrieves the unique author IDs of all comments associated with a given advertisement.
+     *
+     * @param adId the ID of the advertisement
+     * @return a set of unique author IDs
+     */
     @Override
     public Set<Long> getAuthorIdsByAdId(int adId) {
         return commentRepository.findAuthorIdsByAdId(adId);
     }
 
+    /**
+     * Deletes all comments authored by the specified user.
+     *
+     * @param authorId the ID of the comment author
+     */
     @Transactional
     @Override
     public void deleteCommentsByAuthorId(long authorId) {
@@ -126,6 +175,11 @@ public class CommentServiceImpl implements CommentService {
         log.info("Deleted all comments for authorId={}", authorId);
     }
 
+    /**
+     * Deletes all comments associated with a specific advertisement.
+     *
+     * @param adId the ID of the advertisement
+     */
     @Transactional
     @Override
     public void deleteCommentsByAdId(int adId) {
