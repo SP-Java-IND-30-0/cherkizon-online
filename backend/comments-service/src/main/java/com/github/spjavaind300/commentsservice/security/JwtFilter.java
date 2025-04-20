@@ -36,6 +36,7 @@ public class JwtFilter extends OncePerRequestFilter {
                 long userId = jwtUtils.getUserId(token);
                 Role role = jwtUtils.getRole(token);
 
+                UserContextHolder.setToken(token);
                 UserContextHolder.setContext(new UserContext(userId, role));
                 CustomUserDetails userDetails = new CustomUserDetails(userId, role);
 

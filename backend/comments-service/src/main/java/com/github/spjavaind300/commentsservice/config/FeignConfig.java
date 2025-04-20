@@ -1,6 +1,8 @@
 package com.github.spjavaind300.commentsservice.config;
 
 import com.github.spjavaind300.commentsservice.feing.CustomFeignErrorDecoder;
+import com.github.spjavaind300.commentsservice.security.UserContextHolder;
+import feign.RequestInterceptor;
 import feign.Retryer;
 import feign.codec.ErrorDecoder;
 import org.springframework.context.annotation.Bean;
@@ -17,5 +19,15 @@ public class FeignConfig {
     @Bean
     public ErrorDecoder errorDecoder() {
         return new CustomFeignErrorDecoder();
+    }
+
+    @Bean
+    public RequestInterceptor requestInterceptor() {
+        return requestTemplate -> {
+            String token = UserContextHolder.getToken();
+            if (token != null) {
+                requestTemplate.header("Authorization", "Bearer " + token);
+            }
+        };
     }
 }
