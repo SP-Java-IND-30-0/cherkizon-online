@@ -1,9 +1,17 @@
 spring:
   application:
     name: api-gateway
-
+  webflux:
+    multipart:
+      max-parts: 2
+      max-in-memory-size: 10MB
   cloud:
     gateway:
+      httpclient:
+        wiretap: true
+        response-timeout: 30s
+        pool:
+          max-idle-time: 60s
       routes:
         - id: login-route
           uri: http://localhost:8081
@@ -21,41 +29,36 @@ spring:
             - Method=POST
           filters:
             - RewritePath=/register, /api/auth/register
-
         - id: profile-service-route
           uri: http://localhost:8082
           predicates:
             - Path=/users/**,/users
           filters:
             - RewritePath=/users/(?<id>/?.*), /api/users/$\{id}
-
         - id: comments-service-route
           uri: http://localhost:8084
           predicates:
             - Path=/ads/{id}/comments,/ads/{adId}/comments/{commentId}
-#          filters:
-#            - RewritePath=/ads/(?<id>\d+)/comments(?<segment>/?.*), /api/comments/$\{id}$\{segment}
-
         - id: ads-service-route
           uri: http://localhost:8083
           predicates:
             - Path=/ads,/ads/me,/ads/{id}/image,/ads/{id},/ads/images/**
           filters:
             - RewritePath=/ads(?<segment>/?.*), /api/ads$\{segment}
+
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Origin, RETAIN_UNIQUE
         - AddResponseHeader=Access-Control-Expose-Headers, Authorization
-        - name: CacheRequestBody
-          args:
-            cache: caffeine
 
 webclient:
   auth:
     server:
       url: http://localhost:8081
 
-
 server:
   port: 8080
 
-
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.cloud.gateway.filter: TRACE
