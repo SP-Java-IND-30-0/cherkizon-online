@@ -6,7 +6,6 @@ import com.github.spjavaind300.profileservice.exception.InvalidNewPasswordExcept
 import com.github.spjavaind300.profileservice.service.PasswordService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class PasswordServiceImpl implements PasswordService {
@@ -19,9 +18,9 @@ public class PasswordServiceImpl implements PasswordService {
 
     @Override
     public void changePassword(long userId, UpdatePasswordDTO passwordDTO) {
-       ResponseEntity<Void> response = authClient.changePassword(userId, passwordDTO);
-       if (!response.getStatusCode().is2xxSuccessful()) {
-           throw new InvalidNewPasswordException("New password is invalid");
-       }
+        ResponseEntity<Void> response = authClient.changePassword(userId, passwordDTO);
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            throw new InvalidNewPasswordException("New password is invalid");
+        }
     }
 }
