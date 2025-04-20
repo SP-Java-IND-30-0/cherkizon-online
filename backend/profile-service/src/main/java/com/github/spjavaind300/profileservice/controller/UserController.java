@@ -104,15 +104,14 @@ public class UserController {
     }
 
     @GetMapping(
-            value = "/avatar/{userId}/{filename:.+}",
+            value = "/avatar/{userId}",
             produces = MediaType.IMAGE_JPEG_VALUE
     )
     public ResponseEntity<byte[]> getAvatar(
-            @PathVariable long userId,
-            @PathVariable String filename
+            @PathVariable long userId
     ) {
-        String avatarKey = userId + "/" + filename;
-        byte[] imageData = avatarService.getFile(avatarKey);
+
+        byte[] imageData = avatarService.getFile(userId);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.IMAGE_JPEG);

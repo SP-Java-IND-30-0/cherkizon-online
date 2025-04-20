@@ -8,5 +8,5 @@ public interface AvatarService {
 
     void deleteAvatar(String avatarKey);
 
-    byte[] getFile(String avatarKey);
+    byte[] getFile(long userId);
 }

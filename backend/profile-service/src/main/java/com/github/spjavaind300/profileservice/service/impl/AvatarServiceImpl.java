@@ -3,6 +3,8 @@ package com.github.spjavaind300.profileservice.service.impl;
 import com.github.spjavaind300.profileservice.exception.AvatarNotFoundException;
 import com.github.spjavaind300.profileservice.exception.AvatarStorageException;
 import com.github.spjavaind300.profileservice.exception.AvatarReadException;
+import com.github.spjavaind300.profileservice.model.entity.User;
+import com.github.spjavaind300.profileservice.repository.UserRepository;
 import com.github.spjavaind300.profileservice.service.AvatarService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -23,10 +25,12 @@ public class AvatarServiceImpl implements AvatarService {
 
     private final S3Client s3Client;
     private final String bucketName;
+    private final UserRepository userRepository;
 
-    public AvatarServiceImpl(S3Client s3Client, @Qualifier("bucketName") String bucketName) {
+    public AvatarServiceImpl(S3Client s3Client, @Qualifier("bucketName") String bucketName, UserRepository userRepository) {
         this.s3Client = s3Client;
         this.bucketName = bucketName;
+        this.userRepository = userRepository;
     }
 
 
@@ -64,7 +68,19 @@ public class AvatarServiceImpl implements AvatarService {
     }
 
     @Override
-    public byte[] getFile(String avatarKey) {
+    public byte[] getFile(long userId) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AvatarNotFoundException("User " + userId + " not found"));
+        String avatarKey = user.getImage();
+        if (avatarKey == null || avatarKey.isBlank()) {
+            throw new AvatarNotFoundException("Avatar for user " + userId + " not set");
+        }
+        return getFileByKey(avatarKey);
+    }
+
+
+    public byte[] getFileByKey(String avatarKey) {
         log.debug("getFile: пытаемся скачать объект из S3. bucket='{}', key='{}'", bucketName, avatarKey);
         try {
             GetObjectRequest getObjectRequest = GetObjectRequest.builder()
