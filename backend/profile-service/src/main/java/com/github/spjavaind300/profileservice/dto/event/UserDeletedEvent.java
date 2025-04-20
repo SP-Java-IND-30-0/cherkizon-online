@@ -1,5 +1,5 @@
 package com.github.spjavaind300.profileservice.dto.event;
 
 public record UserDeletedEvent(
-        Long userId
+        long userId
 ) {}

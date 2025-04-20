@@ -4,34 +4,34 @@ package com.github.spjavaind300.profileservice.mapper;
 import com.github.spjavaind300.profileservice.dto.InternalProfileResponse;
 import com.github.spjavaind300.profileservice.dto.InternalUserResponse;
 import com.github.spjavaind300.profileservice.dto.InternalUserSummary;
-import com.github.spjavaind300.profileservice.dto.UserDTO;
+import com.github.spjavaind300.profileservice.model.entity.User;
 import org.springframework.stereotype.Component;
 
 @Component
 public class InternalUserMapper {
-    public InternalUserResponse toResponse(UserDTO userDTO) {
+    public InternalUserResponse toResponse(User user) {
         return new InternalUserResponse(
-                userDTO.getFirstName(),
-                userDTO.getLastName(),
-                userDTO.getEmail(),
-                userDTO.getPhone()
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getPhone()
         );
     }
 
-    public InternalUserSummary toSummary(UserDTO userDTO) {
+    public InternalUserSummary toSummary(User user) {
         return new InternalUserSummary(
-                userDTO.getId(),
-                userDTO.getFirstName(),
-                userDTO.getLastName(),
-                userDTO.getEmail()
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail()
         );
     }
 
-    public InternalProfileResponse toProfile(UserDTO userDTO) {
+    public InternalProfileResponse toProfile(User user) {
         return new InternalProfileResponse(
-                userDTO.getId(),
-                userDTO.getFirstName(),
-                userDTO.getImage()
+                user.getId(),
+                user.getFirstName(),
+                user.getImage()
         );
     }
 }
