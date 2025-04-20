@@ -77,10 +77,11 @@ public class AdController {
         ObjectMapper objectMapper = new ObjectMapper();
         AdRequestDto adRequestDto;
         try {
-            adRequestDto=objectMapper.readValue(properties, AdRequestDto.class);
+            adRequestDto = objectMapper.readValue(properties, AdRequestDto.class);
         } catch (JsonProcessingException e) {
-            throw new IllegalArgumentException("Invalid parameter 'properties'="+properties);
+            throw new IllegalArgumentException("Invalid parameter 'properties'=" + properties);
         }
+
 
         if (image.isEmpty()) {
             throw new IllegalArgumentException("Image file is required");
