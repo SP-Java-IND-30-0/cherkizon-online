@@ -33,13 +33,9 @@ public class UserMapper {
         userDTO.setFirstName(user.getFirstName());
         userDTO.setLastName(user.getLastName());
         userDTO.setPhone(user.getPhone());
-        if (user.getImage() != null) {
-            String url = ServletUriComponentsBuilder
-                    .fromCurrentContextPath()
-                    .path("api/users/avatar/")
-                    .path(user.getImage())
-                    .toUriString();
-            userDTO.setImage(url);
+        String key = user.getImage();
+        if (key != null && !key.isEmpty()) {
+            userDTO.setImage("/users/avatar/" + user.getId());
         }
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();

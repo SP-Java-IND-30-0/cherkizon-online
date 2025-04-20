@@ -28,10 +28,15 @@ public class InternalUserMapper {
     }
 
     public InternalProfileResponse toProfile(User user) {
+        String url = null;
+        String key = user.getImage();
+        if (key != null && !key.isEmpty()) {
+            url = "/users/avatar/" + user.getId();
+        }
         return new InternalProfileResponse(
                 user.getId(),
                 user.getFirstName(),
-                user.getImage()
+                url
         );
     }
 }
