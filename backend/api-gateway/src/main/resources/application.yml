@@ -13,7 +13,7 @@ spring:
           filters:
             - name: LoginRouteFilterFactory
               args:
-                loginUrl: "/internal/security"
+                loginUrl: "/api/auth/login"
         - id: register-route
           uri: http://localhost:8081
           predicates:
@@ -27,19 +27,19 @@ spring:
           predicates:
             - Path=/users/**,/users
           filters:
-            - RewritePath=/users/(?<id>/?.*), /api/profile/$\{id}
+            - RewritePath=/users/(?<id>/?.*), /api/users/$\{id}
 
         - id: comments-service-route
           uri: http://localhost:8084
           predicates:
             - Path=/ads/{id}/comments,/ads/{adId}/comments/{commentId}
-          filters:
-            - RewritePath=/ads/(?<id>\d+)/comments(?<segment>/?.*), /api/comments/$\{id}$\{segment}
+#          filters:
+#            - RewritePath=/ads/(?<id>\d+)/comments(?<segment>/?.*), /api/comments/$\{id}$\{segment}
 
         - id: ads-service-route
           uri: http://localhost:8083
           predicates:
-            - Path=/ads,/ads/me,/ads/{id}/image,/ads/{id}
+            - Path=/ads,/ads/me,/ads/{id}/image,/ads/{id},/ads/images/**
           filters:
             - RewritePath=/ads(?<segment>/?.*), /api/ads$\{segment}
       default-filters:
@@ -52,7 +52,7 @@ spring:
 webclient:
   auth:
     server:
-      url: http://localhost:8083
+      url: http://localhost:8081
 
 
 server:
