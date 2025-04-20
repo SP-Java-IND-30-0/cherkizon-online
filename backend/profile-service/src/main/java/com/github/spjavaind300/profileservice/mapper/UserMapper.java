@@ -9,9 +9,18 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+/**
+ * Mapper for converting between User entities and DTOs.
+ */
 @Component
 public class UserMapper {
 
+    /**
+     * Converts a User entity to an UpdateUserDTO.
+     *
+     * @param user the User entity
+     * @return an UpdateUserDTO or null if user is null
+     */
     public UpdateUserDTO toUpdateUserDTO(User user) {
         if (user == null) {
             return null;
@@ -23,6 +32,12 @@ public class UserMapper {
         return updateUserDTO;
     }
 
+    /**
+     * Converts a User entity to a UserDTO, including image URL and role.
+     *
+     * @param user the User entity
+     * @return a UserDTO or null if user is null
+     */
     public UserDTO toUserDTO(User user) {
         if (user == null) {
             return null;
@@ -43,6 +58,12 @@ public class UserMapper {
         return userDTO;
     }
 
+    /**
+     * Updates a User entity with values from an UpdateUserDTO.
+     *
+     * @param dto  the UpdateUserDTO with new data
+     * @param user the User entity to update
+     */
     public void toUpdatedUserEntity(UpdateUserDTO dto, User user) {
         if (dto.getFirstName() != null) {
             user.setFirstName(dto.getFirstName());
@@ -54,6 +75,5 @@ public class UserMapper {
             user.setPhone(dto.getPhone());
         }
     }
-
-
 }
+

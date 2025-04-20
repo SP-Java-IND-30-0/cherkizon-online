@@ -26,6 +26,16 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtFilter;
 
+    /**
+     * Configures the HTTP security filter chain.
+     * <p>
+     * Disables CSRF protection, applies stateless session management,
+     * whitelists specified endpoints, and registers the JWT authentication filter.
+     *
+     * @param http the HttpSecurity instance to configure
+     * @return the built SecurityFilterChain
+     * @throws Exception if an error occurs during configuration
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
