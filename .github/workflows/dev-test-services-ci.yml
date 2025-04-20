@@ -7,6 +7,7 @@ on:
       - 'backend/**'
       - '!backend/pom.xml'
       - '!docker-compose*.yml'
+      - '!*.md'
 
 jobs:
   validate-branch-name:
