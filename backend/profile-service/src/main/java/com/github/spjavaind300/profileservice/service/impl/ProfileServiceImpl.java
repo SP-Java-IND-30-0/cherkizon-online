@@ -47,7 +47,7 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     public UserDTO getProfile(long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User not found: " + userId));
+                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
         return userMapper.toUserDTO(user);
     }
 
@@ -98,7 +98,7 @@ public class ProfileServiceImpl implements ProfileService {
     @Transactional
     public UpdateUserDTO updateProfile(long userId, UpdateUserDTO updatedData) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User not found: " + userId));
+                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
         userMapper.toUpdatedUserEntity(updatedData, user);
         User updatedUser = userRepository.save(user);
         return userMapper.toUpdateUserDTO(updatedUser);
@@ -127,7 +127,7 @@ public class ProfileServiceImpl implements ProfileService {
     @Transactional
     public String updateAvatar(long userId, MultipartFile file) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User not found: " + userId));
+                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден: " + userId));
         if (user.getImage() != null) {
             avatarService.deleteAvatar(user.getImage());
         }
