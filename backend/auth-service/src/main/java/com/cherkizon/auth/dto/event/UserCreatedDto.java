@@ -1,6 +1,12 @@
 package com.cherkizon.auth.dto.event;
 
-public record UserCreatedDto(long id) implements UserEvent {
+public record UserCreatedDto(
+        long id,
+        String username,
+        String firstname,
+        String lastname,
+        String phone
+) implements UserEvent {
     public static final String EVENT_TOPIC = "auth.user.created";
 
 
