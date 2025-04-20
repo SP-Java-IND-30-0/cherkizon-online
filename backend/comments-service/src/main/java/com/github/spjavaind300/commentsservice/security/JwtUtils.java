@@ -7,8 +7,6 @@ public interface JwtUtils {
 
     UserContext getUserContext();
 
-    String generateToken(long userId, String role);
-
     long getUserId(String token);
 
     Role getRole(String token);
