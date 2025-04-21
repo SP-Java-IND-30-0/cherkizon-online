@@ -1,8 +1,8 @@
 package com.github.spjavaind300.profileservice.service.impl;
 
 import com.github.spjavaind300.profileservice.exception.AvatarNotFoundException;
-import com.github.spjavaind300.profileservice.exception.AvatarStorageException;
 import com.github.spjavaind300.profileservice.exception.AvatarReadException;
+import com.github.spjavaind300.profileservice.exception.AvatarStorageException;
 import com.github.spjavaind300.profileservice.model.entity.User;
 import com.github.spjavaind300.profileservice.repository.UserRepository;
 import com.github.spjavaind300.profileservice.service.AvatarService;
@@ -10,15 +10,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
-import software.amazon.awssdk.core.sync.RequestBody;
-
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
 
+/**
+ * Implementation of {@link AvatarService} using AWS S3 for storage.
+ */
 @Service
 @Slf4j
 public class AvatarServiceImpl implements AvatarService {
@@ -33,7 +35,9 @@ public class AvatarServiceImpl implements AvatarService {
         this.userRepository = userRepository;
     }
 
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String saveAvatar(MultipartFile avatar, Long id) {
         String key = id + "/" + avatar.getOriginalFilename();
@@ -50,38 +54,48 @@ public class AvatarServiceImpl implements AvatarService {
             return key;
 
         } catch (IOException e) {
-            throw new AvatarReadException("Ошибка чтения изображения", e);
+            throw new AvatarReadException("Error reading avatar file", e);
         } catch (S3Exception e) {
-            throw new AvatarStorageException("Ошибка загрузки аватара в S3: " +
+            throw new AvatarStorageException("Failed to upload avatar to S3: " +
                     e.awsErrorDetails().errorMessage(), e);
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void deleteAvatar(String avatarKey) {
         try {
             s3Client.deleteObject(deleteRequest -> deleteRequest.bucket(bucketName).key(avatarKey));
         } catch (S3Exception e) {
-            throw new RuntimeException("Ошибка удаления аватара: " +
+            throw new RuntimeException("Error deleting avatar: " +
                     e.awsErrorDetails().errorMessage(), e);
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public byte[] getFile(long userId) {
-
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AvatarNotFoundException("User " + userId + " not found"));
         String avatarKey = user.getImage();
         if (avatarKey == null || avatarKey.isBlank()) {
-            throw new AvatarNotFoundException("Avatar for user " + userId + " not set");
+            throw new AvatarNotFoundException("Avatar for user " + userId + " is not set");
         }
         return getFileByKey(avatarKey);
     }
 
-
+    /**
+     * Downloads raw avatar bytes from S3 by key.
+     *
+     * @param avatarKey the storage key of the avatar
+     * @return a byte array containing the avatar image data
+     */
     public byte[] getFileByKey(String avatarKey) {
-        log.debug("getFile: пытаемся скачать объект из S3. bucket='{}', key='{}'", bucketName, avatarKey);
+        log.debug("Retrieving avatar from S3 bucket='{}', key='{}'", bucketName, avatarKey);
         try {
             GetObjectRequest getObjectRequest = GetObjectRequest.builder()
                     .bucket(bucketName)
@@ -94,15 +108,13 @@ public class AvatarServiceImpl implements AvatarService {
             int status = e.statusCode();
             String message = e.awsErrorDetails().errorMessage();
             if (status == 404) {
-                log.warn("getFile: аватар '{}' не найден (S3 404): {}", avatarKey, message);
+                log.warn("Avatar '{}' not found in S3 (404): {}", avatarKey, message);
                 throw new AvatarNotFoundException(avatarKey, e);
             } else {
-                log.error("getFile: ошибка S3 для '{}', status={} message={}",
+                log.error("S3 error for '{}', status={}, message={}",
                         avatarKey, status, message);
                 throw new AvatarStorageException(avatarKey, e);
             }
         }
     }
-
-
 }

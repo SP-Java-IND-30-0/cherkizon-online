@@ -24,6 +24,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Implementation of {@link ProfileService} for managing user profiles.
+ * <p>
+ * Performs operations such as retrieving, updating, and deleting user profiles,
+ * handling avatar uploads, and creating profiles on user lifecycle events.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -35,32 +41,42 @@ public class ProfileServiceImpl implements ProfileService {
     private final InternalUserMapper internalUserMapper;
     private final ProfileKafkaProducerService kafkaProducer;
 
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public UserDTO getProfile(long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден: " + userId));
+                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
         return userMapper.toUserDTO(user);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public InternalUserResponse getUserForAdsRequest(long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден: " + userId));
+                .orElseThrow(() -> new UserNotFoundException("User not found: " + userId));
         return internalUserMapper.toResponse(user);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public InternalProfileResponse getProfileForAdsRequest(long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден: " + userId));
+                .orElseThrow(() -> new UserNotFoundException("User not found: " + userId));
         return internalUserMapper.toProfile(user);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<InternalUserSummary> getUserSummariesForAdsRequest(List<Long> userIds) {
         List<User> users = userRepository.findAllById(userIds);
-
         if (users.size() != userIds.size()) {
             Set<Long> foundIds = users.stream()
                     .map(User::getId)
@@ -68,33 +84,34 @@ public class ProfileServiceImpl implements ProfileService {
             List<Long> missing = userIds.stream()
                     .filter(id -> !foundIds.contains(id))
                     .toList();
-            throw new UserNotFoundException("Пользователи не найдены: " + missing);
+            throw new UserNotFoundException("Users not found: " + missing);
         }
         return users.stream()
                 .map(internalUserMapper::toSummary)
                 .collect(Collectors.toList());
     }
 
-
-    @Transactional
+    /**
+     * {@inheritDoc}
+     */
     @Override
+    @Transactional
     public UpdateUserDTO updateProfile(long userId, UpdateUserDTO updatedData) {
-
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден: " + userId));
-
+                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
         userMapper.toUpdatedUserEntity(updatedData, user);
-
         User updatedUser = userRepository.save(user);
-
         return userMapper.toUpdateUserDTO(updatedUser);
     }
 
-    @Transactional
+    /**
+     * {@inheritDoc}
+     */
     @Override
+    @Transactional
     public void deleteProfile(long targetUserId) {
-        User user = userRepository.findById(targetUserId).orElseThrow(()
-                -> new UserNotFoundException("Пользователь не найден: " + targetUserId));
+        User user = userRepository.findById(targetUserId)
+                .orElseThrow(() -> new UserNotFoundException("User not found: " + targetUserId));
         checkUserAccess(user.getId());
         if (user.getImage() != null) {
             avatarService.deleteAvatar(user.getImage());
@@ -103,11 +120,14 @@ public class ProfileServiceImpl implements ProfileService {
         kafkaProducer.publishUserDeleted(new UserDeletedEvent(user.getId()));
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     @Transactional
     public String updateAvatar(long userId, MultipartFile file) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь не найден: " + userId));
-
         if (user.getImage() != null) {
             avatarService.deleteAvatar(user.getImage());
         }
@@ -117,16 +137,9 @@ public class ProfileServiceImpl implements ProfileService {
         return avatarUrl;
     }
 
-    private void checkUserAccess(long userId) {
-        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getPrincipal();
-        if (userDetails.role() == Role.USER && userDetails.userId() != userId) {
-            throw new AccessDeniedProfileException();
-        }
-    }
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
     public void createProfile(UserCreatedEvent event) {
@@ -137,5 +150,15 @@ public class ProfileServiceImpl implements ProfileService {
         user.setLastName(event.lastName());
         user.setPhone(event.phone());
         userRepository.save(user);
+    }
+
+    private void checkUserAccess(long userId) {
+        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+        if (userDetails.role() == Role.USER && userDetails.userId() != userId) {
+            throw new AccessDeniedProfileException();
+        }
     }
 }

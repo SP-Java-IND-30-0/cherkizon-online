@@ -1,6 +1,5 @@
 package com.github.spjavaind300.profileservice.service.impl;
 
-
 import com.github.spjavaind300.profileservice.dto.Role;
 import com.github.spjavaind300.profileservice.exception.InvalidJwtException;
 import com.github.spjavaind300.profileservice.security.CustomUserDetails;
@@ -17,6 +16,12 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.function.Function;
 
+/**
+ * JWT utility implementation using the JJWT library.
+ * <p>
+ * Generates tokens signed with an HMAC key and provides methods to parse
+ * and validate token claims.
+ */
 @Service
 public class JwtUtilsImp implements JwtUtils {
 
@@ -28,13 +33,9 @@ public class JwtUtilsImp implements JwtUtils {
         this.JwtSecret = jwtSecret;
     }
 
-    //TODO temporary method
-    @Override
-    public String generateToken(long userId, String role) {
-        long jwtExpiation = (long) 1000 * 60 * 60;
-        return buildToken(new CustomUserDetails(userId, Role.valueOf(role)), jwtExpiation);
-    }
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public long getUserId(String token) {
         try {
@@ -44,6 +45,9 @@ public class JwtUtilsImp implements JwtUtils {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Role getRole(String token) {
         try {
@@ -53,6 +57,9 @@ public class JwtUtilsImp implements JwtUtils {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isValidToken(String token) {
         try {

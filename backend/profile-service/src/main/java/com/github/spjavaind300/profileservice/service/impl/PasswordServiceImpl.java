@@ -7,6 +7,10 @@ import com.github.spjavaind300.profileservice.service.PasswordService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+/**
+ * Implementation of {@link PasswordService} that delegates password changes
+ * to the authentication client.
+ */
 @Service
 public class PasswordServiceImpl implements PasswordService {
 
@@ -16,6 +20,9 @@ public class PasswordServiceImpl implements PasswordService {
         this.authClient = authClient;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void changePassword(long userId, UpdatePasswordDTO passwordDTO) {
         ResponseEntity<Void> response = authClient.changePassword(userId, passwordDTO);
