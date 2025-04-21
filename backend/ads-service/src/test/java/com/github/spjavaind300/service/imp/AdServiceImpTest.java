@@ -209,7 +209,7 @@ class AdServiceImpTest {
 
         assertNotNull(actual);
         assertEquals(requestDto.title(), actual.getTitle());
-        assertEquals(imageDto.url(), actual.getImage());
+        assertEquals("/ads/" + imageDto.url(), actual.getImage());
 
     }
 

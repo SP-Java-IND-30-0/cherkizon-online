@@ -10,6 +10,4 @@ public interface JwtUtils {
 
     Role getRole(String token);
 
-    String generateToken(long userId, String role);
-
 }

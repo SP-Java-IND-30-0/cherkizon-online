@@ -2,7 +2,6 @@ package com.github.spjavaind300.service.imp;
 
 import com.github.spjavaind300.exception.InvalidJwtException;
 import com.github.spjavaind300.model.dto.Role;
-import com.github.spjavaind300.security.CustomUserDetails;
 import com.github.spjavaind300.service.JwtUtils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -12,8 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.function.Function;
 
 @Service
@@ -22,12 +19,6 @@ public class JwtUtilsImp implements JwtUtils {
 
     private final String JwtSecret;
 
-    //TODO temporary method
-    @Override
-    public String generateToken(long userId, String role) {
-        long jwtExpiation = (long) 1000 * 60 * 60;
-        return buildToken(new CustomUserDetails(userId, Role.valueOf(role)), jwtExpiation);
-    }
 
     @Override
     public long getUserId(String token) {
@@ -60,15 +51,6 @@ public class JwtUtilsImp implements JwtUtils {
     private SecretKey getSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(JwtSecret);
         return Keys.hmacShaKeyFor(keyBytes);
-    }
-
-    private String buildToken(CustomUserDetails userContext, long jwtExpiration) {
-        return Jwts.builder()
-                .subject(Long.toString(userContext.userId()))
-                .claim("role", userContext.role())
-                .expiration(Timestamp.from(Instant.now().plusSeconds(jwtExpiration)))
-                .signWith(getSigningKey())
-                .compact();
     }
 
     private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {

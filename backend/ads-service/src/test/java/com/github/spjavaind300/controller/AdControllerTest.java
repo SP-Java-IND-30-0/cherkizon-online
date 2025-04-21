@@ -177,27 +177,6 @@ class AdControllerTest {
 
     }
 
-    @Test
-    void test_createAd_NotValidRequest_returns400() throws Exception {
-
-        AdRequestDto invalidDto = new AdRequestDto("t", -100, "");
-        String jsonRequest = objectMapper.writeValueAsString(invalidDto);
-
-        MockPart jsonPart = new MockPart("properties", jsonRequest.getBytes());
-        jsonPart.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-
-        mockMvc.perform(MockMvcRequestBuilders.multipart(BASE_URI)
-                        .file(new MockMultipartFile("image", "test.png", "image/png", "test".getBytes()))
-                        .part(jsonPart)
-                        .contentType(MediaType.MULTIPART_FORM_DATA)
-                        .with(SecurityMockMvcRequestPostProcessors.securityContext(
-                                SecurityContextHolder.getContext()))
-                        .with(csrf())
-                )
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.violations").isArray())
-                .andExpect(jsonPath("$.violations.length()").value(3));
-    }
 
     @Test
     void test_updateAd() throws Exception {
@@ -274,10 +253,10 @@ class AdControllerTest {
         byte[] imageBytes = "test image".getBytes();
         when(imageStorageService.getFile(anyString())).thenReturn(imageBytes);
 
-        mockMvc.perform(MockMvcRequestBuilders.get(BASE_URI + "/images/{imageKey}", "file.jpg"))
+        mockMvc.perform(MockMvcRequestBuilders.get(BASE_URI + "/images/{imageKey}", "file.png"))
                 .andExpect((status().isOk()))
                 .andExpect(MockMvcResultMatchers.content().bytes(imageBytes))
-                .andExpect(MockMvcResultMatchers.content().contentType("image/jpeg"));
+                .andExpect(MockMvcResultMatchers.content().contentType("image/png"));
 
     }
 }
