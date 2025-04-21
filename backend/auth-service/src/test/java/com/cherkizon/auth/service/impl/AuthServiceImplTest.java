@@ -54,18 +54,22 @@ class AuthServiceImplTest {
         request.setFirstName("John");
         request.setLastName("Doe");
         request.setPhone("+79991234567");
-
         when(userRepository.findByUsername("test@mail.com")).thenReturn(Optional.empty());
         when(passwordEncoder.encode("Password1")).thenReturn("hashedPassword");
-
+        User savedUser = new User();
+        savedUser.setId(1L);
+        savedUser.setUsername("test@mail.com");
+        savedUser.setPassword("hashedPassword");
+        when(userRepository.save(any(User.class))).thenReturn(savedUser);
         authService.register(request);
-
         verify(userRepository).save(argThat(user ->
                 user.getUsername().equals("test@mail.com") &&
                         user.getPassword().equals("hashedPassword")
         ));
         verify(eventPublisher).publish(any(UserCreatedDto.class));
     }
+
+
 
     @Test
     void register_userAlreadyExists() {

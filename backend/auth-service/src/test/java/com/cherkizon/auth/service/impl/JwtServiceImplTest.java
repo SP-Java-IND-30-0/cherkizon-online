@@ -34,15 +34,15 @@ class JwtServiceImplTest {
 
     private final String secret = Base64.getEncoder()
             .encodeToString("superSecretKeyForJwtTesting1234567890!@".getBytes(StandardCharsets.UTF_8));
-    private final long accessExpiration = 1000 * 60 * 15;
-    private final long refreshExpiration = 1000 * 60 * 60 * 24;
 
     private User user;
 
     @BeforeEach
     void setup() {
         ReflectionTestUtils.setField(jwtService, "secret", secret);
+        long accessExpiration = 1000 * 60 * 15;
         ReflectionTestUtils.setField(jwtService, "accessExpiration", accessExpiration);
+        long refreshExpiration = 1000 * 60 * 60 * 24;
         ReflectionTestUtils.setField(jwtService, "refreshExpiration", refreshExpiration);
 
         user = new User(1L, "john_doe", "hashed_password", Role.USER, new ArrayList<>());
@@ -74,7 +74,7 @@ class JwtServiceImplTest {
         when(tokenRepository.findAllByUserId(user.getId())).thenReturn(List.of(dbToken));
         when(passwordEncoder.matches(oldRefreshToken, hashedToken)).thenReturn(true);
         when(passwordEncoder.encode(anyString())).thenReturn("new_encoded_token");
-        Thread.sleep(50);
+        Thread.sleep(1000);
         JwtResponse newTokens = jwtService.refreshToken(oldRefreshToken);
         assertNotNull(newTokens);
         assertNotEquals(oldAccessToken, newTokens.accessToken(), "Access tokens should be different after refresh");
