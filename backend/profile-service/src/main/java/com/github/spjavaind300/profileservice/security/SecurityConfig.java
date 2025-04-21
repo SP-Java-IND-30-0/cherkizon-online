@@ -17,10 +17,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final static String[] AUTH_WHITELIST = {
+    private static final String[] AUTH_WHITELIST = {
             "/swagger-ui.html",
             "/swagger-ui/**",
             "/v3/api-docs/**",
+            "/api/users/avatar/**",
             "/internal/**"
     };
 
